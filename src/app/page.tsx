@@ -2,13 +2,10 @@
 
 import { useBear } from '@/stores';
 import { useUsers, useCreateUser } from '@/hooks/use-users';
-import { useState } from 'react';
+import { UserFormExample } from '@/components/forms/user-form-example';
+import type { CreateUserInput } from '@/lib/validations/user';
 
 export default function Home() {
-  const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
-  const [age, setAge] = useState('');
-
   // Zustand example - Client state
   const bears = useBear((state: any) => state.bears);
   const increasePopulation = useBear((state: any) => state.increasePopulation);
@@ -17,17 +14,8 @@ export default function Home() {
   const { data, isLoading, error } = useUsers();
   const createUserMutation = useCreateUser();
 
-  const handleCreateUser = (e: React.FormEvent) => {
-    e.preventDefault();
-    createUserMutation.mutate({
-      name,
-      email,
-      age: parseInt(age),
-    });
-    // Reset form
-    setName('');
-    setEmail('');
-    setAge('');
+  const handleCreateUser = (formData: CreateUserInput) => {
+    createUserMutation.mutate(formData);
   };
 
   return (
@@ -48,48 +36,25 @@ export default function Home() {
         </div>
       </section>
 
-      {/* TanStack Query Example - Server State */}
+      {/* TanStack Query + React Hook Form Example */}
+      <section className="border rounded-lg p-6">
+        <h2 className="text-2xl font-bold mb-4">
+          React Hook Form + Zod Validation
+        </h2>
+        <p className="text-sm text-gray-600 mb-4">
+          This form uses React Hook Form with Zod schema validation
+        </p>
+
+        {/* Create User Form with Validation */}
+        <UserFormExample onSubmit={handleCreateUser} />
+
+      </section>
+
+      {/* TanStack Query - User List */}
       <section className="border rounded-lg p-6">
         <h2 className="text-2xl font-bold mb-4">
           TanStack Query Example (Server State)
         </h2>
-
-        {/* Create User Form */}
-        <form onSubmit={handleCreateUser} className="mb-6 space-y-3">
-          <div className="flex gap-2">
-            <input
-              type="text"
-              placeholder="Name"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              className="flex-1 px-3 py-2 border rounded"
-              required
-            />
-            <input
-              type="email"
-              placeholder="Email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="flex-1 px-3 py-2 border rounded"
-              required
-            />
-            <input
-              type="number"
-              placeholder="Age"
-              value={age}
-              onChange={(e) => setAge(e.target.value)}
-              className="w-24 px-3 py-2 border rounded"
-              required
-            />
-          </div>
-          <button
-            type="submit"
-            disabled={createUserMutation.isPending}
-            className="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600 disabled:bg-gray-400"
-          >
-            {createUserMutation.isPending ? 'Creating...' : 'Create User'}
-          </button>
-        </form>
 
         {/* Users List */}
         {isLoading && <p>Loading users...</p>}
