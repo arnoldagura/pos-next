@@ -1,25 +1,32 @@
 'use client';
 
 import * as React from 'react';
-import { useFormContext, FormProvider, FieldValues } from 'react-hook-form';
+import {
+  useFormContext,
+  FormProvider,
+  FieldValues,
+  UseFormReturn,
+} from 'react-hook-form';
 import { cn } from '@/lib/utils';
 
 type FormProps<TFieldValues extends FieldValues> = {
   children: React.ReactNode;
   onSubmit: (data: TFieldValues) => void | Promise<void>;
   className?: string;
+  form: UseFormReturn<TFieldValues>;
 } & Omit<React.FormHTMLAttributes<HTMLFormElement>, 'onSubmit'>;
 
 export function Form<TFieldValues extends FieldValues>({
   children,
   onSubmit,
   className,
+  form,
   ...props
-}: FormProps<TFieldValues> & { form: any }) {
-  const handleSubmit = props.form.handleSubmit(onSubmit);
+}: FormProps<TFieldValues>) {
+  const handleSubmit = form.handleSubmit(onSubmit);
 
   return (
-    <FormProvider {...props.form}>
+    <FormProvider {...form}>
       <form onSubmit={handleSubmit} className={className} {...props}>
         {children}
       </form>
@@ -27,11 +34,13 @@ export function Form<TFieldValues extends FieldValues>({
   );
 }
 
+import type { UseFormRegisterReturn } from 'react-hook-form';
+
 type FormFieldProps = {
   name: string;
   label?: string;
   description?: string;
-  children: (field: any) => React.ReactNode;
+  children: (field: UseFormRegisterReturn) => React.ReactNode;
   className?: string;
 };
 

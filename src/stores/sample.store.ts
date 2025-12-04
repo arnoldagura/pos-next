@@ -1,9 +1,16 @@
 import { create } from 'zustand';
 
-export const useBear = create((set) => ({
+interface BearState {
+  bears: number;
+  increasePopulation: () => void;
+  removeAllBears: () => void;
+  updateBears: (newBears: number) => void;
+}
+
+export const useBear = create<BearState>((set) => ({
   bears: 0,
   increasePopulation: () =>
-    set((state: { bears: number }) => ({ bears: state.bears + 1 })),
+    set((state) => ({ bears: state.bears + 1 })),
   removeAllBears: () => set({ bears: 0 }),
-  updateBears: (newBears: any) => set({ bears: newBears }),
+  updateBears: (newBears: number) => set({ bears: newBears }),
 }));

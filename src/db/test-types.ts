@@ -4,7 +4,7 @@ import { eq } from 'drizzle-orm';
 // This file demonstrates type inference is working correctly
 // You can delete this file once you've verified everything works
 
-async function testTypeInference() {
+export async function testTypeInference() {
   // Test 1: Insert with type inference
   const newUser = await db.insert(schema.usersTable).values({
     name: 'Test User',

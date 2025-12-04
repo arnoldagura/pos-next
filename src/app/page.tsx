@@ -7,8 +7,8 @@ import type { CreateUserInput } from '@/lib/validations/user';
 
 export default function Home() {
   // Zustand example - Client state
-  const bears = useBear((state: any) => state.bears);
-  const increasePopulation = useBear((state: any) => state.increasePopulation);
+  const bears = useBear((state) => state.bears);
+  const increasePopulation = useBear((state) => state.increasePopulation);
 
   // TanStack Query example - Server state
   const { data, isLoading, error } = useUsers();
