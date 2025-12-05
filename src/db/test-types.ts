@@ -1,5 +1,5 @@
-import { db, schema } from './db';
-import { eq } from 'drizzle-orm';
+// import { db, schema } from './db';
+// import { eq } from 'drizzle-orm';
 
 // This file demonstrates type inference is working correctly
 // You can delete this file once you've verified everything works

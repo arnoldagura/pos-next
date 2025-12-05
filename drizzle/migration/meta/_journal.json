@@ -1,0 +1,34 @@
+{
+  "version": "7",
+  "dialect": "postgresql",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "7",
+      "when": 1764829403866,
+      "tag": "0000_naive_inertia",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1764913968705,
+      "tag": "0001_tan_centennial",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1764954378179,
+      "tag": "0002_eminent_xavin",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1764956970362,
+      "tag": "0003_damp_zzzax",
+      "breakpoints": true
+    }
+  ]
+}
