@@ -7,18 +7,21 @@ import {
   FieldValues,
   DefaultValues,
   SubmitHandler,
+  FieldErrors,
+  Resolver,
 } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { ZodType } from 'zod';
+import { z } from 'zod';
 import { cn } from '@/lib/utils';
 
 type FormWrapperProps<TFieldValues extends FieldValues> = {
-  schema: ZodType<TFieldValues>;
+  schema: z.ZodType<TFieldValues, FieldValues>;
   defaultValues: DefaultValues<TFieldValues>;
   onSubmit: SubmitHandler<TFieldValues>;
   children: (form: UseFormReturn<TFieldValues>) => React.ReactNode;
   className?: string;
   resetOnSubmit?: boolean;
+  id?: string;
 };
 
 export function FormWrapper<TFieldValues extends FieldValues>({
@@ -30,7 +33,7 @@ export function FormWrapper<TFieldValues extends FieldValues>({
   resetOnSubmit = false,
 }: FormWrapperProps<TFieldValues>) {
   const form = useForm<TFieldValues>({
-    resolver: zodResolver(schema),
+    resolver: zodResolver(schema) as Resolver<TFieldValues>,
     defaultValues,
   });
 
@@ -57,11 +60,12 @@ export function FormWrapper<TFieldValues extends FieldValues>({
 
 type FormFieldWrapperProps = {
   label?: string;
-  error?: string;
+  error?: string | FieldErrors;
   description?: string;
   required?: boolean;
   children: React.ReactNode;
   className?: string;
+  htmlFor?: string;
 };
 
 export function FormFieldWrapper({
@@ -71,20 +75,36 @@ export function FormFieldWrapper({
   required,
   children,
   className,
+  htmlFor,
 }: FormFieldWrapperProps) {
+  const errorMessage = typeof error === 'string' ? error : error?.message;
+
+  const fallbackId = React.useId();
+  const inputId = htmlFor ?? fallbackId;
+
   return (
     <div className={cn('space-y-2', className)}>
       {label && (
-        <label className='text-sm font-medium leading-none'>
+        <label
+          htmlFor={inputId}
+          className='text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70'
+        >
           {label}
           {required && <span className='text-red-500 ml-1'>*</span>}
         </label>
       )}
+
       {children}
-      {description && !error && (
+
+      {description && !errorMessage && (
         <p className='text-sm text-gray-500'>{description}</p>
       )}
-      {error && <p className='text-sm text-red-500'>{error}</p>}
+
+      {errorMessage && (
+        <p role='alert' className='text-sm text-red-500 font-medium'>
+          {errorMessage.toString()}
+        </p>
+      )}
     </div>
   );
 }

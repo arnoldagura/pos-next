@@ -25,6 +25,19 @@ async function getUsersHandler(req: NextRequest) {
       .from(user)
       .where(whereClause);
 
+    // Type-safe mapping of sortBy parameter to user columns
+    const sortableColumns = {
+      id: user.id,
+      name: user.name,
+      email: user.email,
+      createdAt: user.createdAt,
+      updatedAt: user.updatedAt,
+    } as const;
+
+    // Get the column to sort by, defaulting to createdAt
+    const sortColumn =
+      sortableColumns[sortBy as keyof typeof sortableColumns] || user.createdAt;
+
     const users = await db
       .select({
         id: user.id,
@@ -37,11 +50,7 @@ async function getUsersHandler(req: NextRequest) {
       })
       .from(user)
       .where(whereClause)
-      .orderBy(
-        sortOrder === 'asc'
-          ? asc(user[sortBy as keyof typeof user])
-          : desc(user[sortBy as keyof typeof user])
-      )
+      .orderBy(sortOrder === 'asc' ? asc(sortColumn) : desc(sortColumn))
       .limit(limit)
       .offset(offset);
 
