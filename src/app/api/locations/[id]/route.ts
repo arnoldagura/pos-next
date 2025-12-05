@@ -5,12 +5,12 @@ import { eq } from 'drizzle-orm';
 import { protectRoute } from '@/middleware/rbac';
 import { RESOURCES, ACTIONS } from '@/lib/rbac';
 import { updateLocationSchema } from '@/lib/validations';
+import { RouteContext, createDefaultRouteContext } from '@/lib/types/route';
 
-type RouteContext = {
-  params: Promise<{ id: string }>;
-};
-
-async function getLocationHandler(req: NextRequest, context: RouteContext) {
+async function getLocationHandler(
+  req: NextRequest,
+  context: RouteContext<{ id: string }> = createDefaultRouteContext({ id: '' })
+) {
   try {
     const { id } = await context.params;
 
@@ -37,7 +37,10 @@ async function getLocationHandler(req: NextRequest, context: RouteContext) {
   }
 }
 
-async function updateLocationHandler(req: NextRequest, context: RouteContext) {
+async function updateLocationHandler(
+  req: NextRequest,
+  context: RouteContext<{ id: string }> = createDefaultRouteContext({ id: '' })
+) {
   try {
     const { id } = await context.params;
     const body = await req.json();
@@ -79,7 +82,10 @@ async function updateLocationHandler(req: NextRequest, context: RouteContext) {
   }
 }
 
-async function deleteLocationHandler(req: NextRequest, context: RouteContext) {
+async function deleteLocationHandler(
+  req: NextRequest,
+  context: RouteContext<{ id: string }> = createDefaultRouteContext({ id: '' })
+) {
   try {
     const { id } = await context.params;
 

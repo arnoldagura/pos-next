@@ -6,12 +6,12 @@ import { protectRoute } from '@/middleware/rbac';
 import { RESOURCES, ACTIONS } from '@/lib/rbac';
 import { updateCategorySchema } from '@/lib/validations';
 import { ZodError } from 'zod';
+import { RouteContext, createDefaultRouteContext } from '@/lib/types/route';
 
-type RouteContext = {
-  params: Promise<{ id: string }>;
-};
-
-async function getCategoryHandler(req: NextRequest, context: RouteContext) {
+async function getCategoryHandler(
+  req: NextRequest,
+  context: RouteContext<{ id: string }> = createDefaultRouteContext({ id: '' })
+) {
   try {
     const { id } = await context.params;
 
@@ -47,7 +47,10 @@ async function getCategoryHandler(req: NextRequest, context: RouteContext) {
   }
 }
 
-async function updateCategoryHandler(req: NextRequest, context: RouteContext) {
+async function updateCategoryHandler(
+  req: NextRequest,
+  context: RouteContext<{ id: string }> = createDefaultRouteContext({ id: '' })
+) {
   try {
     const { id } = await context.params;
     const body = await req.json();
@@ -140,7 +143,10 @@ async function updateCategoryHandler(req: NextRequest, context: RouteContext) {
   }
 }
 
-async function deleteCategoryHandler(req: NextRequest, context: RouteContext) {
+async function deleteCategoryHandler(
+  req: NextRequest,
+  context: RouteContext<{ id: string }> = createDefaultRouteContext({ id: '' })
+) {
   try {
     const { id } = await context.params;
 

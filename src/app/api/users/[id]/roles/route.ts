@@ -4,12 +4,12 @@ import { userRole, role } from '@/drizzle/schema';
 import { eq } from 'drizzle-orm';
 import { protectRoute } from '@/middleware/rbac';
 import { RESOURCES, ACTIONS } from '@/lib/rbac';
+import { RouteContext, createDefaultRouteContext } from '@/lib/types/route';
 
-type RouteContext = {
-  params: Promise<{ id: string }>;
-};
-
-async function assignRolesHandler(req: NextRequest, context: RouteContext) {
+async function assignRolesHandler(
+  req: NextRequest,
+  context: RouteContext<{ id: string }> = createDefaultRouteContext({ id: '' })
+) {
   try {
     const { id: userId } = await context.params;
     const body = await req.json();

@@ -1,5 +1,12 @@
-import { relations } from 'drizzle-orm';
-import { pgTable, text, timestamp, boolean, integer } from 'drizzle-orm/pg-core';
+import { ColumnBaseConfig, ColumnDataType, relations } from 'drizzle-orm';
+import {
+  pgTable,
+  text,
+  timestamp,
+  boolean,
+  integer,
+  PgColumn,
+} from 'drizzle-orm/pg-core';
 
 export const category = pgTable('category', {
   id: text('id').primaryKey(),
@@ -7,9 +14,13 @@ export const category = pgTable('category', {
   description: text('description'),
   slug: text('slug').notNull().unique(),
   image: text('image'),
-  parentId: text('parent_id').references((): any => category.id, {
-    onDelete: 'set null',
-  }),
+  parentId: text('parent_id').references(
+    (): PgColumn<ColumnBaseConfig<ColumnDataType, string>, object, object> =>
+      category.id,
+    {
+      onDelete: 'set null',
+    }
+  ),
   displayOrder: integer('display_order').default(0).notNull(),
   isActive: boolean('is_active').default(true).notNull(),
   deletedAt: timestamp('deleted_at'), // For soft delete

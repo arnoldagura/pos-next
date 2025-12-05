@@ -4,12 +4,12 @@ import { user, userRole, role as roleTable } from '@/drizzle/schema';
 import { eq } from 'drizzle-orm';
 import { protectRoute } from '@/middleware/rbac';
 import { RESOURCES, ACTIONS } from '@/lib/rbac';
+import { RouteContext, createDefaultRouteContext } from '@/lib/types/route';
 
-type RouteContext = {
-  params: Promise<{ id: string }>;
-};
-
-async function getUserHandler(req: NextRequest, context: RouteContext) {
+async function getUserHandler(
+  req: NextRequest,
+  context: RouteContext<{ id: string }> = createDefaultRouteContext({ id: '' })
+) {
   try {
     const { id } = await context.params;
 
@@ -58,7 +58,10 @@ async function getUserHandler(req: NextRequest, context: RouteContext) {
   }
 }
 
-async function updateUserHandler(req: NextRequest, context: RouteContext) {
+async function updateUserHandler(
+  req: NextRequest,
+  context: RouteContext<{ id: string }> = createDefaultRouteContext({ id: '' })
+) {
   try {
     const { id } = await context.params;
     const body = await req.json();
@@ -98,7 +101,10 @@ async function updateUserHandler(req: NextRequest, context: RouteContext) {
   }
 }
 
-async function deleteUserHandler(req: NextRequest, context: RouteContext) {
+async function deleteUserHandler(
+  req: NextRequest,
+  context: RouteContext<{ id: string }> = createDefaultRouteContext({ id: '' })
+) {
   try {
     const { id } = await context.params;
 
