@@ -4,7 +4,7 @@ import { ACTIONS, RESOURCES } from '@/lib/rbac';
 import { createProductSchema, generateSlug } from '@/lib/validations/product';
 import { protectRoute } from '@/middleware/rbac';
 import { randomUUID } from 'crypto';
-import { and, eq, ilike, or, gte, lte } from 'drizzle-orm';
+import { and, eq, ilike, or, gte, lte, isNull, count, desc } from 'drizzle-orm';
 import { NextRequest, NextResponse } from 'next/server';
 import { ZodError } from 'zod';
 
@@ -16,10 +16,19 @@ export async function getProductsHandler(req: NextRequest) {
     const search = searchParams.get('search');
     const minPrice = searchParams.get('minPrice');
     const maxPrice = searchParams.get('maxPrice');
+    const includeDeleted = searchParams.get('includeDeleted') === 'true';
 
-    const query = db.select().from(product);
+    // Pagination parameters
+    const page = parseInt(searchParams.get('page') || '1', 10);
+    const limit = parseInt(searchParams.get('limit') || '50', 10);
+    const offset = (page - 1) * limit;
 
     const conditions = [];
+
+    // Exclude soft-deleted products by default
+    if (!includeDeleted) {
+      conditions.push(isNull(product.deletedAt));
+    }
 
     if (statusParam !== null) {
       const status = statusParam === 'true';
@@ -49,11 +58,32 @@ export async function getProductsHandler(req: NextRequest) {
       conditions.push(lte(product.sellingPrice, maxPrice));
     }
 
-    const products = await query.where(
-      conditions.length > 0 ? and(...conditions) : undefined
-    );
+    const whereClause = conditions.length > 0 ? and(...conditions) : undefined;
 
-    return NextResponse.json({ products });
+    // Get total count for pagination
+    const [{ totalCount }] = await db
+      .select({ totalCount: count() })
+      .from(product)
+      .where(whereClause);
+
+    // Get products with pagination
+    const products = await db
+      .select()
+      .from(product)
+      .where(whereClause)
+      .orderBy(desc(product.createdAt))
+      .limit(limit)
+      .offset(offset);
+
+    return NextResponse.json({
+      products,
+      pagination: {
+        page,
+        limit,
+        total: totalCount,
+        totalPages: Math.ceil(totalCount / limit),
+      },
+    });
   } catch (error) {
     console.error('Error fetching products:', error);
 

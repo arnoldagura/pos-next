@@ -29,6 +29,7 @@ export const product = pgTable(
     taxRate: numeric('tax_rate', { precision: 5, scale: 2 }).default('0'),
     createdBy: text('created_by'),
     updatedBy: text('updated_by'),
+    deletedAt: timestamp('deleted_at'), // For soft delete
     createdAt: timestamp('created_at').defaultNow().notNull(),
     updatedAt: timestamp('updated_at')
       .defaultNow()
