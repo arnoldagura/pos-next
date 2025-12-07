@@ -19,9 +19,9 @@ async function seedCategories() {
     const beveragesId = randomUUID();
     const dessertsId = randomUUID();
 
-    // Insert parent categories
+    // Insert parent product categories
     await sql`
-      INSERT INTO category (id, name, description, slug, display_order, is_active)
+      INSERT INTO product_category (id, name, description, slug, display_order, is_active)
       VALUES
         (${foodId}, 'Food', 'Main food items and dishes', 'food', 1, true),
         (${beveragesId}, 'Beverages', 'Drinks and beverages', 'beverages', 2, true),
@@ -29,11 +29,11 @@ async function seedCategories() {
       ON CONFLICT (slug) DO NOTHING
     `;
 
-    console.log('✓ Parent categories created');
+    console.log('✓ Parent product categories created');
 
     // Insert child categories for Food
     await sql`
-      INSERT INTO category (id, name, description, slug, parent_id, display_order, is_active)
+      INSERT INTO product_category (id, name, description, slug, parent_id, display_order, is_active)
       VALUES
         (${randomUUID()}, 'Appetizers', 'Starters and small plates', 'appetizers', ${foodId}, 1, true),
         (${randomUUID()}, 'Main Course', 'Main dishes and entrees', 'main-course', ${foodId}, 2, true),
@@ -46,7 +46,7 @@ async function seedCategories() {
 
     // Insert child categories for Beverages
     await sql`
-      INSERT INTO category (id, name, description, slug, parent_id, display_order, is_active)
+      INSERT INTO product_category (id, name, description, slug, parent_id, display_order, is_active)
       VALUES
         (${randomUUID()}, 'Hot Drinks', 'Coffee, tea, and hot beverages', 'hot-drinks', ${beveragesId}, 1, true),
         (${randomUUID()}, 'Cold Drinks', 'Juices, sodas, and cold beverages', 'cold-drinks', ${beveragesId}, 2, true),
@@ -59,7 +59,7 @@ async function seedCategories() {
 
     // Insert child categories for Desserts
     await sql`
-      INSERT INTO category (id, name, description, slug, parent_id, display_order, is_active)
+      INSERT INTO product_category (id, name, description, slug, parent_id, display_order, is_active)
       VALUES
         (${randomUUID()}, 'Cakes', 'Cakes and pastries', 'cakes', ${dessertsId}, 1, true),
         (${randomUUID()}, 'Ice Cream', 'Ice cream and frozen treats', 'ice-cream', ${dessertsId}, 2, true),

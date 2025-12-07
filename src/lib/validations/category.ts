@@ -8,8 +8,8 @@ export function generateSlug(name: string): string {
     .replace(/^-+|-+$/g, '');
 }
 
-// Create category schema
-export const createCategorySchema = z.object({
+// Product Category Schemas
+export const createProductCategorySchema = z.object({
   name: z.string().min(1, 'Name is required').max(100, 'Name is too long'),
   description: z.string().optional(),
   slug: z
@@ -18,14 +18,12 @@ export const createCategorySchema = z.object({
     .max(100, 'Slug is too long')
     .regex(/^[a-z0-9-]+$/, 'Slug must contain only lowercase letters, numbers, and hyphens')
     .optional(),
-  image: z.string().url('Invalid image URL').optional().or(z.literal('')),
   parentId: z.string().optional().nullable(),
   displayOrder: z.number().int().min(0).default(0),
   isActive: z.boolean().default(true),
 });
 
-// Update category schema (all fields optional)
-export const updateCategorySchema = z.object({
+export const updateProductCategorySchema = z.object({
   name: z.string().min(1, 'Name is required').max(100, 'Name is too long').optional(),
   description: z.string().optional().nullable(),
   slug: z
@@ -34,19 +32,58 @@ export const updateCategorySchema = z.object({
     .max(100, 'Slug is too long')
     .regex(/^[a-z0-9-]+$/, 'Slug must contain only lowercase letters, numbers, and hyphens')
     .optional(),
-  image: z.string().url('Invalid image URL').optional().or(z.literal('')).nullable(),
   parentId: z.string().optional().nullable(),
   displayOrder: z.number().int().min(0).optional(),
   isActive: z.boolean().optional(),
 });
 
-// Category query parameters
-export const categoryQuerySchema = z.object({
+export const productCategoryQuerySchema = z.object({
   parentId: z.string().optional(),
   isActive: z.enum(['true', 'false']).optional(),
   includeDeleted: z.enum(['true', 'false']).optional(),
 });
 
-export type CreateCategoryInput = z.infer<typeof createCategorySchema>;
-export type UpdateCategoryInput = z.infer<typeof updateCategorySchema>;
-export type CategoryQueryInput = z.infer<typeof categoryQuerySchema>;
+// Material Category Schemas
+export const createMaterialCategorySchema = z.object({
+  name: z.string().min(1, 'Name is required').max(100, 'Name is too long'),
+  description: z.string().optional(),
+  slug: z
+    .string()
+    .min(1, 'Slug is required')
+    .max(100, 'Slug is too long')
+    .regex(/^[a-z0-9-]+$/, 'Slug must contain only lowercase letters, numbers, and hyphens')
+    .optional(),
+  parentId: z.string().optional().nullable(),
+  displayOrder: z.number().int().min(0).default(0),
+  isActive: z.boolean().default(true),
+});
+
+export const updateMaterialCategorySchema = z.object({
+  name: z.string().min(1, 'Name is required').max(100, 'Name is too long').optional(),
+  description: z.string().optional().nullable(),
+  slug: z
+    .string()
+    .min(1, 'Slug is required')
+    .max(100, 'Slug is too long')
+    .regex(/^[a-z0-9-]+$/, 'Slug must contain only lowercase letters, numbers, and hyphens')
+    .optional(),
+  parentId: z.string().optional().nullable(),
+  displayOrder: z.number().int().min(0).optional(),
+  isActive: z.boolean().optional(),
+});
+
+export const materialCategoryQuerySchema = z.object({
+  parentId: z.string().optional(),
+  isActive: z.enum(['true', 'false']).optional(),
+  includeDeleted: z.enum(['true', 'false']).optional(),
+});
+
+// Type exports for Product Categories
+export type CreateProductCategoryInput = z.infer<typeof createProductCategorySchema>;
+export type UpdateProductCategoryInput = z.infer<typeof updateProductCategorySchema>;
+export type ProductCategoryQueryInput = z.infer<typeof productCategoryQuerySchema>;
+
+// Type exports for Material Categories
+export type CreateMaterialCategoryInput = z.infer<typeof createMaterialCategorySchema>;
+export type UpdateMaterialCategoryInput = z.infer<typeof updateMaterialCategorySchema>;
+export type MaterialCategoryQueryInput = z.infer<typeof materialCategoryQuerySchema>;
