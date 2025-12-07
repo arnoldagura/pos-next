@@ -1,0 +1,95 @@
+import { NextRequest, NextResponse } from 'next/server';
+import { db } from '@/db/db';
+import { restaurantTable } from '@/drizzle/schema';
+import { eq, ilike, or, and } from 'drizzle-orm';
+import { protectRoute } from '@/middleware/rbac';
+import { RESOURCES, ACTIONS } from '@/lib/rbac';
+import { createTableSchema, type TableStatus } from '@/lib/validations';
+import { randomUUID } from 'crypto';
+import { ZodError } from 'zod';
+
+async function getTablesHandler(req: NextRequest) {
+  try {
+    const { searchParams } = new URL(req.url);
+    const status = searchParams.get('status');
+    const locationId = searchParams.get('locationId');
+    const search = searchParams.get('search');
+
+    const query = db.select().from(restaurantTable);
+
+    // Build where conditions
+    const conditions = [];
+
+    if (status) {
+      conditions.push(eq(restaurantTable.status, status as TableStatus));
+    }
+
+    if (locationId) {
+      conditions.push(eq(restaurantTable.locationId, locationId));
+    }
+
+    if (search) {
+      conditions.push(
+        or(
+          ilike(restaurantTable.name, `%${search}%`),
+          ilike(restaurantTable.number, `%${search}%`)
+        )
+      );
+    }
+
+    const tables = await query.where(
+      conditions.length > 0 ? and(...conditions) : undefined
+    );
+
+    return NextResponse.json({ tables });
+  } catch (error) {
+    console.error('Error fetching tables:', error);
+    return NextResponse.json(
+      { error: 'Failed to fetch tables' },
+      { status: 500 }
+    );
+  }
+}
+
+async function createTableHandler(req: NextRequest) {
+  try {
+    const body = await req.json();
+    const validatedData = createTableSchema.parse(body);
+
+    const newTable = await db
+      .insert(restaurantTable)
+      .values({
+        id: randomUUID(),
+        ...validatedData,
+      })
+      .returning();
+
+    return NextResponse.json(newTable[0], { status: 201 });
+  } catch (error: unknown) {
+    console.error('Error creating table:', error);
+
+    if (error instanceof ZodError) {
+      return NextResponse.json(
+        { error: 'Validation error', details: error.issues },
+        { status: 400 }
+      );
+    }
+
+    return NextResponse.json(
+      { error: 'Failed to create table' },
+      { status: 500 }
+    );
+  }
+}
+
+// GET /api/tables - List all tables
+export const GET = protectRoute(getTablesHandler, {
+  resource: RESOURCES.SETTINGS,
+  action: ACTIONS.READ,
+});
+
+// POST /api/tables - Create table
+export const POST = protectRoute(createTableHandler, {
+  resource: RESOURCES.SETTINGS,
+  action: ACTIONS.UPDATE,
+});
