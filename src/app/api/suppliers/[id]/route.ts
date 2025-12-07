@@ -1,33 +1,34 @@
-import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/db/db';
-import { location } from '@/drizzle/schema';
-import { eq } from 'drizzle-orm';
+import { supplier } from '@/drizzle/schema/suppliers';
+import { ACTIONS, RESOURCES } from '@/lib/rbac';
+import { RouteContext, createDefaultRouteContext } from '@/lib/types';
+import { updateSupplierSchema } from '@/lib/validations/supplier';
 import { protectRoute } from '@/middleware/rbac';
-import { RESOURCES, ACTIONS } from '@/lib/rbac';
-import { updateLocationSchema } from '@/lib/validations';
-import { RouteContext, createDefaultRouteContext } from '@/lib/types/route';
+import { error } from 'console';
+import { eq } from 'drizzle-orm';
+import { NextRequest, NextResponse } from 'next/server';
+import { success } from 'zod';
 
-async function getLocationHandler(
+async function getSupplierHandler(
   req: NextRequest,
   context: RouteContext<{ id: string }> = createDefaultRouteContext({ id: '' })
 ) {
   try {
     const { id } = await context.params;
 
-    const [foundLocation] = await db
+    const [foundSupplier] = await db
       .select()
-      .from(location)
-      .where(eq(location.id, id))
+      .from(supplier)
+      .where(eq(supplier.id, id))
       .limit(1);
-
-    if (!foundLocation) {
+    if (!foundSupplier) {
       return NextResponse.json(
-        { error: 'Location not found' },
+        { error: 'Supplier not found' },
         { status: 404 }
       );
     }
 
-    return NextResponse.json(foundLocation);
+    return NextResponse.json(foundSupplier);
   } catch (error) {
     console.error('Error fetching location:', error);
     return NextResponse.json(
@@ -37,33 +38,29 @@ async function getLocationHandler(
   }
 }
 
-async function updateLocationHandler(
+async function updateSupplierHandler(
   req: NextRequest,
   context: RouteContext<{ id: string }> = createDefaultRouteContext({ id: '' })
 ) {
   try {
     const { id } = await context.params;
     const body = await req.json();
-    const validatedData = updateLocationSchema.parse(body);
+    const validatedData = updateSupplierSchema.parse(body);
 
-    const [updatedLocation] = await db
-      .update(location)
-      .set({
-        ...validatedData,
-        updatedAt: new Date(),
-      })
-      .where(eq(location.id, id))
+    const [updatedSupplier] = await db
+      .update(supplier)
+      .set({ ...validatedData, updatedAt: new Date() })
+      .where(eq(supplier.id, id))
       .returning();
 
-    if (!updatedLocation) {
+    if (!updatedSupplier) {
       return NextResponse.json(
-        { error: 'Location not found' },
+        { error: 'Supplier not found' },
         { status: 404 }
       );
     }
-
-    return NextResponse.json(updatedLocation);
-  } catch (error: unknown) {
+    return NextResponse.json(updatedSupplier);
+  } catch (error) {
     console.error('Error updating location:', error);
 
     if (error instanceof Error) {
@@ -82,21 +79,21 @@ async function updateLocationHandler(
   }
 }
 
-async function deleteLocationHandler(
+async function deleteSupplierHandler(
   req: NextRequest,
   context: RouteContext<{ id: string }> = createDefaultRouteContext({ id: '' })
 ) {
   try {
     const { id } = await context.params;
 
-    const [deletedLocation] = await db
-      .delete(location)
-      .where(eq(location.id, id))
-      .returning({ id: location.id });
+    const [deletedSupplier] = await db
+      .delete(supplier)
+      .where(eq(supplier.id, id))
+      .returning({ id: supplier.id });
 
-    if (!deletedLocation) {
+    if (!deletedSupplier) {
       return NextResponse.json(
-        { error: 'Location not found' },
+        { error: 'Supplier not found' },
         { status: 404 }
       );
     }
@@ -111,20 +108,20 @@ async function deleteLocationHandler(
   }
 }
 
-// GET /api/locations/:id - Get location by ID
-export const GET = protectRoute(getLocationHandler, {
-  resource: RESOURCES.SETTINGS,
-  action: ACTIONS.READ,
-});
-
-// PATCH /api/locations/:id - Update location by ID
-export const PATCH = protectRoute(updateLocationHandler, {
+// GET /api/suppliers/:id - Get supplier by ID
+export const GET = protectRoute(getSupplierHandler, {
   resource: RESOURCES.SETTINGS,
   action: ACTIONS.UPDATE,
 });
 
-// DELETE /api/locations/:id - Delete location by ID
-export const DELETE = protectRoute(deleteLocationHandler, {
+// PATCH /api/suppliers/:id - Update supplier by ID
+export const PATCH = protectRoute(updateSupplierHandler, {
   resource: RESOURCES.SETTINGS,
   action: ACTIONS.UPDATE,
+});
+
+// DELETE /api/suppliers/:id - Delete supplier by ID
+export const DELETE = protectRoute(deleteSupplierHandler, {
+  resource: RESOURCES.SETTINGS,
+  action: ACTIONS.DELETE,
 });
