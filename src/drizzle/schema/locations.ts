@@ -1,4 +1,6 @@
+import { relations } from 'drizzle-orm';
 import { pgTable, text, timestamp, boolean } from 'drizzle-orm/pg-core';
+import { inventory } from './inventories';
 
 export const location = pgTable('location', {
   id: text('id').primaryKey(),
@@ -17,3 +19,7 @@ export const location = pgTable('location', {
     .$onUpdate(() => new Date())
     .notNull(),
 });
+
+export const locationRelations = relations(location, ({ many }) => ({
+  inventories: many(inventory),
+}));

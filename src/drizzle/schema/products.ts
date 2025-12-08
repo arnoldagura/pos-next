@@ -18,7 +18,10 @@ export const product = pgTable(
     sku: text('sku').unique(),
     barcode: text('barcode').unique(),
     description: text('description'),
-    sellingPrice: numeric('selling_price', { precision: 10, scale: 2 }).notNull(),
+    sellingPrice: numeric('selling_price', {
+      precision: 10,
+      scale: 2,
+    }).notNull(),
     costPrice: numeric('cost_price', { precision: 10, scale: 2 }),
     categoryId: text('category_id').references(() => productCategory.id, {
       onDelete: 'set null',
@@ -46,10 +49,12 @@ export const product = pgTable(
   })
 );
 
-// Relations for products
-export const productRelations = relations(product, ({ one }) => ({
+import { inventory } from './inventories';
+
+export const productRelations = relations(product, ({ one, many }) => ({
   category: one(productCategory, {
     fields: [product.categoryId],
     references: [productCategory.id],
   }),
+  inventories: many(inventory),
 }));

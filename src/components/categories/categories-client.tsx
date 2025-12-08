@@ -1,11 +1,28 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Plus, Pencil, Trash2, ChevronRight, ChevronDown } from 'lucide-react';
+import { Plus, Pencil, Trash2, ChevronRight, ChevronDown, GripVertical } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
 import { CategoryFormDialog } from './category-form-dialog';
+import {
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  DragEndEvent,
+} from '@dnd-kit/core';
+import {
+  arrayMove,
+  SortableContext,
+  sortableKeyboardCoordinates,
+  useSortable,
+  verticalListSortingStrategy,
+} from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
 
 type Category = {
   id: string;
@@ -20,6 +37,124 @@ type Category = {
   children?: Category[];
 };
 
+type SortableCategoryProps = {
+  category: Category;
+  level: number;
+  expandedCategories: Set<string>;
+  onToggleExpand: (id: string) => void;
+  onEdit: (category: Category) => void;
+  onDelete: (category: Category) => void;
+};
+
+function SortableCategory({
+  category,
+  level,
+  expandedCategories,
+  onToggleExpand,
+  onEdit,
+  onDelete,
+}: SortableCategoryProps) {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id: category.id });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.5 : 1,
+  };
+
+  const hasChildren = category.children && category.children.length > 0;
+  const isExpanded = expandedCategories.has(category.id);
+  const paddingLeft = `${level * 2}rem`;
+
+  return (
+    <div ref={setNodeRef} style={style}>
+      <div
+        className='flex items-center justify-between p-3 hover:bg-gray-50 border-b'
+        style={{ paddingLeft }}
+      >
+        <div className='flex items-center gap-3 flex-1'>
+          <div
+            {...attributes}
+            {...listeners}
+            className='cursor-grab active:cursor-grabbing p-1 hover:bg-gray-200 rounded'
+          >
+            <GripVertical className='h-4 w-4 text-gray-400' />
+          </div>
+
+          {hasChildren ? (
+            <button
+              onClick={() => onToggleExpand(category.id)}
+              className='p-1 hover:bg-gray-200 rounded'
+            >
+              {isExpanded ? (
+                <ChevronDown className='h-4 w-4' />
+              ) : (
+                <ChevronRight className='h-4 w-4' />
+              )}
+            </button>
+          ) : (
+            <div className='w-6' />
+          )}
+
+          <div className='flex-1'>
+            <div className='flex items-center gap-2'>
+              <h3 className='font-medium'>{category.name}</h3>
+              <Badge variant={category.isActive ? 'default' : 'secondary'}>
+                {category.isActive ? 'Active' : 'Inactive'}
+              </Badge>
+            </div>
+            {category.description && (
+              <p className='text-sm text-gray-600 mt-1'>
+                {category.description}
+              </p>
+            )}
+            <p className='text-xs text-gray-500 mt-1'>
+              Slug: {category.slug} • Order: {category.displayOrder}
+            </p>
+          </div>
+        </div>
+
+        <div className='flex gap-2'>
+          <Button variant='ghost' size='sm' onClick={() => onEdit(category)}>
+            <Pencil className='h-4 w-4' />
+          </Button>
+          <Button variant='ghost' size='sm' onClick={() => onDelete(category)}>
+            <Trash2 className='h-4 w-4 text-red-500' />
+          </Button>
+        </div>
+      </div>
+
+      {hasChildren && isExpanded && (
+        <SortableContext
+          items={category.children!.map((child) => child.id)}
+          strategy={verticalListSortingStrategy}
+        >
+          <div>
+            {category.children!.map((child) => (
+              <SortableCategory
+                key={child.id}
+                category={child}
+                level={level + 1}
+                expandedCategories={expandedCategories}
+                onToggleExpand={onToggleExpand}
+                onEdit={onEdit}
+                onDelete={onDelete}
+              />
+            ))}
+          </div>
+        </SortableContext>
+      )}
+    </div>
+  );
+}
+
 export function CategoriesClient() {
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
@@ -29,6 +164,13 @@ export function CategoriesClient() {
   >(undefined);
   const [expandedCategories, setExpandedCategories] = useState<Set<string>>(
     new Set()
+  );
+
+  const sensors = useSensors(
+    useSensor(PointerSensor),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    })
   );
 
   const fetchCategories = async () => {
@@ -96,6 +238,50 @@ export function CategoriesClient() {
     setExpandedCategories(newExpanded);
   };
 
+  const handleDragEnd = async (event: DragEndEvent) => {
+    const { active, over } = event;
+
+    if (!over || active.id === over.id) {
+      return;
+    }
+
+    const oldIndex = categories.findIndex((cat) => cat.id === active.id);
+    const newIndex = categories.findIndex((cat) => cat.id === over.id);
+
+    if (oldIndex === -1 || newIndex === -1) {
+      return;
+    }
+
+    // Optimistic update
+    const newCategories = arrayMove(categories, oldIndex, newIndex);
+    setCategories(newCategories);
+
+    // Update display order on the server
+    try {
+      const updates = newCategories.map((cat, index) => ({
+        id: cat.id,
+        displayOrder: index,
+      }));
+
+      // Update each category's display order
+      await Promise.all(
+        updates.map((update) =>
+          fetch(`/api/categories/${update.id}`, {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ displayOrder: update.displayOrder }),
+          })
+        )
+      );
+
+      toast.success('Category order updated');
+    } catch {
+      toast.error('Failed to update category order');
+      // Revert on error
+      fetchCategories();
+    }
+  };
+
   const handleEdit = (category: Category) => {
     setSelectedCategory(category);
     setShowDialog(true);
@@ -134,79 +320,6 @@ export function CategoriesClient() {
     }
   };
 
-  const renderCategory = (category: Category, level: number = 0) => {
-    const hasChildren = category.children && category.children.length > 0;
-    const isExpanded = expandedCategories.has(category.id);
-    const paddingLeft = `${level * 2}rem`;
-
-    return (
-      <div key={category.id}>
-        <div
-          className='flex items-center justify-between p-3 hover:bg-gray-50 border-b'
-          style={{ paddingLeft }}
-        >
-          <div className='flex items-center gap-3 flex-1'>
-            {hasChildren ? (
-              <button
-                onClick={() => toggleExpand(category.id)}
-                className='p-1 hover:bg-gray-200 rounded'
-              >
-                {isExpanded ? (
-                  <ChevronDown className='h-4 w-4' />
-                ) : (
-                  <ChevronRight className='h-4 w-4' />
-                )}
-              </button>
-            ) : (
-              <div className='w-6' />
-            )}
-
-            <div className='flex-1'>
-              <div className='flex items-center gap-2'>
-                <h3 className='font-medium'>{category.name}</h3>
-                <Badge variant={category.isActive ? 'default' : 'secondary'}>
-                  {category.isActive ? 'Active' : 'Inactive'}
-                </Badge>
-              </div>
-              {category.description && (
-                <p className='text-sm text-gray-600 mt-1'>
-                  {category.description}
-                </p>
-              )}
-              <p className='text-xs text-gray-500 mt-1'>
-                Slug: {category.slug} • Order: {category.displayOrder}
-              </p>
-            </div>
-          </div>
-
-          <div className='flex gap-2'>
-            <Button
-              variant='ghost'
-              size='sm'
-              onClick={() => handleEdit(category)}
-            >
-              <Pencil className='h-4 w-4' />
-            </Button>
-            <Button
-              variant='ghost'
-              size='sm'
-              onClick={() => handleDelete(category)}
-            >
-              <Trash2 className='h-4 w-4 text-red-500' />
-            </Button>
-          </div>
-        </div>
-
-        {hasChildren && isExpanded && (
-          <div>
-            {category.children!.map((child) =>
-              renderCategory(child, level + 1)
-            )}
-          </div>
-        )}
-      </div>
-    );
-  };
 
   return (
     <div className='p-6 space-y-4'>
@@ -247,7 +360,28 @@ export function CategoriesClient() {
         </div>
       ) : (
         <div className='rounded-md border bg-white'>
-          {categories.map((category) => renderCategory(category))}
+          <DndContext
+            sensors={sensors}
+            collisionDetection={closestCenter}
+            onDragEnd={handleDragEnd}
+          >
+            <SortableContext
+              items={categories.map((cat) => cat.id)}
+              strategy={verticalListSortingStrategy}
+            >
+              {categories.map((category) => (
+                <SortableCategory
+                  key={category.id}
+                  category={category}
+                  level={0}
+                  expandedCategories={expandedCategories}
+                  onToggleExpand={toggleExpand}
+                  onEdit={handleEdit}
+                  onDelete={handleDelete}
+                />
+              ))}
+            </SortableContext>
+          </DndContext>
         </div>
       )}
 
