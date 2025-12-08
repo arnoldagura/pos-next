@@ -1,6 +1,9 @@
 import { readFileSync } from 'fs';
 import { join } from 'path';
 import postgres from 'postgres';
+import { config } from 'dotenv';
+
+config();
 
 async function applyMigration() {
   if (!process.env.DATABASE_URL) {
@@ -16,7 +19,7 @@ async function applyMigration() {
       process.cwd(),
       'drizzle',
       'migration',
-      '0001_tan_centennial.sql',
+      '0001_tan_centennial.sql'
     );
     const migrationSQL = readFileSync(migrationPath, 'utf-8');
 

@@ -2,6 +2,9 @@ import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { NextRequest } from 'next/server';
 import { getLowStockHandler } from '../route';
 import * as inventoryCalculation from '@/lib/services/inventory-calculation';
+import { config } from 'dotenv';
+
+config();
 
 // Mock dependencies
 vi.mock('@/lib/services/inventory-calculation');
@@ -40,9 +43,13 @@ describe('Inventory API - GET /api/inventory/low-stock', () => {
       },
     ];
 
-    vi.mocked(inventoryCalculation.getLowStockItems).mockResolvedValue(mockLowStockItems);
+    vi.mocked(inventoryCalculation.getLowStockItems).mockResolvedValue(
+      mockLowStockItems
+    );
 
-    const request = new NextRequest('http://localhost/api/inventory/low-stock?locationId=loc-1');
+    const request = new NextRequest(
+      'http://localhost/api/inventory/low-stock?locationId=loc-1'
+    );
     const response = await getLowStockHandler(request);
     const data = await response.json();
 
@@ -59,7 +66,9 @@ describe('Inventory API - GET /api/inventory/low-stock', () => {
   it('should return empty array when no low stock items', async () => {
     vi.mocked(inventoryCalculation.getLowStockItems).mockResolvedValue([]);
 
-    const request = new NextRequest('http://localhost/api/inventory/low-stock?locationId=loc-1');
+    const request = new NextRequest(
+      'http://localhost/api/inventory/low-stock?locationId=loc-1'
+    );
     const response = await getLowStockHandler(request);
     const data = await response.json();
 
@@ -82,7 +91,9 @@ describe('Inventory API - GET /api/inventory/low-stock', () => {
       new Error('Database error')
     );
 
-    const request = new NextRequest('http://localhost/api/inventory/low-stock?locationId=loc-1');
+    const request = new NextRequest(
+      'http://localhost/api/inventory/low-stock?locationId=loc-1'
+    );
     const response = await getLowStockHandler(request);
     const data = await response.json();
 
