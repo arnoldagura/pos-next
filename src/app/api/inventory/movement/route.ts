@@ -1,0 +1,99 @@
+import { db } from '@/db/db';
+import { inventory, inventoryMovement } from '@/drizzle/schema';
+import { ACTIONS, RESOURCES } from '@/lib/rbac';
+import { createMovementSchema } from '@/lib/validations/inventory';
+import { protectRoute } from '@/middleware/rbac';
+import { randomUUID } from 'crypto';
+import { eq } from 'drizzle-orm';
+import { NextRequest, NextResponse } from 'next/server';
+import { ZodError } from 'zod';
+import {
+  validateStockAvailability,
+  invalidateInventoryCache,
+  invalidateLocationCache,
+} from '@/lib/services/inventory-calculation';
+
+export async function createMovementHandler(req: NextRequest) {
+  try {
+    const body = await req.json();
+    const validatedData = createMovementSchema.parse(body);
+
+    const inventoryRecord = await db
+      .select()
+      .from(inventory)
+      .where(eq(inventory.id, validatedData.inventoryId))
+      .limit(1);
+
+    if (inventoryRecord.length === 0) {
+      return NextResponse.json(
+        { error: 'Inventory not found' },
+        { status: 404 }
+      );
+    }
+
+    const decreaseTypes = ['sale', 'transfer_out', 'waste'];
+    if (decreaseTypes.includes(validatedData.type)) {
+      const validation = await validateStockAvailability(
+        validatedData.inventoryId,
+        validatedData.quantity
+      );
+
+      if (!validation.available) {
+        return NextResponse.json(
+          {
+            error: 'Insufficient stock',
+            currentStock: validation.currentStock,
+            requested: validation.requestedQuantity,
+            shortfall: validation.shortfall,
+          },
+          { status: 400 }
+        );
+      }
+    }
+
+    const movementDate = validatedData.date
+      ? new Date(validatedData.date)
+      : new Date();
+
+    const newMovement = await db
+      .insert(inventoryMovement)
+      .values({
+        id: randomUUID(),
+        inventoryId: validatedData.inventoryId,
+        type: validatedData.type,
+        quantity: validatedData.quantity.toString(),
+        unitPrice: validatedData.unitPrice?.toString(),
+        date: movementDate,
+        remarks: validatedData.remarks,
+        referenceType: validatedData.referenceType,
+        referenceId: validatedData.referenceId,
+        createdBy: validatedData.createdBy,
+      })
+      .returning();
+
+    invalidateInventoryCache(validatedData.inventoryId);
+    invalidateLocationCache(inventoryRecord[0].locationId);
+
+    return NextResponse.json(newMovement[0], { status: 201 });
+  } catch (error) {
+    console.error('Error creating movement:', error);
+
+    if (error instanceof ZodError) {
+      return NextResponse.json(
+        { error: 'Validation error', details: error.issues },
+        { status: 400 }
+      );
+    }
+
+    return NextResponse.json(
+      { error: 'Failed to create movement' },
+      { status: 500 }
+    );
+  }
+}
+
+// POST /api/inventory/movement - Record movement
+export const POST = protectRoute(createMovementHandler, {
+  resource: RESOURCES.INVENTORY,
+  action: ACTIONS.UPDATE,
+});
