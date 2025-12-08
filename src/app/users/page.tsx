@@ -10,7 +10,6 @@ export default async function UsersPage() {
     redirect('/login');
   }
 
-  // Check if user has permission to view users
   const canViewUsers = await hasPermission(user.id, 'users:read');
 
   if (!canViewUsers) {
@@ -34,9 +33,7 @@ export default async function UsersPage() {
         <div className='bg-white rounded-lg shadow'>
           <div className='p-6 border-b'>
             <h1 className='text-3xl font-bold'>User Management</h1>
-            <p className='text-gray-600 mt-1'>
-              Manage users and their roles
-            </p>
+            <p className='text-gray-600 mt-1'>Manage users and their roles</p>
           </div>
           <UsersClient currentUserId={user.id} />
         </div>

@@ -47,10 +47,7 @@ async function getProductHandler(
       .limit(1);
 
     if (!foundProduct) {
-      return NextResponse.json(
-        { error: 'Product not found' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'Product not found' }, { status: 404 });
     }
 
     return NextResponse.json(foundProduct);
@@ -149,6 +146,20 @@ async function updateProductHandler(
           : validatedData.taxRate;
     }
 
+    if (validatedData.sku !== undefined) {
+      updateData.sku =
+        validatedData.sku && validatedData.sku.trim() !== ''
+          ? validatedData.sku
+          : null;
+    }
+
+    if (validatedData.barcode !== undefined) {
+      updateData.barcode =
+        validatedData.barcode && validatedData.barcode.trim() !== ''
+          ? validatedData.barcode
+          : null;
+    }
+
     const [updatedProduct] = await db
       .update(product)
       .set({ ...updateData, updatedAt: new Date() })
@@ -156,10 +167,7 @@ async function updateProductHandler(
       .returning();
 
     if (!updatedProduct) {
-      return NextResponse.json(
-        { error: 'Product not found' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'Product not found' }, { status: 404 });
     }
 
     return NextResponse.json(updatedProduct);
@@ -197,10 +205,7 @@ async function deleteProductHandler(
       .returning({ id: product.id });
 
     if (!deletedProduct) {
-      return NextResponse.json(
-        { error: 'Product not found' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'Product not found' }, { status: 404 });
     }
 
     return NextResponse.json({ success: true });

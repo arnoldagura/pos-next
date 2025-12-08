@@ -39,6 +39,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { toast } from 'sonner';
+import { ProductFormDialog } from './product-form-dialog';
 
 type Product = {
   id: string;
@@ -79,6 +80,8 @@ export function ProductsClient() {
   const [sortField, setSortField] = useState<SortField>('createdAt');
   const [sortOrder, setSortOrder] = useState<SortOrder>('desc');
   const [editingPrice, setEditingPrice] = useState<{ id: string; value: string } | null>(null);
+  const [showProductDialog, setShowProductDialog] = useState(false);
+  const [selectedProduct, setSelectedProduct] = useState<Product | undefined>(undefined);
 
   const fetchCategories = async () => {
     try {
@@ -358,7 +361,13 @@ export function ProductsClient() {
           Export
         </Button>
 
-        <Button className="w-full sm:w-auto">
+        <Button
+          className="w-full sm:w-auto"
+          onClick={() => {
+            setSelectedProduct(undefined);
+            setShowProductDialog(true);
+          }}
+        >
           <Plus className="h-4 w-4 mr-2" />
           Add Product
         </Button>
@@ -547,7 +556,12 @@ export function ProductsClient() {
                             </Button>
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end">
-                            <DropdownMenuItem>
+                            <DropdownMenuItem
+                              onClick={() => {
+                                setSelectedProduct(product);
+                                setShowProductDialog(true);
+                              }}
+                            >
                               <Pencil className="h-4 w-4 mr-2" />
                               Edit
                             </DropdownMenuItem>
@@ -604,6 +618,17 @@ export function ProductsClient() {
           )}
         </>
       )}
+
+      {/* Product Form Dialog */}
+      <ProductFormDialog
+        product={selectedProduct}
+        open={showProductDialog}
+        onOpenChange={setShowProductDialog}
+        onSuccess={() => {
+          fetchProducts();
+          setSelectedProduct(undefined);
+        }}
+      />
     </div>
   );
 }

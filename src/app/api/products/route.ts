@@ -167,12 +167,23 @@ export async function createProductHandler(req: NextRequest) {
           : validatedData.taxRate
         : '0';
 
+    const sku =
+      validatedData.sku && validatedData.sku.trim() !== ''
+        ? validatedData.sku
+        : null;
+    const barcode =
+      validatedData.barcode && validatedData.barcode.trim() !== ''
+        ? validatedData.barcode
+        : null;
+
     const newProduct = await db
       .insert(product)
       .values({
         id: randomUUID(),
         ...validatedData,
         slug,
+        sku,
+        barcode,
         sellingPrice,
         costPrice,
         taxRate,
