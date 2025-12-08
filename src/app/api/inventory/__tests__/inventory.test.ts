@@ -1,9 +1,6 @@
-import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { NextRequest } from 'next/server';
-import {
-  getInventoryHandler,
-  createInventoryHandler,
-} from '../route';
+import { getInventoryHandler, createInventoryHandler } from '../route';
 import { db } from '@/db/db';
 import * as inventoryCalculation from '@/lib/services/inventory-calculation';
 
@@ -63,7 +60,9 @@ describe('Inventory API - GET /api/inventory', () => {
       'inv-1': { inventoryId: 'inv-1', currentStock: 50, unitOfMeasure: 'pcs' },
     });
 
-    const request = new NextRequest('http://localhost/api/inventory?page=1&limit=50');
+    const request = new NextRequest(
+      'http://localhost/api/inventory?page=1&limit=50'
+    );
     const response = await getInventoryHandler(request);
     const data = await response.json();
 
@@ -100,7 +99,9 @@ describe('Inventory API - GET /api/inventory', () => {
     vi.mocked(db.select).mockReturnValue(mockDbChain as never);
     vi.mocked(inventoryCalculation.getBulkStockLevels).mockResolvedValue({});
 
-    const request = new NextRequest('http://localhost/api/inventory?locationId=loc-1');
+    const request = new NextRequest(
+      'http://localhost/api/inventory?locationId=loc-1'
+    );
     const response = await getInventoryHandler(request);
 
     expect(response.status).toBe(200);
@@ -158,11 +159,13 @@ describe('Inventory API - POST /api/inventory', () => {
     // Mock insert
     vi.mocked(db.insert).mockReturnValue({
       values: vi.fn().mockReturnThis(),
-      returning: vi.fn().mockResolvedValue([{
-        id: 'inv-new',
-        ...newInventory,
-        alertThreshold: '10',
-      }]),
+      returning: vi.fn().mockResolvedValue([
+        {
+          id: 'inv-new',
+          ...newInventory,
+          alertThreshold: '10',
+        },
+      ]),
     } as never);
 
     const request = new NextRequest('http://localhost/api/inventory', {
@@ -204,7 +207,9 @@ describe('Inventory API - POST /api/inventory', () => {
     const data = await response.json();
 
     expect(response.status).toBe(400);
-    expect(data.error).toBe('Inventory already exists for this product at this location');
+    expect(data.error).toBe(
+      'Inventory already exists for this product at this location'
+    );
   });
 
   it('should reject if product does not exist', async () => {

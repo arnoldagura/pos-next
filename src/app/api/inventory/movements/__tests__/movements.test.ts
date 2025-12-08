@@ -71,13 +71,11 @@ describe('Inventory API - GET /api/inventory/movements', () => {
     const data = await response.json();
 
     expect(response.status).toBe(200);
-    expect(data.movements).toHaveLength(2);
-    expect(data.pagination).toEqual({
-      page: 1,
-      limit: 50,
-      total: 2,
-      totalPages: 1,
-    });
+    expect(data.data).toHaveLength(2);
+    expect(data.total).toBe(2);
+    expect(data.page).toBe(1);
+    expect(data.limit).toBe(50);
+    expect(data.totalPages).toBe(1);
   });
 
   it('should filter by inventoryId', async () => {

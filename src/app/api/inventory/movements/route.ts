@@ -1,5 +1,5 @@
 import { db } from '@/db/db';
-import { inventoryMovement, inventory } from '@/drizzle/schema';
+import { inventoryMovement } from '@/drizzle/schema';
 import { ACTIONS, RESOURCES } from '@/lib/rbac';
 import { protectRoute } from '@/middleware/rbac';
 import { eq, and, count, desc, gte, lte, sql } from 'drizzle-orm';
@@ -54,13 +54,11 @@ export async function getMovementsHandler(req: NextRequest) {
       .offset(offset);
 
     return NextResponse.json({
-      movements,
-      pagination: {
-        page,
-        limit,
-        total: totalCount,
-        totalPages: Math.ceil(totalCount / limit),
-      },
+      data: movements,
+      total: totalCount,
+      page,
+      limit,
+      totalPages: Math.ceil(totalCount / limit),
     });
   } catch (error) {
     console.error('Error fetching movements:', error);
