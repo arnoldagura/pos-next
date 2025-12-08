@@ -40,7 +40,9 @@ export const inventory = pgTable(
   })
 );
 
-export const inventoryRelations = relations(inventory, ({ one }) => ({
+import { inventoryMovement } from './inventory-movements';
+
+export const inventoryRelations = relations(inventory, ({ one, many }) => ({
   product: one(product, {
     fields: [inventory.productId],
     references: [product.id],
@@ -49,4 +51,5 @@ export const inventoryRelations = relations(inventory, ({ one }) => ({
     fields: [inventory.locationId],
     references: [location.id],
   }),
+  movements: many(inventoryMovement),
 }));

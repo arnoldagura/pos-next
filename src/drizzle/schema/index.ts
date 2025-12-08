@@ -5,3 +5,4 @@ export * from './categories';
 export * from './tables';
 export * from './products';
 export * from './inventories';
+export * from './inventory-movements';
