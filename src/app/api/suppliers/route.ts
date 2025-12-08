@@ -5,7 +5,6 @@ import { createSupplierSchema } from '@/lib/validations/supplier';
 import { protectRoute } from '@/middleware/rbac';
 import { randomUUID } from 'crypto';
 import { eq, ilike, or } from 'drizzle-orm';
-import { get } from 'http';
 import { NextRequest, NextResponse } from 'next/server';
 import { ZodError } from 'zod';
 

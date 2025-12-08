@@ -31,7 +31,19 @@ export function Navbar() {
                 Dashboard
               </Link>
               <Link
-                href='/dashboard/users'
+                href='/products'
+                className='text-gray-700 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium'
+              >
+                Products
+              </Link>
+              <Link
+                href='/categories'
+                className='text-gray-700 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium'
+              >
+                Categories
+              </Link>
+              <Link
+                href='/users'
                 className='text-gray-700 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium'
               >
                 Users

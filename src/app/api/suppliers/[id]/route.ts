@@ -4,10 +4,8 @@ import { ACTIONS, RESOURCES } from '@/lib/rbac';
 import { RouteContext, createDefaultRouteContext } from '@/lib/types';
 import { updateSupplierSchema } from '@/lib/validations/supplier';
 import { protectRoute } from '@/middleware/rbac';
-import { error } from 'console';
 import { eq } from 'drizzle-orm';
 import { NextRequest, NextResponse } from 'next/server';
-import { success } from 'zod';
 
 async function getSupplierHandler(
   req: NextRequest,
