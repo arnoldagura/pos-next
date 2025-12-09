@@ -33,19 +33,15 @@ export interface Cart {
 }
 
 interface CartState {
-  // Current active cart
   activeCartId: string | null;
 
-  // All carts (for multiple cart support)
   carts: Map<string, Cart>;
 
-  // Actions
   createCart: (cartId?: string) => string;
   switchCart: (cartId: string) => void;
   deleteCart: (cartId: string) => void;
 
-  // Item management
-  addItem: (item: Omit<CartItem, 'subtotal' | 'total'>) => void;
+  addItem: (item: Omit<CartItem, 'id' | 'subtotal' | 'total'>) => void;
   removeItem: (itemId: string) => void;
   updateQuantity: (itemId: string, quantity: number) => void;
   applyItemDiscount: (
@@ -54,22 +50,18 @@ interface CartState {
     discountType: 'percentage' | 'fixed'
   ) => void;
 
-  // Cart metadata
   setTable: (tableId: string, tableName: string) => void;
   setCustomer: (customerId: string, customerName: string) => void;
 
-  // Clear cart
   clear: () => void;
 
-  // Computed getters
   getActiveCart: () => Cart | null;
   getCart: (cartId: string) => Cart | null;
   getAllCarts: () => Cart[];
 }
 
-// Helper function to calculate item totals
 const calculateItemTotals = (
-  item: Omit<CartItem, 'subtotal' | 'total'>
+  item: Omit<CartItem, 'id' | 'subtotal' | 'total'> & { id?: string }
 ): CartItem => {
   const subtotal = item.price * item.quantity;
 
@@ -86,12 +78,14 @@ const calculateItemTotals = (
 
   return {
     ...item,
+    id:
+      item.id ||
+      `item_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`,
     subtotal,
     total,
   };
 };
 
-// Helper function to calculate cart totals
 const calculateCartTotals = (cart: Cart): Cart => {
   const subtotal = cart.items.reduce((sum, item) => sum + item.subtotal, 0);
 
@@ -125,7 +119,6 @@ const calculateCartTotals = (cart: Cart): Cart => {
   };
 };
 
-// Generate unique cart ID
 const generateCartId = (): string => {
   return `cart_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
 };
@@ -215,10 +208,7 @@ export const useCartStore = create<CartState>()(
               quantity: existingItem.quantity + item.quantity,
             });
           } else {
-            const newItem = calculateItemTotals({
-              ...item,
-              id: `item_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`,
-            });
+            const newItem = calculateItemTotals(item);
             updatedItems = [...cart.items, newItem];
           }
 

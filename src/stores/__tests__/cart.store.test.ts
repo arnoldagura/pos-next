@@ -1,7 +1,6 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { describe, it, expect, beforeEach } from 'vitest';
 import { useCartStore } from '../cart.store';
 
-// Mock localStorage
 const localStorageMock = (() => {
   let store: Record<string, string> = {};
 
@@ -25,7 +24,6 @@ Object.defineProperty(global, 'localStorage', {
 
 describe('Cart Store', () => {
   beforeEach(() => {
-    // Reset the store before each test
     useCartStore.setState({
       activeCartId: null,
       carts: new Map(),
@@ -182,7 +180,9 @@ describe('Cart Store', () => {
       });
 
       const cart = useCartStore.getState().getActiveCart();
-      const itemId = cart?.items[0].id!;
+      expect(cart).not.toBeNull();
+      expect(cart!.items[0]).toBeDefined();
+      const itemId = cart!.items[0].id;
 
       useCartStore.getState().removeItem(itemId);
       const updatedCart = useCartStore.getState().getActiveCart();
@@ -201,7 +201,9 @@ describe('Cart Store', () => {
       });
 
       const cart = useCartStore.getState().getActiveCart();
-      const itemId = cart?.items[0].id!;
+      expect(cart).not.toBeNull();
+      expect(cart!.items[0]).toBeDefined();
+      const itemId = cart!.items[0].id;
 
       useCartStore.getState().updateQuantity(itemId, 5);
       const updatedCart = useCartStore.getState().getActiveCart();
@@ -220,7 +222,9 @@ describe('Cart Store', () => {
       });
 
       const cart = useCartStore.getState().getActiveCart();
-      const itemId = cart?.items[0].id!;
+      expect(cart).not.toBeNull();
+      expect(cart!.items[0]).toBeDefined();
+      const itemId = cart!.items[0].id;
 
       useCartStore.getState().updateQuantity(itemId, 0);
       const updatedCart = useCartStore.getState().getActiveCart();
@@ -245,7 +249,9 @@ describe('Cart Store', () => {
       });
 
       const cart = useCartStore.getState().getActiveCart();
-      const itemId = cart?.items[0].id!;
+      expect(cart).not.toBeNull();
+      expect(cart!.items[0]).toBeDefined();
+      const itemId = cart!.items[0].id;
 
       useCartStore.getState().applyItemDiscount(itemId, 10, 'percentage');
       const updatedCart = useCartStore.getState().getActiveCart();
@@ -267,7 +273,9 @@ describe('Cart Store', () => {
       });
 
       const cart = useCartStore.getState().getActiveCart();
-      const itemId = cart?.items[0].id!;
+      expect(cart).not.toBeNull();
+      expect(cart!.items[0]).toBeDefined();
+      const itemId = cart!.items[0].id;
 
       useCartStore.getState().applyItemDiscount(itemId, 20, 'fixed');
       const updatedCart = useCartStore.getState().getActiveCart();
@@ -289,7 +297,9 @@ describe('Cart Store', () => {
       });
 
       const cart = useCartStore.getState().getActiveCart();
-      const itemId = cart?.items[0].id!;
+      expect(cart).not.toBeNull();
+      expect(cart!.items[0]).toBeDefined();
+      const itemId = cart!.items[0].id;
 
       useCartStore.getState().applyItemDiscount(itemId, 20, 'fixed');
       const updatedCart = useCartStore.getState().getActiveCart();
