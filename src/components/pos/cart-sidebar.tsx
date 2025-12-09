@@ -20,12 +20,14 @@ import {
 import Image from 'next/image';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
+import { CheckoutDialog } from './checkout-dialog';
 
 interface CartSidebarProps {
   onClose?: () => void;
+  locationId: string;
 }
 
-export function CartSidebar({ onClose }: CartSidebarProps) {
+export function CartSidebar({ onClose, locationId }: CartSidebarProps) {
   const cart = useCartStore((state) => state.getActiveCart());
   const {
     updateQuantity,
@@ -39,6 +41,8 @@ export function CartSidebar({ onClose }: CartSidebarProps) {
     value: string;
     type: 'percentage' | 'fixed';
   } | null>(null);
+
+  const [showCheckout, setShowCheckout] = useState(false);
 
   if (!cart) {
     return (
@@ -93,8 +97,7 @@ export function CartSidebar({ onClose }: CartSidebarProps) {
   };
 
   const handleCheckout = () => {
-    // TODO: Implement checkout flow
-    toast.info('Checkout flow not yet implemented');
+    setShowCheckout(true);
   };
 
   const handleClearCart = () => {
@@ -387,6 +390,13 @@ export function CartSidebar({ onClose }: CartSidebarProps) {
           </Button>
         </div>
       </div>
+
+      {/* Checkout Dialog */}
+      <CheckoutDialog
+        open={showCheckout}
+        onOpenChange={setShowCheckout}
+        locationId={locationId}
+      />
     </div>
   );
 }

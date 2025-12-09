@@ -65,7 +65,7 @@ describe('Cart Store', () => {
 
     it('should delete a cart', () => {
       const cart1Id = useCartStore.getState().createCart();
-      const cart2Id = useCartStore.getState().createCart();
+      // const cart2Id = useCartStore.getState().createCart();
 
       useCartStore.getState().deleteCart(cart1Id);
       expect(useCartStore.getState().carts.size).toBe(1);
@@ -304,7 +304,6 @@ describe('Cart Store', () => {
       useCartStore.getState().applyItemDiscount(itemId, 20, 'fixed');
       const updatedCart = useCartStore.getState().getActiveCart();
 
-      // Price: 100, Discount: 20, After discount: 80, Tax 10%: 8, Total: 88
       expect(updatedCart?.items[0].total).toBe(88);
     });
   });

@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { useForm } from 'react-hook-form';
+import { useForm, useWatch } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
@@ -36,9 +36,14 @@ import {
 } from '@/components/ui/alert-dialog';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Loader2, AlertTriangle, TrendingUp, TrendingDown } from 'lucide-react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
 
-// Adjustment reasons
 export const ADJUSTMENT_REASONS = {
   cycle_count: 'Cycle Count',
   damaged: 'Damaged',
@@ -49,7 +54,6 @@ export const ADJUSTMENT_REASONS = {
 
 type AdjustmentReason = keyof typeof ADJUSTMENT_REASONS;
 
-// Form schema
 const adjustmentFormSchema = z.object({
   inventoryId: z.string().min(1, 'Please select a product'),
   quantity: z.number().refine((val) => val !== 0, 'Quantity cannot be zero'),
@@ -77,7 +81,8 @@ export function StockAdjustmentForm({
   onCancel,
 }: StockAdjustmentFormProps) {
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
-  const [pendingValues, setPendingValues] = useState<AdjustmentFormValues | null>(null);
+  const [pendingValues, setPendingValues] =
+    useState<AdjustmentFormValues | null>(null);
   const queryClient = useQueryClient();
 
   const form = useForm<AdjustmentFormValues>({
@@ -91,7 +96,10 @@ export function StockAdjustmentForm({
   });
 
   const currentStock = inventory?.currentStock || 0;
-  const quantityValue = form.watch('quantity');
+  const quantityValue = useWatch({
+    control: form.control,
+    name: 'quantity',
+  });
   const newStock = currentStock + (quantityValue || 0);
 
   const adjustmentMutation = useMutation({
@@ -102,7 +110,9 @@ export function StockAdjustmentForm({
         body: JSON.stringify({
           inventoryId: values.inventoryId,
           quantity: values.quantity,
-          remarks: `${ADJUSTMENT_REASONS[values.reason as AdjustmentReason]}: ${values.remarks}`,
+          remarks: `${ADJUSTMENT_REASONS[values.reason as AdjustmentReason]}: ${
+            values.remarks
+          }`,
         }),
       });
 
@@ -144,151 +154,163 @@ export function StockAdjustmentForm({
 
   return (
     <>
-      <Form form={form} onSubmit={handleSubmit} className="space-y-6">
-          {/* Product Information */}
-          {inventory && (
-            <Card>
-              <CardHeader>
-                <CardTitle>Product Information</CardTitle>
-                <CardDescription>
-                  {inventory.productName} ({inventory.productSku})
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <p className="text-sm text-muted-foreground">Current Stock</p>
-                    <p className="text-2xl font-bold">{currentStock.toFixed(2)}</p>
-                    {inventory.unitOfMeasure && (
-                      <p className="text-sm text-muted-foreground">{inventory.unitOfMeasure}</p>
-                    )}
-                  </div>
-                  <div>
-                    <p className="text-sm text-muted-foreground">New Stock (Preview)</p>
-                    <div className="flex items-center gap-2">
-                      <p className={`text-2xl font-bold ${showWarning ? 'text-destructive' : 'text-primary'}`}>
-                        {newStock.toFixed(2)}
-                      </p>
-                      {isIncrease ? (
-                        <TrendingUp className="h-5 w-5 text-green-600" />
-                      ) : (
-                        <TrendingDown className="h-5 w-5 text-red-600" />
-                      )}
-                    </div>
-                    {showWarning && (
-                      <Alert variant="destructive" className="mt-2">
-                        <AlertTriangle className="h-4 w-4" />
-                        <AlertDescription>
-                          Warning: Adjustment will result in negative stock
-                        </AlertDescription>
-                      </Alert>
-                    )}
-                  </div>
+      <Form form={form} onSubmit={handleSubmit} className='space-y-6'>
+        {/* Product Information */}
+        {inventory && (
+          <Card>
+            <CardHeader>
+              <CardTitle>Product Information</CardTitle>
+              <CardDescription>
+                {inventory.productName} ({inventory.productSku})
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className='grid grid-cols-2 gap-4'>
+                <div>
+                  <p className='text-sm text-muted-foreground'>Current Stock</p>
+                  <p className='text-2xl font-bold'>
+                    {currentStock.toFixed(2)}
+                  </p>
+                  {inventory.unitOfMeasure && (
+                    <p className='text-sm text-muted-foreground'>
+                      {inventory.unitOfMeasure}
+                    </p>
+                  )}
                 </div>
-              </CardContent>
-            </Card>
-          )}
+                <div>
+                  <p className='text-sm text-muted-foreground'>
+                    New Stock (Preview)
+                  </p>
+                  <div className='flex items-center gap-2'>
+                    <p
+                      className={`text-2xl font-bold ${
+                        showWarning ? 'text-destructive' : 'text-primary'
+                      }`}
+                    >
+                      {newStock.toFixed(2)}
+                    </p>
+                    {isIncrease ? (
+                      <TrendingUp className='h-5 w-5 text-green-600' />
+                    ) : (
+                      <TrendingDown className='h-5 w-5 text-red-600' />
+                    )}
+                  </div>
+                  {showWarning && (
+                    <Alert variant='destructive' className='mt-2'>
+                      <AlertTriangle className='h-4 w-4' />
+                      <AlertDescription>
+                        Warning: Adjustment will result in negative stock
+                      </AlertDescription>
+                    </Alert>
+                  )}
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        )}
 
-          {/* Adjustment Details */}
-          <div className="space-y-4">
-            <FormField
-              control={form.control}
-              name="quantity"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Adjustment Quantity</FormLabel>
-                  <FormControl>
-                    <Input
-                      type="number"
-                      step="0.01"
-                      placeholder="Enter quantity (positive to add, negative to subtract)"
-                      {...field}
-                      onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
-                    />
-                  </FormControl>
-                  <FormDescription>
-                    Use positive numbers to increase stock, negative to decrease
-                  </FormDescription>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="reason"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Adjustment Reason</FormLabel>
-                  <Select onValueChange={field.onChange} value={field.value}>
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select a reason" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      {Object.entries(ADJUSTMENT_REASONS).map(([key, label]) => (
-                        <SelectItem key={key} value={key}>
-                          {label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="remarks"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Remarks</FormLabel>
-                  <FormControl>
-                    <Textarea
-                      placeholder="Provide details about this adjustment..."
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormDescription>
-                    Explain why this adjustment is being made
-                  </FormDescription>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          </div>
-
-          {/* Error Display */}
-          {adjustmentMutation.error && (
-            <Alert variant="destructive">
-              <AlertTriangle className="h-4 w-4" />
-              <AlertDescription>
-                {adjustmentMutation.error instanceof Error
-                  ? adjustmentMutation.error.message
-                  : 'Failed to adjust stock'}
-              </AlertDescription>
-            </Alert>
-          )}
-
-          {/* Actions */}
-          <div className="flex justify-end gap-3">
-            {onCancel && (
-              <Button type="button" variant="outline" onClick={onCancel}>
-                Cancel
-              </Button>
+        {/* Adjustment Details */}
+        <div className='space-y-4'>
+          <FormField
+            control={form.control}
+            name='quantity'
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Adjustment Quantity</FormLabel>
+                <FormControl>
+                  <Input
+                    type='number'
+                    step='0.01'
+                    placeholder='Enter quantity (positive to add, negative to subtract)'
+                    {...field}
+                    onChange={(e) =>
+                      field.onChange(parseFloat(e.target.value) || 0)
+                    }
+                  />
+                </FormControl>
+                <FormDescription>
+                  Use positive numbers to increase stock, negative to decrease
+                </FormDescription>
+                <FormMessage />
+              </FormItem>
             )}
-            <Button
-              type="submit"
-              disabled={adjustmentMutation.isPending || !inventory}
-            >
-              {adjustmentMutation.isPending && (
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              )}
-              Submit Adjustment
+          />
+
+          <FormField
+            control={form.control}
+            name='reason'
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Adjustment Reason</FormLabel>
+                <Select onValueChange={field.onChange} value={field.value}>
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder='Select a reason' />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    {Object.entries(ADJUSTMENT_REASONS).map(([key, label]) => (
+                      <SelectItem key={key} value={key}>
+                        {label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name='remarks'
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Remarks</FormLabel>
+                <FormControl>
+                  <Textarea
+                    placeholder='Provide details about this adjustment...'
+                    {...field}
+                  />
+                </FormControl>
+                <FormDescription>
+                  Explain why this adjustment is being made
+                </FormDescription>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
+
+        {/* Error Display */}
+        {adjustmentMutation.error && (
+          <Alert variant='destructive'>
+            <AlertTriangle className='h-4 w-4' />
+            <AlertDescription>
+              {adjustmentMutation.error instanceof Error
+                ? adjustmentMutation.error.message
+                : 'Failed to adjust stock'}
+            </AlertDescription>
+          </Alert>
+        )}
+
+        {/* Actions */}
+        <div className='flex justify-end gap-3'>
+          {onCancel && (
+            <Button type='button' variant='outline' onClick={onCancel}>
+              Cancel
             </Button>
-          </div>
+          )}
+          <Button
+            type='submit'
+            disabled={adjustmentMutation.isPending || !inventory}
+          >
+            {adjustmentMutation.isPending && (
+              <Loader2 className='mr-2 h-4 w-4 animate-spin' />
+            )}
+            Submit Adjustment
+          </Button>
+        </div>
       </Form>
 
       {/* Confirmation Dialog */}
@@ -301,28 +323,35 @@ export function StockAdjustmentForm({
             </AlertDialogDescription>
           </AlertDialogHeader>
           {pendingValues && inventory && (
-            <div className="space-y-2 py-4">
-              <div className="flex justify-between">
-                <span className="text-muted-foreground">Product:</span>
-                <span className="font-medium">{inventory.productName}</span>
+            <div className='space-y-2 py-4'>
+              <div className='flex justify-between'>
+                <span className='text-muted-foreground'>Product:</span>
+                <span className='font-medium'>{inventory.productName}</span>
               </div>
-              <div className="flex justify-between">
-                <span className="text-muted-foreground">Current Stock:</span>
-                <span className="font-medium">{currentStock.toFixed(2)}</span>
+              <div className='flex justify-between'>
+                <span className='text-muted-foreground'>Current Stock:</span>
+                <span className='font-medium'>{currentStock.toFixed(2)}</span>
               </div>
-              <div className="flex justify-between">
-                <span className="text-muted-foreground">Change:</span>
-                <span className={`font-medium ${(pendingValues.quantity || 0) > 0 ? 'text-green-600' : 'text-red-600'}`}>
-                  {(pendingValues.quantity || 0) > 0 ? '+' : ''}{pendingValues.quantity}
+              <div className='flex justify-between'>
+                <span className='text-muted-foreground'>Change:</span>
+                <span
+                  className={`font-medium ${
+                    (pendingValues.quantity || 0) > 0
+                      ? 'text-green-600'
+                      : 'text-red-600'
+                  }`}
+                >
+                  {(pendingValues.quantity || 0) > 0 ? '+' : ''}
+                  {pendingValues.quantity}
                 </span>
               </div>
-              <div className="flex justify-between border-t pt-2">
-                <span className="text-muted-foreground">New Stock:</span>
-                <span className="text-lg font-bold">{newStock.toFixed(2)}</span>
+              <div className='flex justify-between border-t pt-2'>
+                <span className='text-muted-foreground'>New Stock:</span>
+                <span className='text-lg font-bold'>{newStock.toFixed(2)}</span>
               </div>
-              <div className="flex justify-between">
-                <span className="text-muted-foreground">Reason:</span>
-                <span className="font-medium">
+              <div className='flex justify-between'>
+                <span className='text-muted-foreground'>Reason:</span>
+                <span className='font-medium'>
                   {ADJUSTMENT_REASONS[pendingValues.reason as AdjustmentReason]}
                 </span>
               </div>

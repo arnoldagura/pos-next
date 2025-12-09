@@ -38,7 +38,6 @@ export function POSClient() {
       const data = await response.json();
       setLocations(data.locations || []);
 
-      // Auto-select first location
       if (data.locations && data.locations.length > 0) {
         setSelectedLocation(data.locations[0].id);
       }
@@ -48,20 +47,23 @@ export function POSClient() {
   };
 
   return (
-    <div className="flex h-screen overflow-hidden bg-gray-50">
+    <div className='flex h-screen overflow-hidden bg-gray-50'>
       {/* Main Content - Product Grid */}
-      <div className="flex-1 flex flex-col overflow-hidden">
+      <div className='flex-1 flex flex-col overflow-hidden'>
         {/* Header */}
-        <div className="bg-white border-b px-6 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <h1 className="text-2xl font-bold">Point of Sale</h1>
+        <div className='bg-white border-b px-6 py-4 flex items-center justify-between'>
+          <div className='flex items-center gap-4'>
+            <h1 className='text-2xl font-bold'>Point of Sale</h1>
 
             {/* Location Selector */}
-            <div className="flex items-center gap-2">
-              <MapPin className="h-4 w-4 text-gray-500" />
-              <Select value={selectedLocation} onValueChange={setSelectedLocation}>
-                <SelectTrigger className="w-[200px]">
-                  <SelectValue placeholder="Select location" />
+            <div className='flex items-center gap-2'>
+              <MapPin className='h-4 w-4 text-gray-500' />
+              <Select
+                value={selectedLocation}
+                onValueChange={setSelectedLocation}
+              >
+                <SelectTrigger className='w-[200px]'>
+                  <SelectValue placeholder='Select location' />
                 </SelectTrigger>
                 <SelectContent>
                   {locations.map((location) => (
@@ -76,12 +78,12 @@ export function POSClient() {
 
           {/* Mobile Cart Toggle */}
           <Button
-            variant="outline"
-            size="sm"
-            className="lg:hidden"
+            variant='outline'
+            size='sm'
+            className='lg:hidden'
             onClick={() => setShowCart(!showCart)}
           >
-            <ShoppingCart className="h-4 w-4 mr-2" />
+            <ShoppingCart className='h-4 w-4 mr-2' />
             Cart ({itemCount})
           </Button>
         </div>
@@ -91,19 +93,22 @@ export function POSClient() {
       </div>
 
       {/* Cart Sidebar - Desktop */}
-      <div className="hidden lg:block w-96 border-l bg-white">
-        <CartSidebar />
+      <div className='hidden lg:block w-96 border-l bg-white'>
+        <CartSidebar locationId={selectedLocation} />
       </div>
 
       {/* Cart Sidebar - Mobile Overlay */}
       {showCart && (
         <>
           <div
-            className="fixed inset-0 bg-black/50 z-40 lg:hidden"
+            className='fixed inset-0 bg-black/50 z-40 lg:hidden'
             onClick={() => setShowCart(false)}
           />
-          <div className="fixed right-0 top-0 bottom-0 w-96 max-w-full bg-white z-50 lg:hidden shadow-xl">
-            <CartSidebar onClose={() => setShowCart(false)} />
+          <div className='fixed right-0 top-0 bottom-0 w-96 max-w-full bg-white z-50 lg:hidden shadow-xl'>
+            <CartSidebar
+              onClose={() => setShowCart(false)}
+              locationId={selectedLocation}
+            />
           </div>
         </>
       )}

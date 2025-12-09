@@ -3,11 +3,10 @@ import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { ProductGrid } from '../product-grid';
 import { useCartStore } from '@/stores';
+import Image from 'next/image';
 
-// Mock fetch
 global.fetch = vi.fn();
 
-// Mock Next.js Image component
 vi.mock('next/image', () => ({
   default: ({
     src,
@@ -17,10 +16,17 @@ vi.mock('next/image', () => ({
     src: string;
     alt: string;
     [key: string]: unknown;
-  }) => <img src={src} alt={alt} {...props} />,
+  }) => (
+    <Image
+      src={src}
+      alt={alt}
+      width={(props.width as number) || 200}
+      height={(props.height as number) || 200}
+      {...props}
+    />
+  ),
 }));
 
-// Mock toast
 vi.mock('sonner', () => ({
   toast: {
     success: vi.fn(),
@@ -102,13 +108,11 @@ describe('ProductGrid', () => {
   beforeEach(() => {
     vi.clearAllMocks();
 
-    // Reset cart store
     useCartStore.setState({
       activeCartId: null,
       carts: new Map(),
     });
 
-    // Setup fetch mock
     (global.fetch as unknown as ReturnType<typeof vi.fn>).mockImplementation(
       (url: string) => {
         if (url.includes('/api/categories')) {
@@ -143,7 +147,7 @@ describe('ProductGrid', () => {
   });
 
   it('renders product grid with products', async () => {
-    render(<ProductGrid locationId="loc-1" />);
+    render(<ProductGrid locationId='loc-1' />);
 
     await waitFor(() => {
       expect(screen.getByText('Cappuccino')).toBeInTheDocument();
@@ -152,7 +156,7 @@ describe('ProductGrid', () => {
   });
 
   it('displays product prices correctly', async () => {
-    render(<ProductGrid locationId="loc-1" />);
+    render(<ProductGrid locationId='loc-1' />);
 
     await waitFor(() => {
       expect(screen.getByText('$4.50')).toBeInTheDocument();
@@ -161,7 +165,7 @@ describe('ProductGrid', () => {
   });
 
   it('shows stock indicators when location is provided', async () => {
-    render(<ProductGrid locationId="loc-1" />);
+    render(<ProductGrid locationId='loc-1' />);
 
     await waitFor(() => {
       expect(screen.getByText(/50.*available/)).toBeInTheDocument();
@@ -171,7 +175,7 @@ describe('ProductGrid', () => {
 
   it('filters products by search term', async () => {
     const user = userEvent.setup();
-    render(<ProductGrid locationId="loc-1" />);
+    render(<ProductGrid locationId='loc-1' />);
 
     await waitFor(() => {
       expect(screen.getByText('Cappuccino')).toBeInTheDocument();
@@ -180,7 +184,6 @@ describe('ProductGrid', () => {
     const searchInput = screen.getByPlaceholderText(/search products/i);
     await user.type(searchInput, 'Latte');
 
-    // Wait for debounce or filter
     await waitFor(() => {
       expect(global.fetch).toHaveBeenCalledWith(
         expect.stringContaining('search=Latte')
@@ -190,7 +193,7 @@ describe('ProductGrid', () => {
 
   it('filters products by category', async () => {
     const user = userEvent.setup();
-    render(<ProductGrid locationId="loc-1" />);
+    render(<ProductGrid locationId='loc-1' />);
 
     await waitFor(() => {
       expect(screen.getByText('Coffee')).toBeInTheDocument();
@@ -208,7 +211,7 @@ describe('ProductGrid', () => {
 
   it('adds product to cart when clicked', async () => {
     const user = userEvent.setup();
-    render(<ProductGrid locationId="loc-1" />);
+    render(<ProductGrid locationId='loc-1' />);
 
     await waitFor(() => {
       expect(screen.getByText('Cappuccino')).toBeInTheDocument();
@@ -226,7 +229,7 @@ describe('ProductGrid', () => {
 
   it('handles barcode scanner input', async () => {
     const user = userEvent.setup();
-    render(<ProductGrid locationId="loc-1" />);
+    render(<ProductGrid locationId='loc-1' />);
 
     await waitFor(() => {
       expect(screen.getByText('Cappuccino')).toBeInTheDocument();
@@ -283,7 +286,7 @@ describe('ProductGrid', () => {
       }
     );
 
-    render(<ProductGrid locationId="loc-1" />);
+    render(<ProductGrid locationId='loc-1' />);
 
     await waitFor(() => {
       expect(screen.getByText('Out of Stock')).toBeInTheDocument();
@@ -291,7 +294,7 @@ describe('ProductGrid', () => {
   });
 
   it('prevents adding out of stock products to cart', async () => {
-    const user = userEvent.setup();
+    // const user = userEvent.setup();
 
     const outOfStockInventory = [
       {
@@ -335,7 +338,7 @@ describe('ProductGrid', () => {
       }
     );
 
-    render(<ProductGrid locationId="loc-1" />);
+    render(<ProductGrid locationId='loc-1' />);
 
     await waitFor(() => {
       expect(screen.getByText('Cappuccino')).toBeInTheDocument();
@@ -381,7 +384,7 @@ describe('ProductGrid', () => {
       }
     );
 
-    render(<ProductGrid locationId="loc-1" />);
+    render(<ProductGrid locationId='loc-1' />);
 
     await waitFor(() => {
       expect(screen.getByText('No products found')).toBeInTheDocument();
@@ -389,7 +392,7 @@ describe('ProductGrid', () => {
   });
 
   it('handles keyboard shortcuts', async () => {
-    render(<ProductGrid locationId="loc-1" />);
+    render(<ProductGrid locationId='loc-1' />);
 
     await waitFor(() => {
       expect(screen.getByText('Cappuccino')).toBeInTheDocument();
@@ -398,11 +401,9 @@ describe('ProductGrid', () => {
     const searchInput = screen.getByPlaceholderText(/search products/i);
     const barcodeInput = screen.getByPlaceholderText(/scan barcode/i);
 
-    // Ctrl+K should focus search
     fireEvent.keyDown(window, { key: 'k', ctrlKey: true });
     expect(document.activeElement).toBe(searchInput);
 
-    // Ctrl+B should focus barcode
     fireEvent.keyDown(window, { key: 'b', ctrlKey: true });
     expect(document.activeElement).toBe(barcodeInput);
   });

@@ -181,7 +181,7 @@ export const useCartStore = create<CartState>()(
       },
 
       addItem: (item) => {
-        const { activeCartId, carts } = get();
+        const { activeCartId } = get();
 
         if (!activeCartId) {
           const newCartId = get().createCart();

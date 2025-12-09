@@ -75,7 +75,6 @@ export function ProductGrid({ locationId }: ProductGridProps) {
 
   const { addItem } = useCartStore();
 
-  // Fetch categories
   const fetchCategories = useCallback(async () => {
     try {
       const response = await fetch('/api/categories?isActive=true');
@@ -88,7 +87,6 @@ export function ProductGrid({ locationId }: ProductGridProps) {
     }
   }, []);
 
-  // Fetch products
   const fetchProducts = useCallback(async () => {
     try {
       setLoading(true);
@@ -112,7 +110,6 @@ export function ProductGrid({ locationId }: ProductGridProps) {
     }
   }, [search]);
 
-  // Fetch inventory for stock levels
   const fetchInventory = useCallback(async () => {
     if (!locationId) return;
 
@@ -152,7 +149,6 @@ export function ProductGrid({ locationId }: ProductGridProps) {
     }
   }, [locationId, fetchInventory]);
 
-  // Filter products by selected categories
   useEffect(() => {
     if (selectedCategories.size === 0) {
       setProducts(allProducts);
@@ -165,22 +161,18 @@ export function ProductGrid({ locationId }: ProductGridProps) {
     }
   }, [allProducts, selectedCategories]);
 
-  // Keyboard shortcuts
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      // Ctrl/Cmd + K for search focus
       if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
         e.preventDefault();
         searchInputRef.current?.focus();
       }
 
-      // Ctrl/Cmd + B for barcode scanner focus
       if ((e.ctrlKey || e.metaKey) && e.key === 'b') {
         e.preventDefault();
         barcodeInputRef.current?.focus();
       }
 
-      // Escape to clear search
       if (e.key === 'Escape') {
         if (document.activeElement === searchInputRef.current) {
           setSearch('');
@@ -197,7 +189,6 @@ export function ProductGrid({ locationId }: ProductGridProps) {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, []);
 
-  // Toggle category selection
   const toggleCategory = (categoryId: string) => {
     setSelectedCategories((prev) => {
       const newSet = new Set(prev);
@@ -210,12 +201,36 @@ export function ProductGrid({ locationId }: ProductGridProps) {
     });
   };
 
-  // Clear all category filters
   const clearCategoryFilters = () => {
     setSelectedCategories(new Set());
   };
 
-  // Handle barcode scan
+  const handleAddToCart = useCallback(
+    (product: Product) => {
+      const stockItem = inventory.get(product.id);
+
+      if (locationId && stockItem && stockItem.currentStock <= 0) {
+        toast.error('Product is out of stock');
+        return;
+      }
+
+      addItem({
+        productId: product.id,
+        name: product.name,
+        price: parseFloat(product.sellingPrice),
+        quantity: 1,
+        discount: 0,
+        discountType: 'fixed',
+        taxRate: parseFloat(product.taxRate),
+        image: product.image || undefined,
+        sku: product.sku || undefined,
+      });
+
+      toast.success(`${product.name} added to cart`);
+    },
+    [inventory, locationId, addItem]
+  );
+
   const handleBarcodeSubmit = useCallback(
     (barcode: string) => {
       const product = allProducts.find(
@@ -231,35 +246,9 @@ export function ProductGrid({ locationId }: ProductGridProps) {
         setBarcodeInput('');
       }
     },
-    [allProducts]
+    [allProducts, handleAddToCart]
   );
 
-  // Add product to cart
-  const handleAddToCart = (product: Product) => {
-    const stockItem = inventory.get(product.id);
-
-    // Check if out of stock
-    if (locationId && stockItem && stockItem.currentStock <= 0) {
-      toast.error('Product is out of stock');
-      return;
-    }
-
-    addItem({
-      productId: product.id,
-      name: product.name,
-      price: parseFloat(product.sellingPrice),
-      quantity: 1,
-      discount: 0,
-      discountType: 'fixed',
-      taxRate: parseFloat(product.taxRate),
-      image: product.image || undefined,
-      sku: product.sku || undefined,
-    });
-
-    toast.success(`${product.name} added to cart`);
-  };
-
-  // Get stock status
   const getStockStatus = (product: Product) => {
     if (!locationId) return null;
 
@@ -454,7 +443,6 @@ export function ProductGrid({ locationId }: ProductGridProps) {
   );
 }
 
-// Product Card Component
 interface ProductCardProps {
   product: Product;
   stockStatus: { status: string; stock: number } | null;
@@ -552,7 +540,6 @@ function ProductCard({ product, stockStatus, onAddToCart }: ProductCardProps) {
   );
 }
 
-// Skeleton for loading state
 function ProductCardSkeleton() {
   return (
     <div className='flex flex-col bg-white rounded-lg border p-3'>

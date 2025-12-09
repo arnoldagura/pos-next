@@ -108,10 +108,16 @@ export function StockReceiptDialog({
   }, [open]);
 
   useEffect(() => {
-    const inventoryId = form.watch('materialInventoryId');
-    const inventory = materialInventories.find((inv) => inv.id === inventoryId);
-    setSelectedInventory(inventory || null);
-  }, [form.watch('materialInventoryId'), materialInventories, form]);
+    const subscription = form.watch((value, { name }) => {
+      if (name === 'materialInventoryId') {
+        const inventory = materialInventories.find(
+          (inv) => inv.id === value.materialInventoryId
+        );
+        setSelectedInventory(inventory || null);
+      }
+    });
+    return () => subscription.unsubscribe();
+  }, [form, materialInventories]);
 
   const onSubmit = async (data: StockReceiptFormValues) => {
     try {
