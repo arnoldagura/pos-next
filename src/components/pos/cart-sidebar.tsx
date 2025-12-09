@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useCartStore } from '@/stores';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -33,8 +33,10 @@ interface CartSidebarProps {
 
 export function CartSidebar({ onClose, locationId }: CartSidebarProps) {
   const cart = useCartStore((state) => state.getActiveCart());
-  const allCarts = useCartStore((state) => state.getAllCarts());
+  const carts = useCartStore((state) => state.carts);
   const activeCartId = useCartStore((state) => state.activeCartId);
+
+  const allCarts = useMemo(() => Array.from(carts.values()), [carts]);
   const {
     updateQuantity,
     removeItem,
@@ -54,7 +56,6 @@ export function CartSidebar({ onClose, locationId }: CartSidebarProps) {
   const [showTableSelection, setShowTableSelection] = useState(false);
   const [showPendingOrders, setShowPendingOrders] = useState(false);
 
-  // Count pending orders (carts with items that aren't the active cart)
   const pendingOrdersCount = allCarts.filter(
     (c) => c.items.length > 0 && c.id !== activeCartId
   ).length;
@@ -62,7 +63,6 @@ export function CartSidebar({ onClose, locationId }: CartSidebarProps) {
   if (!cart) {
     return (
       <div className='flex flex-col h-full'>
-        {/* Header */}
         <div className='p-4 border-b flex items-center justify-between'>
           <h2 className='text-lg font-semibold flex items-center gap-2'>
             <ShoppingCart className='h-5 w-5' />
@@ -125,7 +125,6 @@ export function CartSidebar({ onClose, locationId }: CartSidebarProps) {
       return;
     }
 
-    // Create a new cart and switch to it
     const newCartId = createCart();
     switchCart(newCartId);
     toast.success('Order held - new cart ready');
@@ -133,7 +132,6 @@ export function CartSidebar({ onClose, locationId }: CartSidebarProps) {
 
   return (
     <div className='flex flex-col h-full'>
-      {/* Header */}
       <div className='p-4 border-b'>
         <div className='flex items-center justify-between mb-3'>
           <h2 className='text-lg font-semibold flex items-center gap-2'>
@@ -341,7 +339,6 @@ export function CartSidebar({ onClose, locationId }: CartSidebarProps) {
                 </div>
               )}
 
-              {/* Item Total */}
               <div className='flex justify-between items-center mt-2 pt-2 border-t'>
                 <span className='text-sm text-gray-600'>Subtotal:</span>
                 <div className='text-right'>
