@@ -16,12 +16,15 @@ import {
   Percent,
   DollarSign,
   Utensils,
+  Clock,
 } from 'lucide-react';
 import Image from 'next/image';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 import { CheckoutDialog } from './checkout-dialog';
 import { TableSelectionDialog } from './table-selection-dialog';
+import { PendingOrdersPanel } from './pending-orders-panel';
+import { Badge } from '@/components/ui/badge';
 
 interface CartSidebarProps {
   onClose?: () => void;
@@ -30,8 +33,16 @@ interface CartSidebarProps {
 
 export function CartSidebar({ onClose, locationId }: CartSidebarProps) {
   const cart = useCartStore((state) => state.getActiveCart());
-  const { updateQuantity, removeItem, applyItemDiscount, clear } =
-    useCartStore();
+  const allCarts = useCartStore((state) => state.getAllCarts());
+  const activeCartId = useCartStore((state) => state.activeCartId);
+  const {
+    updateQuantity,
+    removeItem,
+    applyItemDiscount,
+    clear,
+    createCart,
+    switchCart,
+  } = useCartStore();
 
   const [editingDiscount, setEditingDiscount] = useState<{
     itemId: string;
@@ -41,6 +52,12 @@ export function CartSidebar({ onClose, locationId }: CartSidebarProps) {
 
   const [showCheckout, setShowCheckout] = useState(false);
   const [showTableSelection, setShowTableSelection] = useState(false);
+  const [showPendingOrders, setShowPendingOrders] = useState(false);
+
+  // Count pending orders (carts with items that aren't the active cart)
+  const pendingOrdersCount = allCarts.filter(
+    (c) => c.items.length > 0 && c.id !== activeCartId
+  ).length;
 
   if (!cart) {
     return (
@@ -102,19 +119,51 @@ export function CartSidebar({ onClose, locationId }: CartSidebarProps) {
     }
   };
 
+  const handleHoldOrder = () => {
+    if (!cart || cart.items.length === 0) {
+      toast.error('Cart is empty');
+      return;
+    }
+
+    // Create a new cart and switch to it
+    const newCartId = createCart();
+    switchCart(newCartId);
+    toast.success('Order held - new cart ready');
+  };
+
   return (
     <div className='flex flex-col h-full'>
       {/* Header */}
-      <div className='p-4 border-b flex items-center justify-between'>
-        <h2 className='text-lg font-semibold flex items-center gap-2'>
-          <ShoppingCart className='h-5 w-5' />
-          Cart ({cart.items.length})
-        </h2>
-        {onClose && (
-          <Button variant='ghost' size='sm' onClick={onClose}>
-            <X className='h-4 w-4' />
-          </Button>
-        )}
+      <div className='p-4 border-b'>
+        <div className='flex items-center justify-between mb-3'>
+          <h2 className='text-lg font-semibold flex items-center gap-2'>
+            <ShoppingCart className='h-5 w-5' />
+            Cart ({cart.items.length})
+          </h2>
+          <div className='flex items-center gap-2'>
+            <Button
+              variant='outline'
+              size='sm'
+              onClick={() => setShowPendingOrders(true)}
+              className='relative'
+            >
+              <Clock className='h-4 w-4' />
+              {pendingOrdersCount > 0 && (
+                <Badge
+                  variant='destructive'
+                  className='absolute -top-2 -right-2 h-5 w-5 rounded-full p-0 flex items-center justify-center text-xs'
+                >
+                  {pendingOrdersCount}
+                </Badge>
+              )}
+            </Button>
+            {onClose && (
+              <Button variant='ghost' size='sm' onClick={onClose}>
+                <X className='h-4 w-4' />
+              </Button>
+            )}
+          </div>
+        </div>
       </div>
 
       <ScrollArea className='flex-1'>
@@ -369,14 +418,25 @@ export function CartSidebar({ onClose, locationId }: CartSidebarProps) {
             Checkout
           </Button>
 
-          <Button
-            variant='outline'
-            className='w-full'
-            onClick={handleClearCart}
-            disabled={cart.items.length === 0}
-          >
-            Clear Cart
-          </Button>
+          <div className='grid grid-cols-2 gap-2'>
+            <Button
+              variant='outline'
+              onClick={handleHoldOrder}
+              disabled={cart.items.length === 0}
+            >
+              <Clock className='h-4 w-4 mr-2' />
+              Hold Order
+            </Button>
+
+            <Button
+              variant='outline'
+              onClick={handleClearCart}
+              disabled={cart.items.length === 0}
+            >
+              <Trash2 className='h-4 w-4 mr-2' />
+              Clear
+            </Button>
+          </div>
         </div>
       </div>
 
@@ -390,6 +450,11 @@ export function CartSidebar({ onClose, locationId }: CartSidebarProps) {
         open={showTableSelection}
         onOpenChange={setShowTableSelection}
         locationId={locationId}
+      />
+
+      <PendingOrdersPanel
+        open={showPendingOrders}
+        onOpenChange={setShowPendingOrders}
       />
     </div>
   );
