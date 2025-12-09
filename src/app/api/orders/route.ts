@@ -153,6 +153,7 @@ export async function GET(req: NextRequest) {
   try {
     const { searchParams } = new URL(req.url);
     const locationId = searchParams.get('locationId');
+    const tableId = searchParams.get('tableId');
     const status = searchParams.get('status');
     const page = parseInt(searchParams.get('page') || '1', 10);
     const limit = parseInt(searchParams.get('limit') || '50', 10);
@@ -162,6 +163,10 @@ export async function GET(req: NextRequest) {
 
     if (locationId) {
       conditions.push(eq(order.locationId, locationId));
+    }
+
+    if (tableId) {
+      conditions.push(eq(order.tableId, tableId));
     }
 
     if (status) {

@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useCartStore } from '@/stores';
+import { useCartStore, useTableStore } from '@/stores';
 import {
   Dialog,
   DialogContent,
@@ -43,6 +43,7 @@ export function CheckoutDialog({
 }: CheckoutDialogProps) {
   const cart = useCartStore((state) => state.getActiveCart());
   const clear = useCartStore((state) => state.clear);
+  const { updateTableStatus, clearSelection } = useTableStore();
 
   const [step, setStep] = useState<'payment' | 'processing' | 'success'>(
     'payment'
@@ -149,6 +150,16 @@ export function CheckoutDialog({
       const data = await response.json();
       setOrderId(data.order.id);
       setOrderNumber(data.order.orderNumber);
+
+      if (cart.tableId) {
+        try {
+          await updateTableStatus(cart.tableId, 'available');
+          clearSelection();
+        } catch (error) {
+          console.error('Failed to update table status:', error);
+        }
+      }
+
       setStep('success');
       toast.success('Order completed successfully!');
     } catch (error) {

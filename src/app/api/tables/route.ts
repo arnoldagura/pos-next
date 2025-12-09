@@ -11,17 +11,25 @@ import { ZodError } from 'zod';
 async function getTablesHandler(req: NextRequest) {
   try {
     const { searchParams } = new URL(req.url);
-    const status = searchParams.get('status');
+    const statusParam = searchParams.get('status');
     const locationId = searchParams.get('locationId');
     const search = searchParams.get('search');
 
     const query = db.select().from(restaurantTable);
 
-    // Build where conditions
     const conditions = [];
 
-    if (status) {
-      conditions.push(eq(restaurantTable.status, status as TableStatus));
+    if (statusParam) {
+      const statuses = statusParam
+        .split(',')
+        .map((s) => s.trim()) as TableStatus[];
+      if (statuses.length === 1) {
+        conditions.push(eq(restaurantTable.status, statuses[0]));
+      } else if (statuses.length > 1) {
+        conditions.push(
+          or(...statuses.map((status) => eq(restaurantTable.status, status)))
+        );
+      }
     }
 
     if (locationId) {
@@ -41,7 +49,7 @@ async function getTablesHandler(req: NextRequest) {
       conditions.length > 0 ? and(...conditions) : undefined
     );
 
-    return NextResponse.json({ tables });
+    return NextResponse.json({ data: tables });
   } catch (error) {
     console.error('Error fetching tables:', error);
     return NextResponse.json(
