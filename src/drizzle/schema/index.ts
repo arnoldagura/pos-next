@@ -11,3 +11,4 @@ export * from './inventory-movements';
 export * from './material-inventories';
 export * from './orders';
 export * from './production-recipes';
+export * from './production-orders';
