@@ -1,13 +1,9 @@
 import { db } from '@/db/db';
-import {
-  productionRecipe,
-  productionRecipeIngredient,
-} from '@/drizzle/schema';
+import { productionRecipe, productionRecipeIngredient } from '@/drizzle/schema';
 import { and, count, desc, eq, ilike, or } from 'drizzle-orm';
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 
-// Validation schemas
 const createRecipeSchema = z.object({
   name: z.string().min(1, 'Name is required'),
   description: z.string().optional(),
@@ -39,6 +35,7 @@ export async function GET(req: NextRequest) {
     const limit = parseInt(searchParams.get('limit') || '20', 10);
     const offset = (page - 1) * limit;
 
+    console.log('arnold', statusParam);
     const conditions = [];
 
     if (search) {
@@ -55,19 +52,18 @@ export async function GET(req: NextRequest) {
     }
 
     if (statusParam !== null) {
-      const status = statusParam === 'true';
+      const status = statusParam === 'active' ? true : false;
+
       conditions.push(eq(productionRecipe.status, status));
     }
 
     const whereClause = conditions.length > 0 ? and(...conditions) : undefined;
 
-    // Get total count
     const [{ totalCount }] = await db
       .select({ totalCount: count() })
       .from(productionRecipe)
       .where(whereClause);
 
-    // Get recipes with relations
     const recipes = await db.query.productionRecipe.findMany({
       where: whereClause,
       with: {
@@ -109,14 +105,20 @@ export async function POST(req: NextRequest) {
     const validatedData = createRecipeSchema.parse(body);
 
     // Validate output selection
-    if (validatedData.outputType === 'product' && !validatedData.outputProductId) {
+    if (
+      validatedData.outputType === 'product' &&
+      !validatedData.outputProductId
+    ) {
       return NextResponse.json(
         { error: 'Output product is required when output type is product' },
         { status: 400 }
       );
     }
 
-    if (validatedData.outputType === 'material' && !validatedData.outputMaterialId) {
+    if (
+      validatedData.outputType === 'material' &&
+      !validatedData.outputMaterialId
+    ) {
       return NextResponse.json(
         { error: 'Output material is required when output type is material' },
         { status: 400 }
@@ -124,7 +126,9 @@ export async function POST(req: NextRequest) {
     }
 
     // Generate recipe ID
-    const recipeId = `recipe_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
+    const recipeId = `recipe_${Date.now()}_${Math.random()
+      .toString(36)
+      .substring(2, 9)}`;
 
     // Create recipe with ingredients in transaction
     await db.transaction(async (tx) => {
@@ -146,7 +150,9 @@ export async function POST(req: NextRequest) {
 
       // Insert ingredients
       const ingredientValues = validatedData.ingredients.map((ingredient) => ({
-        id: `recipe_ing_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`,
+        id: `recipe_ing_${Date.now()}_${Math.random()
+          .toString(36)
+          .substring(2, 9)}`,
         recipeId,
         materialId: ingredient.materialId,
         quantity: ingredient.quantity.toString(),

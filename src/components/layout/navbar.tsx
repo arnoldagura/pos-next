@@ -31,16 +31,22 @@ export function Navbar() {
                 Dashboard
               </Link>
               <Link
+                href='/categories'
+                className='text-gray-700 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium'
+              >
+                Categories
+              </Link>
+              <Link
                 href='/products'
                 className='text-gray-700 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium'
               >
                 Products
               </Link>
               <Link
-                href='/categories'
+                href='/materials'
                 className='text-gray-700 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium'
               >
-                Categories
+                Materials
               </Link>
               <Link
                 href='/inventory'
@@ -49,10 +55,17 @@ export function Navbar() {
                 Inventory
               </Link>
               <Link
-                href='/materials'
+                href='/recipes'
                 className='text-gray-700 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium'
               >
-                Materials
+                Recipes
+              </Link>
+
+              <Link
+                href='/production-orders'
+                className='text-gray-700 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium'
+              >
+                Production Orders
               </Link>
               <Link
                 href='/users'
