@@ -32,7 +32,7 @@ export async function getMaterialsHandler(req: NextRequest) {
     }
 
     if (statusParam !== null) {
-      const status = statusParam === 'true';
+      const status = statusParam === 'active' ? true : false;
       conditions.push(eq(material.status, status));
     }
 
