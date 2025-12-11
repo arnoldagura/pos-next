@@ -45,8 +45,10 @@ import {
   PackagePlus,
 } from 'lucide-react';
 import { toast } from 'sonner';
+import { useRouter } from 'next/navigation';
 import MaterialInventoryFormDialog from './material-inventory-form-dialog';
 import AddBatchDialog from './add-batch-dialog';
+import EditSettingsDialog from './edit-settings-dialog';
 
 interface MaterialInventory {
   id: string;
@@ -94,12 +96,14 @@ const materialTypeLabels: Record<string, string> = {
 };
 
 export default function MaterialInventoriesClient() {
+  const router = useRouter();
   const [inventories, setInventories] = useState<MaterialInventory[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [locationFilter, setLocationFilter] = useState<string>('all');
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [isAddBatchOpen, setIsAddBatchOpen] = useState(false);
+  const [isEditSettingsOpen, setIsEditSettingsOpen] = useState(false);
   const [selectedInventory, setSelectedInventory] =
     useState<MaterialInventory | null>(null);
   const [page, setPage] = useState(1);
@@ -144,6 +148,15 @@ export default function MaterialInventoriesClient() {
   const handleAddBatch = (inventory: MaterialInventory) => {
     setSelectedInventory(inventory);
     setIsAddBatchOpen(true);
+  };
+
+  const handleViewMovements = (inventory: MaterialInventory) => {
+    router.push(`/material-inventories/${inventory.id}/movements`);
+  };
+
+  const handleEditSettings = (inventory: MaterialInventory) => {
+    setSelectedInventory(inventory);
+    setIsEditSettingsOpen(true);
   };
 
   const isLowStock = (inventory: MaterialInventory) => {
@@ -204,8 +217,12 @@ export default function MaterialInventoriesClient() {
                     <PackagePlus className='h-4 w-4 mr-2' />
                     Add Batch
                   </DropdownMenuItem>
-                  <DropdownMenuItem>View Movements</DropdownMenuItem>
-                  <DropdownMenuItem>Edit Settings</DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => handleViewMovements(inventory)}>
+                    View Movements
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => handleEditSettings(inventory)}>
+                    Edit Settings
+                  </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
             </div>
@@ -336,8 +353,12 @@ export default function MaterialInventoriesClient() {
                       <PackagePlus className='h-4 w-4 mr-2' />
                       Add Batch
                     </DropdownMenuItem>
-                    <DropdownMenuItem>View Movements</DropdownMenuItem>
-                    <DropdownMenuItem>Edit Settings</DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => handleViewMovements(inventory)}>
+                      View Movements
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => handleEditSettings(inventory)}>
+                      Edit Settings
+                    </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
               </TableCell>
@@ -460,12 +481,20 @@ export default function MaterialInventoriesClient() {
       />
 
       {selectedInventory && (
-        <AddBatchDialog
-          open={isAddBatchOpen}
-          onOpenChange={setIsAddBatchOpen}
-          inventory={selectedInventory}
-          onSuccess={fetchInventories}
-        />
+        <>
+          <AddBatchDialog
+            open={isAddBatchOpen}
+            onOpenChange={setIsAddBatchOpen}
+            inventory={selectedInventory}
+            onSuccess={fetchInventories}
+          />
+          <EditSettingsDialog
+            open={isEditSettingsOpen}
+            onOpenChange={setIsEditSettingsOpen}
+            inventory={selectedInventory}
+            onSuccess={fetchInventories}
+          />
+        </>
       )}
     </div>
   );

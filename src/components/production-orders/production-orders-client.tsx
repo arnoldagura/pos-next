@@ -26,7 +26,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { Plus, MoreVertical, Search, Filter, Calendar } from 'lucide-react';
+import { Plus, MoreVertical, Search, Filter, Calendar, Loader2 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 import ProductionOrderFormDialog from './production-order-form-dialog';
@@ -106,6 +106,7 @@ export default function ProductionOrdersClient() {
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
+  const [actionLoading, setActionLoading] = useState<string | null>(null);
 
   const fetchOrders = async () => {
     try {
@@ -140,6 +141,7 @@ export default function ProductionOrdersClient() {
 
   const handleSchedule = async (orderId: string) => {
     try {
+      setActionLoading(orderId);
       const response = await fetch(
         `/api/production-orders/${orderId}/schedule`,
         {
@@ -159,11 +161,14 @@ export default function ProductionOrdersClient() {
     } catch (error) {
       console.error('Error scheduling order:', error);
       toast.error(error instanceof Error ? error.message : 'Failed to schedule order');
+    } finally {
+      setActionLoading(null);
     }
   };
 
   const handleStart = async (orderId: string) => {
     try {
+      setActionLoading(orderId);
       const response = await fetch(`/api/production-orders/${orderId}/start`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -180,6 +185,8 @@ export default function ProductionOrdersClient() {
     } catch (error) {
       console.error('Error starting production:', error);
       toast.error(error instanceof Error ? error.message : 'Failed to start production');
+    } finally {
+      setActionLoading(null);
     }
   };
 
@@ -189,6 +196,7 @@ export default function ProductionOrdersClient() {
     }
 
     try {
+      setActionLoading(orderId);
       const response = await fetch(`/api/production-orders/${orderId}/cancel`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -205,6 +213,8 @@ export default function ProductionOrdersClient() {
     } catch (error) {
       console.error('Error cancelling order:', error);
       toast.error(error instanceof Error ? error.message : 'Failed to cancel order');
+    } finally {
+      setActionLoading(null);
     }
   };
 
@@ -301,8 +311,12 @@ export default function ProductionOrdersClient() {
                     </div>
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
-                        <Button variant="ghost" size="sm">
-                          <MoreVertical className="h-4 w-4" />
+                        <Button variant="ghost" size="sm" disabled={actionLoading === order.id}>
+                          {actionLoading === order.id ? (
+                            <Loader2 className="h-4 w-4 animate-spin" />
+                          ) : (
+                            <MoreVertical className="h-4 w-4" />
+                          )}
                         </Button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
@@ -313,6 +327,7 @@ export default function ProductionOrdersClient() {
                             e.stopPropagation();
                             router.push(`/production-orders/${order.id}`);
                           }}
+                          disabled={actionLoading === order.id}
                         >
                           View Details
                         </DropdownMenuItem>
@@ -322,8 +337,16 @@ export default function ProductionOrdersClient() {
                               e.stopPropagation();
                               handleSchedule(order.id);
                             }}
+                            disabled={actionLoading === order.id}
                           >
-                            Schedule
+                            {actionLoading === order.id ? (
+                              <>
+                                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                                Scheduling...
+                              </>
+                            ) : (
+                              'Schedule'
+                            )}
                           </DropdownMenuItem>
                         )}
                         {order.status === 'scheduled' && (
@@ -332,8 +355,16 @@ export default function ProductionOrdersClient() {
                               e.stopPropagation();
                               handleStart(order.id);
                             }}
+                            disabled={actionLoading === order.id}
                           >
-                            Start Production
+                            {actionLoading === order.id ? (
+                              <>
+                                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                                Starting...
+                              </>
+                            ) : (
+                              'Start Production'
+                            )}
                           </DropdownMenuItem>
                         )}
                         {(order.status === 'draft' ||
@@ -346,9 +377,17 @@ export default function ProductionOrdersClient() {
                                 e.stopPropagation();
                                 handleCancel(order.id);
                               }}
+                              disabled={actionLoading === order.id}
                               className="text-red-600"
                             >
-                              Cancel Order
+                              {actionLoading === order.id ? (
+                                <>
+                                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                                  Cancelling...
+                                </>
+                              ) : (
+                                'Cancel Order'
+                              )}
                             </DropdownMenuItem>
                           </>
                         )}

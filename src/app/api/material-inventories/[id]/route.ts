@@ -17,9 +17,10 @@ export async function GET(
   request: NextRequest,
   { params }: { params: { id: string } }
 ) {
+  const { id } = await params;
   try {
     const inventory = await db.query.materialInventory.findFirst({
-      where: eq(materialInventory.id, params.id),
+      where: eq(materialInventory.id, id),
       with: {
         material: {
           with: {
@@ -70,6 +71,7 @@ export async function PATCH(
   { params }: { params: { id: string } }
 ) {
   try {
+    const { id } = await params;
     const body = await request.json();
 
     const validation = updateMaterialInventorySchema.safeParse(body);
@@ -96,7 +98,7 @@ export async function PATCH(
     const [updated] = await db
       .update(materialInventory)
       .set(updateData)
-      .where(eq(materialInventory.id, params.id))
+      .where(eq(materialInventory.id, id))
       .returning();
 
     if (!updated) {
@@ -108,7 +110,7 @@ export async function PATCH(
 
     // Fetch updated inventory with relations
     const inventory = await db.query.materialInventory.findFirst({
-      where: eq(materialInventory.id, params.id),
+      where: eq(materialInventory.id, id),
       with: {
         material: {
           with: {
@@ -141,10 +143,11 @@ export async function DELETE(
   request: NextRequest,
   { params }: { params: { id: string } }
 ) {
+  const { id } = await params;
   try {
     const [deleted] = await db
       .delete(materialInventory)
-      .where(eq(materialInventory.id, params.id))
+      .where(eq(materialInventory.id, id))
       .returning();
 
     if (!deleted) {

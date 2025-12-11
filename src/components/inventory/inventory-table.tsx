@@ -17,11 +17,19 @@ import {
   DropdownMenuLabel,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { MoreHorizontal, Edit, FileDown, Printer } from 'lucide-react';
+import {
+  MoreHorizontal,
+  Edit,
+  FileDown,
+  Printer,
+  History,
+  Settings,
+} from 'lucide-react';
+import { useRouter } from 'next/navigation';
 import { cn } from '@/lib/utils';
 import * as XLSX from 'xlsx';
 
-interface InventoryItem {
+export interface InventoryItem {
   id: string;
   productId: string;
   productName: string;
@@ -40,6 +48,7 @@ interface InventoryTableProps {
   data: InventoryItem[];
   isLoading: boolean;
   onAdjustStock: (inventoryId: string) => void;
+  onEditSettings?: (item: InventoryItem) => void;
   locationId?: string;
 }
 
@@ -47,8 +56,10 @@ export function InventoryTable({
   data,
   isLoading,
   onAdjustStock,
+  onEditSettings,
   locationId,
 }: InventoryTableProps) {
+  const router = useRouter();
   const getStockStatus = (item: InventoryItem) => {
     if (item.belowThreshold) {
       return { label: 'Low Stock', variant: 'destructive' as const };
@@ -268,6 +279,22 @@ export function InventoryTable({
                           <Edit className='h-4 w-4 mr-2' />
                           Adjust Stock
                         </DropdownMenuItem>
+                        <DropdownMenuItem
+                          onClick={() =>
+                            router.push(`/inventory/${item.id}/movements`)
+                          }
+                        >
+                          <History className='h-4 w-4 mr-2' />
+                          View Movements
+                        </DropdownMenuItem>
+                        {onEditSettings && (
+                          <DropdownMenuItem
+                            onClick={() => onEditSettings(item)}
+                          >
+                            <Settings className='h-4 w-4 mr-2' />
+                            Edit Settings
+                          </DropdownMenuItem>
+                        )}
                       </DropdownMenuContent>
                     </DropdownMenu>
                   </TableCell>

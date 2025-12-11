@@ -24,6 +24,7 @@ import {
   XCircle,
   AlertCircle,
   Clock,
+  Loader2,
 } from 'lucide-react';
 import CompleteProductionDialog from './complete-production-dialog';
 import FinalizeCostsDialog from './finalize-costs-dialog';
@@ -146,6 +147,7 @@ export default function ProductionOrderDetailClient({
   const [loading, setLoading] = useState(true);
   const [completeDialogOpen, setCompleteDialogOpen] = useState(false);
   const [finalizeDialogOpen, setFinalizeDialogOpen] = useState(false);
+  const [actionLoading, setActionLoading] = useState<string | null>(null);
 
   const fetchOrder = async () => {
     try {
@@ -183,6 +185,7 @@ export default function ProductionOrderDetailClient({
 
   const handleSchedule = async () => {
     try {
+      setActionLoading('schedule');
       const response = await fetch(`/api/production-orders/${orderId}/schedule`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -200,11 +203,14 @@ export default function ProductionOrderDetailClient({
     } catch (error) {
       console.error('Error scheduling order:', error);
       toast.error(error instanceof Error ? error.message : 'Failed to schedule order');
+    } finally {
+      setActionLoading(null);
     }
   };
 
   const handleStart = async () => {
     try {
+      setActionLoading('start');
       const response = await fetch(`/api/production-orders/${orderId}/start`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -221,6 +227,8 @@ export default function ProductionOrderDetailClient({
     } catch (error) {
       console.error('Error starting production:', error);
       toast.error(error instanceof Error ? error.message : 'Failed to start production');
+    } finally {
+      setActionLoading(null);
     }
   };
 
@@ -230,6 +238,7 @@ export default function ProductionOrderDetailClient({
     }
 
     try {
+      setActionLoading('cancel');
       const response = await fetch(`/api/production-orders/${orderId}/cancel`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -246,6 +255,8 @@ export default function ProductionOrderDetailClient({
     } catch (error) {
       console.error('Error cancelling order:', error);
       toast.error(error instanceof Error ? error.message : 'Failed to cancel order');
+    } finally {
+      setActionLoading(null);
     }
   };
 
@@ -297,15 +308,33 @@ export default function ProductionOrderDetailClient({
             {statusLabels[order.status]}
           </Badge>
           {order.status === 'draft' && (
-            <Button onClick={handleSchedule} disabled={!allMaterialsSufficient}>
-              <Calendar className="h-4 w-4 mr-2" />
-              Schedule
+            <Button onClick={handleSchedule} disabled={!allMaterialsSufficient || actionLoading === 'schedule'}>
+              {actionLoading === 'schedule' ? (
+                <>
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  Scheduling...
+                </>
+              ) : (
+                <>
+                  <Calendar className="h-4 w-4 mr-2" />
+                  Schedule
+                </>
+              )}
             </Button>
           )}
           {order.status === 'scheduled' && (
-            <Button onClick={handleStart}>
-              <Play className="h-4 w-4 mr-2" />
-              Start Production
+            <Button onClick={handleStart} disabled={actionLoading === 'start'}>
+              {actionLoading === 'start' ? (
+                <>
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  Starting...
+                </>
+              ) : (
+                <>
+                  <Play className="h-4 w-4 mr-2" />
+                  Start Production
+                </>
+              )}
             </Button>
           )}
           {order.status === 'in_progress' && (
@@ -323,9 +352,18 @@ export default function ProductionOrderDetailClient({
           {(order.status === 'draft' ||
             order.status === 'scheduled' ||
             order.status === 'in_progress') && (
-            <Button variant="destructive" onClick={handleCancel}>
-              <XCircle className="h-4 w-4 mr-2" />
-              Cancel
+            <Button variant="destructive" onClick={handleCancel} disabled={actionLoading === 'cancel'}>
+              {actionLoading === 'cancel' ? (
+                <>
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  Cancelling...
+                </>
+              ) : (
+                <>
+                  <XCircle className="h-4 w-4 mr-2" />
+                  Cancel
+                </>
+              )}
             </Button>
           )}
         </div>

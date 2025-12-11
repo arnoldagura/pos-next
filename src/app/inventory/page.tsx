@@ -1,12 +1,24 @@
 'use client';
 
 import { useState } from 'react';
-import { Package, AlertTriangle, TrendingUp, DollarSign } from 'lucide-react';
+import {
+  Package,
+  AlertTriangle,
+  TrendingUp,
+  DollarSign,
+  Plus,
+} from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { InventoryTable } from '@/components/inventory/inventory-table';
+import { Button } from '@/components/ui/button';
+import {
+  InventoryItem,
+  InventoryTable,
+} from '@/components/inventory/inventory-table';
 import { LocationSelector } from '@/components/inventory/location-selector';
 import { InventoryFilters } from '@/components/inventory/inventory-filters';
 import { StockAdjustmentDialog } from '@/components/inventory/stock-adjustment-dialog';
+import EditInventorySettingsDialog from '@/components/inventory/edit-inventory-settings-dialog';
+import CreateInventoryDialog from '@/components/inventory/create-inventory-dialog';
 import { useInventory, useLowStockItems } from '@/hooks/use-inventory';
 
 export default function InventoryPage() {
@@ -17,6 +29,10 @@ export default function InventoryPage() {
     null
   );
   const [isAdjustmentOpen, setIsAdjustmentOpen] = useState(false);
+  const [isEditSettingsOpen, setIsEditSettingsOpen] = useState(false);
+  const [selectedInventoryForEdit, setSelectedInventoryForEdit] =
+    useState<InventoryItem>({} as InventoryItem);
+  const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
 
   const { data: inventoryData, isLoading } = useInventory({
     locationId: selectedLocation || undefined,
@@ -54,6 +70,11 @@ export default function InventoryPage() {
     setIsAdjustmentOpen(true);
   };
 
+  const handleEditSettings = (item: InventoryItem) => {
+    setSelectedInventoryForEdit(item);
+    setIsEditSettingsOpen(true);
+  };
+
   return (
     <div className='space-y-6 p-6'>
       {/* Header */}
@@ -64,10 +85,16 @@ export default function InventoryPage() {
             Monitor and manage stock levels across all locations
           </p>
         </div>
-        <LocationSelector
-          value={selectedLocation}
-          onChange={setSelectedLocation}
-        />
+        <div className='flex items-center gap-4'>
+          <Button onClick={() => setIsCreateDialogOpen(true)}>
+            <Plus className='h-4 w-4 mr-2' />
+            Add Product to Inventory
+          </Button>
+          <LocationSelector
+            value={selectedLocation}
+            onChange={setSelectedLocation}
+          />
+        </div>
       </div>
 
       {/* Summary Cards */}
@@ -149,6 +176,7 @@ export default function InventoryPage() {
             data={filteredInventory}
             isLoading={isLoading}
             onAdjustStock={handleAdjustStock}
+            onEditSettings={handleEditSettings}
             locationId={selectedLocation}
           />
         </CardContent>
@@ -162,6 +190,32 @@ export default function InventoryPage() {
         onSuccess={() => {
           setIsAdjustmentOpen(false);
           setSelectedInventoryId(null);
+        }}
+      />
+
+      {/* Edit Settings Dialog */}
+      {selectedInventoryForEdit && (
+        <EditInventorySettingsDialog
+          open={isEditSettingsOpen}
+          onOpenChange={setIsEditSettingsOpen}
+          inventory={selectedInventoryForEdit}
+          onSuccess={() => {
+            setIsEditSettingsOpen(false);
+            setSelectedInventoryForEdit({} as InventoryItem);
+            // Refetch inventory data
+            window.location.reload();
+          }}
+        />
+      )}
+
+      {/* Create Inventory Dialog */}
+      <CreateInventoryDialog
+        open={isCreateDialogOpen}
+        onOpenChange={setIsCreateDialogOpen}
+        onSuccess={() => {
+          setIsCreateDialogOpen(false);
+          // Refetch inventory data
+          window.location.reload();
         }}
       />
     </div>
