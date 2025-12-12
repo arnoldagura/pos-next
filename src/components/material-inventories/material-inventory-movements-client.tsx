@@ -29,66 +29,15 @@ import { Badge } from '@/components/ui/badge';
 import { ArrowLeft, ArrowUp, ArrowDown, FileText, Filter } from 'lucide-react';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
-
-interface Movement {
-  id: string;
-  type: string;
-  quantity: string;
-  unitPrice: string | null;
-  date: string;
-  remarks: string | null;
-  referenceType: string | null;
-  referenceId: string | null;
-  createdBy: string | null;
-  batch: {
-    id: string;
-    batchNumber: string;
-  } | null;
-}
-
-interface MaterialInventory {
-  id: string;
-  material: {
-    name: string;
-    sku: string | null;
-    unitOfMeasure: string;
-  };
-  location: {
-    name: string;
-  };
-  totalQuantity: string;
-}
-
+import {
+  movementTypeColors,
+  movementTypeLabels,
+  positiveMovementTypes,
+} from '@/lib/constants/movements';
+import { MaterialInventory, Movement } from '@/lib/types';
 interface MaterialInventoryMovementsClientProps {
   inventoryId: string;
 }
-
-const movementTypeLabels: Record<string, string> = {
-  purchase: 'Purchase',
-  production_consumption: 'Production Use',
-  adjustment: 'Adjustment',
-  waste: 'Waste',
-  expired: 'Expired',
-  transfer_in: 'Transfer In',
-  transfer_out: 'Transfer Out',
-  transfer_to_pos: 'Transfer to POS',
-};
-
-const movementTypeColors: Record<
-  string,
-  'default' | 'secondary' | 'destructive' | 'outline'
-> = {
-  purchase: 'default',
-  production_consumption: 'secondary',
-  adjustment: 'outline',
-  waste: 'destructive',
-  expired: 'destructive',
-  transfer_in: 'default',
-  transfer_out: 'secondary',
-  transfer_to_pos: 'secondary',
-};
-
-const positiveMovementTypes = ['purchase', 'adjustment', 'transfer_in'];
 
 export default function MaterialInventoryMovementsClient({
   inventoryId,
@@ -169,7 +118,7 @@ export default function MaterialInventoryMovementsClient({
           <h1 className='text-3xl font-bold'>{inventory.material.name}</h1>
           <p className='text-muted-foreground'>
             {inventory.location.name}
-            {inventory.material.sku && ` • SKU: ${inventory.material.sku}`}
+            {inventory.sku && ` • SKU: ${inventory.sku}`}
           </p>
         </div>
       )}
@@ -181,7 +130,7 @@ export default function MaterialInventoryMovementsClient({
             <CardTitle className='text-3xl'>
               {inventory
                 ? `${parseFloat(inventory.totalQuantity).toFixed(2)} ${
-                    inventory.material.unitOfMeasure
+                    inventory.unitOfMeasure
                   }`
                 : '-'}
             </CardTitle>
@@ -312,8 +261,7 @@ export default function MaterialInventoryMovementsClient({
                             }
                           >
                             {isPositiveMovement(movement.type) ? '+' : '-'}
-                            {quantity.toFixed(2)}{' '}
-                            {inventory?.material.unitOfMeasure}
+                            {quantity.toFixed(2)} {inventory?.unitOfMeasure}
                           </span>
                         </TableCell>
                         <TableCell className='text-right'>

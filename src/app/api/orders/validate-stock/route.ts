@@ -1,5 +1,5 @@
 import { db } from '@/db/db';
-import { inventory } from '@/drizzle/schema';
+import { productInventory } from '@/drizzle/schema';
 import { eq, and } from 'drizzle-orm';
 import { NextRequest, NextResponse } from 'next/server';
 import { getBulkStockLevels } from '@/lib/services/inventory-calculation';
@@ -27,11 +27,11 @@ export async function POST(req: NextRequest) {
 
       const [inventoryRecord] = await db
         .select()
-        .from(inventory)
+        .from(productInventory)
         .where(
           and(
-            eq(inventory.productId, productId),
-            eq(inventory.locationId, locationId)
+            eq(productInventory.productId, productId),
+            eq(productInventory.locationId, locationId)
           )
         )
         .limit(1);

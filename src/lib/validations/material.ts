@@ -9,26 +9,9 @@ export const materialTypeSchema = z.enum([
 
 export const createMaterialSchema = z.object({
   name: z.string().min(1, 'Name is required').max(255, 'Name is too long'),
-  sku: z.string().max(100, 'SKU is too long').optional(),
   description: z.string().optional(),
   type: materialTypeSchema,
   categoryId: z.string().optional().nullable(),
-  supplierId: z.string().optional().nullable(),
-  unitOfMeasure: z
-    .string()
-    .min(1, 'Unit of measure is required')
-    .max(50, 'Unit of measure is too long'),
-  defaultCost: z
-    .number()
-    .min(0, 'Default cost must be greater than or equal to 0')
-    .or(z.string().regex(/^\d+(\.\d{1,2})?$/, 'Invalid cost format'))
-    .optional(),
-  alertThreshold: z
-    .number()
-    .min(0, 'Alert threshold must be greater than or equal to 0')
-    .or(z.string().regex(/^\d+(\.\d{1,2})?$/, 'Invalid threshold format'))
-    .optional(),
-  expiryTracking: z.boolean().default(false),
   image: z.string().optional(),
   status: z.boolean().default(true),
   createdBy: z.string().optional(),
@@ -40,27 +23,9 @@ export const updateMaterialSchema = z.object({
     .min(1, 'Name is required')
     .max(255, 'Name is too long')
     .optional(),
-  sku: z.string().max(100, 'SKU is too long').optional(),
   description: z.string().optional().nullable(),
   type: materialTypeSchema.optional(),
   categoryId: z.string().optional().nullable(),
-  supplierId: z.string().optional().nullable(),
-  unitOfMeasure: z
-    .string()
-    .min(1, 'Unit of measure is required')
-    .max(50, 'Unit of measure is too long')
-    .optional(),
-  defaultCost: z
-    .number()
-    .min(0, 'Default cost must be greater than or equal to 0')
-    .or(z.string().regex(/^\d+(\.\d{1,2})?$/, 'Invalid cost format'))
-    .optional(),
-  alertThreshold: z
-    .number()
-    .min(0, 'Alert threshold must be greater than or equal to 0')
-    .or(z.string().regex(/^\d+(\.\d{1,2})?$/, 'Invalid threshold format'))
-    .optional(),
-  expiryTracking: z.boolean().optional(),
   image: z.string().optional().nullable(),
   status: z.boolean().optional(),
   updatedBy: z.string().optional(),
@@ -69,13 +34,21 @@ export const updateMaterialSchema = z.object({
 export const createMaterialInventorySchema = z.object({
   materialId: z.string().min(1, 'Material ID is required'),
   locationId: z.string().min(1, 'Location ID is required'),
+  variantName: z.string().optional(),
+  sku: z.string().optional(),
+  defaultSupplierId: z.string().optional().nullable(),
+  unitOfMeasure: z.string().min(1, 'Unit of measure is required'),
+  cost: z.number().min(0).optional(),
   alertThreshold: z.number().min(0).default(0),
-  unitOfMeasure: z.string().optional(),
 });
 
 export const updateMaterialInventorySchema = z.object({
-  alertThreshold: z.number().min(0).optional(),
+  variantName: z.string().optional().nullable(),
+  sku: z.string().optional(),
+  defaultSupplierId: z.string().optional().nullable(),
   unitOfMeasure: z.string().optional(),
+  cost: z.number().min(0).optional(),
+  alertThreshold: z.number().min(0).optional(),
 });
 
 export const materialMovementTypeSchema = z.enum([
@@ -124,7 +97,6 @@ export const receiveMaterialSchema = z.object({
   createdBy: z.string().optional(),
 });
 
-export type MaterialType = z.infer<typeof materialTypeSchema>;
 export type CreateMaterialInput = z.infer<typeof createMaterialSchema>;
 export type UpdateMaterialInput = z.infer<typeof updateMaterialSchema>;
 export type CreateMaterialInventoryInput = z.infer<

@@ -43,7 +43,7 @@ export async function getExpiringMaterialsHandler(req: NextRequest) {
         materialInventoryId: materialBatch.materialInventoryId,
         materialId: material.id,
         materialName: material.name,
-        materialSku: material.sku,
+        materialInventorySku: materialInventory.sku,
         materialType: material.type,
         locationId: materialInventory.locationId,
         locationName: location.name,

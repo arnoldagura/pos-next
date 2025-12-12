@@ -1,7 +1,14 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Plus, Pencil, Trash2, ChevronRight, ChevronDown, GripVertical } from 'lucide-react';
+import {
+  Plus,
+  Pencil,
+  Trash2,
+  ChevronRight,
+  ChevronDown,
+  GripVertical,
+} from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
@@ -23,19 +30,7 @@ import {
   verticalListSortingStrategy,
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
-
-type Category = {
-  id: string;
-  name: string;
-  slug: string;
-  description: string | null;
-  parentId: string | null;
-  displayOrder: number;
-  isActive: boolean;
-  createdAt: string;
-  updatedAt: string;
-  children?: Category[];
-};
+import { Category } from '@/lib/types';
 
 type SortableCategoryProps = {
   category: Category;
@@ -319,7 +314,6 @@ export function CategoriesClient() {
       console.error(error);
     }
   };
-
 
   return (
     <div className='p-6 space-y-4'>

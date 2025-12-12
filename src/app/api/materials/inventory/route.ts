@@ -38,7 +38,7 @@ export async function getMaterialInventoryHandler(req: NextRequest) {
         id: materialInventory.id,
         materialId: materialInventory.materialId,
         materialName: material.name,
-        materialSku: material.sku,
+        materialInventorySku: materialInventory.sku,
         materialType: material.type,
         locationId: materialInventory.locationId,
         locationName: location.name,

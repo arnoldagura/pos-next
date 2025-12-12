@@ -10,7 +10,7 @@ import {
   ArrowUpDown,
   ArrowUp,
   ArrowDown,
-  MoreVertical
+  MoreVertical,
 } from 'lucide-react';
 import Image from 'next/image';
 import {
@@ -40,31 +40,10 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { toast } from 'sonner';
 import { ProductFormDialog } from './product-form-dialog';
+import { Category } from '@/lib/types';
+import { Product } from '@/lib/types/product';
 
-type Product = {
-  id: string;
-  name: string;
-  slug: string;
-  sku: string | null;
-  barcode: string | null;
-  description: string | null;
-  sellingPrice: string;
-  costPrice: string | null;
-  categoryId: string | null;
-  image: string | null;
-  status: boolean;
-  unitOfMeasure: string | null;
-  taxRate: string;
-  createdAt: string;
-  updatedAt: string;
-};
-
-type Category = {
-  id: string;
-  name: string;
-};
-
-type SortField = 'name' | 'sellingPrice' | 'createdAt';
+type SortField = 'name' | 'createdAt';
 type SortOrder = 'asc' | 'desc';
 
 export function ProductsClient() {
@@ -76,12 +55,16 @@ export function ProductsClient() {
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
-  const [selectedProducts, setSelectedProducts] = useState<Set<string>>(new Set());
+  const [selectedProducts, setSelectedProducts] = useState<Set<string>>(
+    new Set()
+  );
   const [sortField, setSortField] = useState<SortField>('createdAt');
   const [sortOrder, setSortOrder] = useState<SortOrder>('desc');
-  const [editingPrice, setEditingPrice] = useState<{ id: string; value: string } | null>(null);
+
   const [showProductDialog, setShowProductDialog] = useState(false);
-  const [selectedProduct, setSelectedProduct] = useState<Product | undefined>(undefined);
+  const [selectedProduct, setSelectedProduct] = useState<Product | undefined>(
+    undefined
+  );
 
   const fetchCategories = async () => {
     try {
@@ -125,15 +108,16 @@ export function ProductsClient() {
     }
   };
 
-  const sortProducts = (prods: Product[], field: SortField, order: SortOrder) => {
+  const sortProducts = (
+    prods: Product[],
+    field: SortField,
+    order: SortOrder
+  ) => {
     return [...prods].sort((a, b) => {
       let aVal: string | number = a[field];
       let bVal: string | number = b[field];
 
-      if (field === 'sellingPrice') {
-        aVal = parseFloat(a.sellingPrice);
-        bVal = parseFloat(b.sellingPrice);
-      } else if (field === 'createdAt') {
+      if (field === 'createdAt') {
         aVal = new Date(a.createdAt).getTime();
         bVal = new Date(b.createdAt).getTime();
       }
@@ -169,17 +153,19 @@ export function ProductsClient() {
   };
 
   const getSortIcon = (field: SortField) => {
-    if (sortField !== field) return <ArrowUpDown className="h-4 w-4 ml-1" />;
-    return sortOrder === 'asc' ?
-      <ArrowUp className="h-4 w-4 ml-1" /> :
-      <ArrowDown className="h-4 w-4 ml-1" />;
+    if (sortField !== field) return <ArrowUpDown className='h-4 w-4 ml-1' />;
+    return sortOrder === 'asc' ? (
+      <ArrowUp className='h-4 w-4 ml-1' />
+    ) : (
+      <ArrowDown className='h-4 w-4 ml-1' />
+    );
   };
 
   const toggleSelectAll = () => {
     if (selectedProducts.size === products.length) {
       setSelectedProducts(new Set());
     } else {
-      setSelectedProducts(new Set(products.map(p => p.id)));
+      setSelectedProducts(new Set(products.map((p) => p.id)));
     }
   };
 
@@ -193,7 +179,9 @@ export function ProductsClient() {
     setSelectedProducts(newSelected);
   };
 
-  const handleBulkAction = async (action: 'activate' | 'deactivate' | 'delete') => {
+  const handleBulkAction = async (
+    action: 'activate' | 'deactivate' | 'delete'
+  ) => {
     if (selectedProducts.size === 0) {
       toast.error('No products selected');
       return;
@@ -218,30 +206,13 @@ export function ProductsClient() {
       });
 
       await Promise.all(promises);
-      toast.success(`Successfully ${action}d ${selectedProducts.size} product(s)`);
+      toast.success(
+        `Successfully ${action}d ${selectedProducts.size} product(s)`
+      );
       setSelectedProducts(new Set());
       fetchProducts();
     } catch (error) {
       toast.error(`Failed to ${action} products`);
-      console.error(error);
-    }
-  };
-
-  const handleQuickEditPrice = async (id: string, newPrice: string) => {
-    try {
-      const response = await fetch(`/api/products/${id}`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ sellingPrice: parseFloat(newPrice) }),
-      });
-
-      if (!response.ok) throw new Error('Failed to update price');
-
-      toast.success('Price updated successfully');
-      setEditingPrice(null);
-      fetchProducts();
-    } catch (error) {
-      toast.error('Failed to update price');
       console.error(error);
     }
   };
@@ -280,21 +251,17 @@ export function ProductsClient() {
       const data = await response.json();
       const exportData = data.products || [];
 
-      // Convert to CSV
       const headers = ['Name', 'SKU', 'Barcode', 'Category', 'Price', 'Status'];
       const rows = exportData.map((p: Product) => [
         p.name,
-        p.sku || '',
-        p.barcode || '',
-        categories.find(c => c.id === p.categoryId)?.name || '',
-        p.sellingPrice,
+        categories.find((c) => c.id === p.categoryId)?.name || '',
         p.status ? 'Active' : 'Inactive',
       ]);
 
       const csv = [
         headers.join(','),
         ...rows.map((row: string[]) =>
-          row.map(cell => `"${cell}"`).join(',')
+          row.map((cell) => `"${cell}"`).join(',')
         ),
       ].join('\n');
 
@@ -315,28 +282,28 @@ export function ProductsClient() {
   };
 
   return (
-    <div className="p-6 space-y-4">
+    <div className='p-6 space-y-4'>
       {/* Search and Filters */}
-      <div className="flex flex-col sm:flex-row gap-4">
-        <div className="flex-1 relative">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+      <div className='flex flex-col sm:flex-row gap-4'>
+        <div className='flex-1 relative'>
+          <Search className='absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400' />
           <Input
-            placeholder="Search by name, SKU, or barcode..."
+            placeholder='Search by name...'
             value={search}
             onChange={(e) => {
               setSearch(e.target.value);
               setPage(1);
             }}
-            className="pl-9"
+            className='pl-9'
           />
         </div>
 
         <Select value={categoryFilter} onValueChange={setCategoryFilter}>
-          <SelectTrigger className="w-full sm:w-[200px]">
-            <SelectValue placeholder="Filter by category" />
+          <SelectTrigger className='w-full sm:w-[200px]'>
+            <SelectValue placeholder='Filter by category' />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">All Categories</SelectItem>
+            <SelectItem value='all'>All Categories</SelectItem>
             {categories.map((cat) => (
               <SelectItem key={cat.id} value={cat.id}>
                 {cat.name}
@@ -346,64 +313,68 @@ export function ProductsClient() {
         </Select>
 
         <Select value={statusFilter} onValueChange={setStatusFilter}>
-          <SelectTrigger className="w-full sm:w-[150px]">
-            <SelectValue placeholder="Filter by status" />
+          <SelectTrigger className='w-full sm:w-[150px]'>
+            <SelectValue placeholder='Filter by status' />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">All Status</SelectItem>
-            <SelectItem value="true">Active</SelectItem>
-            <SelectItem value="false">Inactive</SelectItem>
+            <SelectItem value='all'>All Status</SelectItem>
+            <SelectItem value='active'>Active</SelectItem>
+            <SelectItem value='inactive'>Inactive</SelectItem>
           </SelectContent>
         </Select>
 
-        <Button onClick={handleExportToExcel} variant="outline" className="w-full sm:w-auto">
-          <Download className="h-4 w-4 mr-2" />
+        <Button
+          onClick={handleExportToExcel}
+          variant='outline'
+          className='w-full sm:w-auto'
+        >
+          <Download className='h-4 w-4 mr-2' />
           Export
         </Button>
 
         <Button
-          className="w-full sm:w-auto"
+          className='w-full sm:w-auto'
           onClick={() => {
             setSelectedProduct(undefined);
             setShowProductDialog(true);
           }}
         >
-          <Plus className="h-4 w-4 mr-2" />
+          <Plus className='h-4 w-4 mr-2' />
           Add Product
         </Button>
       </div>
 
       {/* Bulk Actions */}
       {selectedProducts.size > 0 && (
-        <div className="flex items-center gap-2 p-3 bg-blue-50 rounded-lg border border-blue-200">
-          <span className="text-sm font-medium">
+        <div className='flex items-center gap-2 p-3 bg-blue-50 rounded-lg border border-blue-200'>
+          <span className='text-sm font-medium'>
             {selectedProducts.size} selected
           </span>
           <Button
-            size="sm"
-            variant="outline"
+            size='sm'
+            variant='outline'
             onClick={() => handleBulkAction('activate')}
           >
             Activate
           </Button>
           <Button
-            size="sm"
-            variant="outline"
+            size='sm'
+            variant='outline'
             onClick={() => handleBulkAction('deactivate')}
           >
             Deactivate
           </Button>
           <Button
-            size="sm"
-            variant="outline"
+            size='sm'
+            variant='outline'
             onClick={() => handleBulkAction('delete')}
-            className="text-red-600 hover:text-red-700"
+            className='text-red-600 hover:text-red-700'
           >
             Delete
           </Button>
           <Button
-            size="sm"
-            variant="ghost"
+            size='sm'
+            variant='ghost'
             onClick={() => setSelectedProducts(new Set())}
           >
             Clear
@@ -412,60 +383,53 @@ export function ProductsClient() {
       )}
 
       {loading ? (
-        <div className="flex items-center justify-center py-12">
-          <div className="text-gray-500">Loading products...</div>
+        <div className='flex items-center justify-center py-12'>
+          <div className='text-gray-500'>Loading products...</div>
         </div>
       ) : (
         <>
-          <div className="rounded-md border overflow-x-auto">
+          <div className='rounded-md border overflow-x-auto'>
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead className="w-[50px]">
+                  <TableHead className='w-[50px]'>
                     <Checkbox
-                      checked={products.length > 0 && selectedProducts.size === products.length}
+                      checked={
+                        products.length > 0 &&
+                        selectedProducts.size === products.length
+                      }
                       onCheckedChange={toggleSelectAll}
                     />
                   </TableHead>
-                  <TableHead className="w-[80px]">Image</TableHead>
+                  <TableHead className='w-[80px]'>Image</TableHead>
                   <TableHead>
                     <button
                       onClick={() => handleSort('name')}
-                      className="flex items-center hover:text-gray-900"
+                      className='flex items-center hover:text-gray-900'
                     >
                       Name
                       {getSortIcon('name')}
                     </button>
                   </TableHead>
-                  <TableHead>SKU</TableHead>
                   <TableHead>Category</TableHead>
-                  <TableHead>
-                    <button
-                      onClick={() => handleSort('sellingPrice')}
-                      className="flex items-center hover:text-gray-900"
-                    >
-                      Price
-                      {getSortIcon('sellingPrice')}
-                    </button>
-                  </TableHead>
                   <TableHead>Status</TableHead>
                   <TableHead>
                     <button
                       onClick={() => handleSort('createdAt')}
-                      className="flex items-center hover:text-gray-900"
+                      className='flex items-center hover:text-gray-900'
                     >
                       Created
                       {getSortIcon('createdAt')}
                     </button>
                   </TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
+                  <TableHead className='text-right'>Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {products.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={9} className="text-center py-8">
-                      <p className="text-gray-500">No products found</p>
+                    <TableCell colSpan={9} className='text-center py-8'>
+                      <p className='text-gray-500'>No products found</p>
                     </TableCell>
                   </TableRow>
                 ) : (
@@ -474,7 +438,9 @@ export function ProductsClient() {
                       <TableCell>
                         <Checkbox
                           checked={selectedProducts.has(product.id)}
-                          onCheckedChange={() => toggleSelectProduct(product.id)}
+                          onCheckedChange={() =>
+                            toggleSelectProduct(product.id)
+                          }
                         />
                       </TableCell>
                       <TableCell>
@@ -484,101 +450,76 @@ export function ProductsClient() {
                             alt={product.name}
                             width={48}
                             height={48}
-                            className="rounded object-cover"
+                            className='rounded object-cover'
                           />
                         ) : (
-                          <div className="w-12 h-12 bg-gray-200 rounded flex items-center justify-center text-gray-400 text-xs">
+                          <div className='w-12 h-12 bg-gray-200 rounded flex items-center justify-center text-gray-400 text-xs'>
                             No image
                           </div>
                         )}
                       </TableCell>
-                      <TableCell className="font-medium">{product.name}</TableCell>
-                      <TableCell className="text-gray-600">
-                        {product.sku || '-'}
+                      <TableCell className='font-medium'>
+                        {product.name}
                       </TableCell>
                       <TableCell>
-                        {categories.find(c => c.id === product.categoryId)?.name || '-'}
+                        {categories.find((c) => c.id === product.categoryId)
+                          ?.name || '-'}
                       </TableCell>
                       <TableCell>
-                        {editingPrice?.id === product.id ? (
-                          <div className="flex items-center gap-2">
-                            <Input
-                              type="number"
-                              step="0.01"
-                              value={editingPrice.value}
-                              onChange={(e) =>
-                                setEditingPrice({ id: product.id, value: e.target.value })
-                              }
-                              className="w-24 h-8"
-                              autoFocus
-                              onBlur={() => {
-                                if (editingPrice.value !== product.sellingPrice) {
-                                  handleQuickEditPrice(product.id, editingPrice.value);
-                                } else {
-                                  setEditingPrice(null);
-                                }
-                              }}
-                              onKeyDown={(e) => {
-                                if (e.key === 'Enter') {
-                                  handleQuickEditPrice(product.id, editingPrice.value);
-                                } else if (e.key === 'Escape') {
-                                  setEditingPrice(null);
-                                }
-                              }}
-                            />
-                          </div>
-                        ) : (
-                          <button
-                            onClick={() =>
-                              setEditingPrice({ id: product.id, value: product.sellingPrice })
-                            }
-                            className="hover:text-blue-600 transition-colors"
+                        <button
+                          onClick={() =>
+                            handleToggleStatus(product.id, product.status)
+                          }
+                        >
+                          <Badge
+                            variant={product.status ? 'default' : 'secondary'}
                           >
-                            ${parseFloat(product.sellingPrice).toFixed(2)}
-                          </button>
-                        )}
-                      </TableCell>
-                      <TableCell>
-                        <button onClick={() => handleToggleStatus(product.id, product.status)}>
-                          <Badge variant={product.status ? 'default' : 'secondary'}>
                             {product.status ? 'Active' : 'Inactive'}
                           </Badge>
                         </button>
                       </TableCell>
-                      <TableCell className="text-gray-600">
+                      <TableCell className='text-gray-600'>
                         {new Date(product.createdAt).toLocaleDateString()}
                       </TableCell>
-                      <TableCell className="text-right">
+                      <TableCell className='text-right'>
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" size="sm">
-                              <MoreVertical className="h-4 w-4" />
+                            <Button variant='ghost' size='sm'>
+                              <MoreVertical className='h-4 w-4' />
                             </Button>
                           </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end">
+                          <DropdownMenuContent align='end'>
                             <DropdownMenuItem
                               onClick={() => {
                                 setSelectedProduct(product);
                                 setShowProductDialog(true);
                               }}
                             >
-                              <Pencil className="h-4 w-4 mr-2" />
+                              <Pencil className='h-4 w-4 mr-2' />
                               Edit
                             </DropdownMenuItem>
                             <DropdownMenuItem
-                              className="text-red-600"
+                              className='text-red-600'
                               onClick={() => {
-                                if (confirm('Are you sure you want to delete this product?')) {
-                                  fetch(`/api/products/${product.id}`, { method: 'DELETE' })
+                                if (
+                                  confirm(
+                                    'Are you sure you want to delete this product?'
+                                  )
+                                ) {
+                                  fetch(`/api/products/${product.id}`, {
+                                    method: 'DELETE',
+                                  })
                                     .then(() => {
                                       toast.success('Product deleted');
                                       fetchProducts();
                                     })
-                                    .catch(() => toast.error('Failed to delete product'));
+                                    .catch(() =>
+                                      toast.error('Failed to delete product')
+                                    );
                                 }
                               }}
                             >
-                              <Trash2 className="h-4 w-4 mr-2" />
+                              <Trash2 className='h-4 w-4 mr-2' />
                               Delete
                             </DropdownMenuItem>
                           </DropdownMenuContent>
@@ -592,22 +533,22 @@ export function ProductsClient() {
           </div>
 
           {totalPages > 1 && (
-            <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-              <p className="text-sm text-gray-600">
+            <div className='flex flex-col sm:flex-row items-center justify-between gap-4'>
+              <p className='text-sm text-gray-600'>
                 Page {page} of {totalPages}
               </p>
-              <div className="flex gap-2">
+              <div className='flex gap-2'>
                 <Button
-                  variant="outline"
-                  size="sm"
+                  variant='outline'
+                  size='sm'
                   onClick={() => setPage((p) => Math.max(1, p - 1))}
                   disabled={page === 1}
                 >
                   Previous
                 </Button>
                 <Button
-                  variant="outline"
-                  size="sm"
+                  variant='outline'
+                  size='sm'
                   onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
                   disabled={page === totalPages}
                 >

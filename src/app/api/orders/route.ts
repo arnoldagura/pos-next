@@ -1,6 +1,6 @@
 import { db } from '@/db/db';
-import { order, orderItem, inventory, orderStatusEnum } from '@/drizzle/schema';
-import { inventoryMovement } from '@/drizzle/schema/inventory-movements';
+import { order, orderItem, productInventory, orderStatusEnum } from '@/drizzle/schema';
+import { productInventoryMovement } from '@/drizzle/schema/product-inventory-movements';
 import { randomUUID } from 'crypto';
 import { eq, and, sql } from 'drizzle-orm';
 import { NextRequest, NextResponse } from 'next/server';
@@ -104,11 +104,11 @@ export async function POST(req: NextRequest) {
       for (const item of items as OrderItemInput[]) {
         const [inventoryRecord] = await tx
           .select()
-          .from(inventory)
+          .from(productInventory)
           .where(
             and(
-              eq(inventory.productId, item.productId),
-              eq(inventory.locationId, locationId)
+              eq(productInventory.productId, item.productId),
+              eq(productInventory.locationId, locationId)
             )
           )
           .limit(1);
@@ -119,9 +119,9 @@ export async function POST(req: NextRequest) {
           );
         }
 
-        await tx.insert(inventoryMovement).values({
+        await tx.insert(productInventoryMovement).values({
           id: randomUUID(),
-          inventoryId: inventoryRecord.id,
+          productInventoryId: inventoryRecord.id,
           type: 'sale',
           quantity: `-${item.quantity}`,
           unitPrice: item.unitPrice.toString(),

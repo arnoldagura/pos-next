@@ -2,12 +2,12 @@ import { db } from '@/db/db';
 import {
   productionOrder,
   productionRecipe,
+  materialInventory,
 } from '@/drizzle/schema';
-import { eq } from 'drizzle-orm';
+import { eq, and } from 'drizzle-orm';
 
-// Types
 export interface MaterialCostBreakdown {
-  materialId: string;
+  materialInventoryId: string;
   materialName?: string;
   quantity: number;
   unitCost: number;
@@ -58,7 +58,6 @@ export interface BatchCostAnalysisResult {
   optimalUnitCost?: number;
 }
 
-// Errors
 export class ProductionCostingError extends Error {
   constructor(message: string) {
     super(message);
@@ -76,13 +75,16 @@ export class ProductionCostingError extends Error {
 export async function calculateMaterialCost(
   orderId: string
 ): Promise<{ totalCost: number; breakdown: MaterialCostBreakdown[] }> {
-  // Get production order with materials
   const order = await db.query.productionOrder.findFirst({
     where: eq(productionOrder.id, orderId),
     with: {
       materials: {
         with: {
-          material: true,
+          materialInventory: {
+            with: {
+              material: true,
+            },
+          },
         },
       },
     },
@@ -95,15 +97,18 @@ export async function calculateMaterialCost(
   const breakdown: MaterialCostBreakdown[] = [];
   let totalCost = 0;
 
-  // Calculate cost for each material
   for (const prodMaterial of order.materials || []) {
-    const quantity = Number(prodMaterial.actualQuantity || prodMaterial.plannedQuantity);
-    const unitCost = Number(prodMaterial.unitCost || prodMaterial.material?.defaultCost || 0);
+    const quantity = Number(
+      prodMaterial.actualQuantity || prodMaterial.plannedQuantity
+    );
+    const unitCost = Number(
+      prodMaterial.unitCost || prodMaterial.materialInventory || 0
+    );
     const materialTotalCost = quantity * unitCost;
 
     breakdown.push({
-      materialId: prodMaterial.materialId,
-      materialName: prodMaterial.material?.name,
+      materialInventoryId: prodMaterial.materialInventoryId,
+      materialName: prodMaterial.materialInventory?.material.name,
       quantity,
       unitCost,
       totalCost: materialTotalCost,
@@ -132,7 +137,6 @@ export async function calculateFullCost(
   laborCost?: number,
   overheadCost?: number
 ): Promise<FullCostBreakdown> {
-  // Get production order
   const order = await db.query.productionOrder.findFirst({
     where: eq(productionOrder.id, orderId),
   });
@@ -141,15 +145,15 @@ export async function calculateFullCost(
     throw new ProductionCostingError(`Production order ${orderId} not found`);
   }
 
-  // Calculate material cost
   const materialCostResult = await calculateMaterialCost(orderId);
 
-  // Use provided costs or fall back to order costs
-  const finalLaborCost = laborCost !== undefined ? laborCost : Number(order.laborCost || 0);
-  const finalOverheadCost = overheadCost !== undefined ? overheadCost : Number(order.overheadCost || 0);
+  const finalLaborCost =
+    laborCost !== undefined ? laborCost : Number(order.laborCost || 0);
+  const finalOverheadCost =
+    overheadCost !== undefined ? overheadCost : Number(order.overheadCost || 0);
 
-  // Calculate totals
-  const totalCost = materialCostResult.totalCost + finalLaborCost + finalOverheadCost;
+  const totalCost =
+    materialCostResult.totalCost + finalLaborCost + finalOverheadCost;
   const quantity = Number(order.actualQuantity || order.plannedQuantity);
   const unitCost = quantity > 0 ? totalCost / quantity : 0;
 
@@ -179,10 +183,8 @@ export async function calculateSuggestedPrice(
     throw new ProductionCostingError('Profit margin cannot be negative');
   }
 
-  // Calculate full cost
   const costBreakdown = await calculateFullCost(orderId);
 
-  // Calculate profit and suggested price
   const profitAmount = costBreakdown.unitCost * (profitMarginPercent / 100);
   const suggestedPrice = costBreakdown.unitCost + profitAmount;
 
@@ -199,6 +201,7 @@ export async function calculateSuggestedPrice(
  * Useful for planning and decision-making
  *
  * @param recipeId - Production recipe ID
+ * @param locationId - Location ID to get material inventory costs (optional, uses first available if not provided)
  * @param quantity - Planned production quantity
  * @param laborCostEstimate - Estimated labor cost (optional)
  * @param overheadCostEstimate - Estimated overhead cost (optional)
@@ -208,13 +211,13 @@ export async function estimateProductionCost(
   recipeId: string,
   quantity: number,
   laborCostEstimate: number = 0,
-  overheadCostEstimate: number = 0
+  overheadCostEstimate: number = 0,
+  locationId?: string | undefined
 ): Promise<ProductionCostEstimate> {
   if (quantity <= 0) {
     throw new ProductionCostingError('Quantity must be greater than zero');
   }
 
-  // Get recipe with ingredients
   const recipe = await db.query.productionRecipe.findFirst({
     where: eq(productionRecipe.id, recipeId),
     with: {
@@ -230,20 +233,41 @@ export async function estimateProductionCost(
     throw new ProductionCostingError(`Production recipe ${recipeId} not found`);
   }
 
-  // Calculate scaling factor
   const scalingFactor = quantity / Number(recipe.outputQuantity);
 
-  // Calculate material costs
   const materialBreakdown: MaterialCostBreakdown[] = [];
   let totalMaterialCost = 0;
 
   for (const ingredient of recipe.ingredients || []) {
     const scaledQuantity = Number(ingredient.quantity) * scalingFactor;
-    const unitCost = Number(ingredient.material?.defaultCost || 0);
+
+    let matInventory;
+    if (locationId) {
+      matInventory = await db.query.materialInventory.findFirst({
+        where: and(
+          eq(materialInventory.materialId, ingredient.materialId),
+          eq(materialInventory.locationId, locationId)
+        ),
+      });
+    } else {
+      matInventory = await db.query.materialInventory.findFirst({
+        where: eq(materialInventory.materialId, ingredient.materialId),
+      });
+    }
+
+    if (!matInventory) {
+      throw new ProductionCostingError(
+        `Material inventory not found for material ${ingredient.materialId}${
+          locationId ? ` at location ${locationId}` : ''
+        }`
+      );
+    }
+
+    const unitCost = Number(matInventory.cost || 0);
     const totalCost = scaledQuantity * unitCost;
 
     materialBreakdown.push({
-      materialId: ingredient.materialId,
+      materialInventoryId: matInventory.id,
       materialName: ingredient.material?.name,
       quantity: scaledQuantity,
       unitCost,
@@ -254,8 +278,8 @@ export async function estimateProductionCost(
     totalMaterialCost += totalCost;
   }
 
-  // Calculate totals
-  const estimatedTotalCost = totalMaterialCost + laborCostEstimate + overheadCostEstimate;
+  const estimatedTotalCost =
+    totalMaterialCost + laborCostEstimate + overheadCostEstimate;
   const estimatedUnitCost = quantity > 0 ? estimatedTotalCost / quantity : 0;
 
   return {
@@ -273,6 +297,7 @@ export async function estimateProductionCost(
  * Helps determine optimal production batch size considering economies of scale
  *
  * @param recipeId - Production recipe ID
+ * @param locationId - Location ID to get material inventory costs (optional, uses first available if not provided)
  * @param quantities - Array of batch quantities to compare
  * @param laborCostCalculator - Function to calculate labor cost for given quantity
  * @param overheadCostCalculator - Function to calculate overhead cost for given quantity
@@ -280,6 +305,7 @@ export async function estimateProductionCost(
  */
 export async function batchCostAnalysis(
   recipeId: string,
+  locationId: string | undefined,
   quantities: number[],
   laborCostCalculator?: (quantity: number) => number,
   overheadCostCalculator?: (quantity: number) => number
@@ -288,27 +314,28 @@ export async function batchCostAnalysis(
     throw new ProductionCostingError('At least one quantity must be provided');
   }
 
-  if (quantities.some(q => q <= 0)) {
-    throw new ProductionCostingError('All quantities must be greater than zero');
+  if (quantities.some((q) => q <= 0)) {
+    throw new ProductionCostingError(
+      'All quantities must be greater than zero'
+    );
   }
 
-  // Sort quantities for easier comparison
   const sortedQuantities = [...quantities].sort((a, b) => a - b);
 
-  // Calculate costs for each batch size
   const batches: BatchCostComparison[] = [];
 
   for (const quantity of sortedQuantities) {
-    // Calculate labor and overhead costs
     const laborCost = laborCostCalculator ? laborCostCalculator(quantity) : 0;
-    const overheadCost = overheadCostCalculator ? overheadCostCalculator(quantity) : 0;
+    const overheadCost = overheadCostCalculator
+      ? overheadCostCalculator(quantity)
+      : 0;
 
-    // Get cost estimate
     const estimate = await estimateProductionCost(
       recipeId,
       quantity,
       laborCost,
-      overheadCost
+      overheadCost,
+      locationId
     );
 
     batches.push({
@@ -321,23 +348,21 @@ export async function batchCostAnalysis(
     });
   }
 
-  // Calculate savings compared to smallest batch
   const smallestBatchUnitCost = batches[0].unitCost;
 
   for (let i = 1; i < batches.length; i++) {
     const savings = smallestBatchUnitCost - batches[i].unitCost;
-    const savingsPercentage = smallestBatchUnitCost > 0
-      ? (savings / smallestBatchUnitCost) * 100
-      : 0;
+    const savingsPercentage =
+      smallestBatchUnitCost > 0 ? (savings / smallestBatchUnitCost) * 100 : 0;
 
     batches[i].costSavingsVsSmallest = savings;
     batches[i].costSavingsPercentage = savingsPercentage;
   }
 
-  // Find optimal batch size (lowest unit cost)
-  const optimalBatch = batches.reduce((min, batch) =>
-    batch.unitCost < min.unitCost ? batch : min
-  , batches[0]);
+  const optimalBatch = batches.reduce(
+    (min, batch) => (batch.unitCost < min.unitCost ? batch : min),
+    batches[0]
+  );
 
   return {
     batches,

@@ -1,20 +1,19 @@
 import { db } from '@/db/db';
-import {
-  productionRecipe,
-  productionRecipeIngredient,
-} from '@/drizzle/schema';
+import { productionRecipe, productionRecipeIngredient } from '@/drizzle/schema';
 import { eq } from 'drizzle-orm';
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 
-// Validation schema for update
 const updateRecipeSchema = z.object({
   name: z.string().min(1, 'Name is required').optional(),
   description: z.string().optional(),
   outputType: z.enum(['product', 'material']).optional(),
   outputProductId: z.string().optional(),
   outputMaterialId: z.string().optional(),
-  outputQuantity: z.number().positive('Output quantity must be positive').optional(),
+  outputQuantity: z
+    .number()
+    .positive('Output quantity must be positive')
+    .optional(),
   unitOfMeasure: z.string().min(1, 'Unit of measure is required').optional(),
   ingredients: z
     .array(
@@ -32,11 +31,12 @@ const updateRecipeSchema = z.object({
 // GET /api/recipes/[id] - Get single recipe
 export async function GET(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  context: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await context.params;
     const recipe = await db.query.productionRecipe.findFirst({
-      where: eq(productionRecipe.id, params.id),
+      where: eq(productionRecipe.id, id),
       with: {
         outputProduct: true,
         outputMaterial: true,
@@ -65,39 +65,42 @@ export async function GET(
 // PUT /api/recipes/[id] - Update recipe
 export async function PUT(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  context: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await context.params;
     const body = await req.json();
     const validatedData = updateRecipeSchema.parse(body);
 
-    // Check if recipe exists
     const existingRecipe = await db.query.productionRecipe.findFirst({
-      where: eq(productionRecipe.id, params.id),
+      where: eq(productionRecipe.id, id),
     });
 
     if (!existingRecipe) {
       return NextResponse.json({ error: 'Recipe not found' }, { status: 404 });
     }
 
-    // Validate output selection if being updated
-    if (validatedData.outputType === 'product' && !validatedData.outputProductId) {
+    if (
+      validatedData.outputType === 'product' &&
+      !validatedData.outputProductId
+    ) {
       return NextResponse.json(
         { error: 'Output product is required when output type is product' },
         { status: 400 }
       );
     }
 
-    if (validatedData.outputType === 'material' && !validatedData.outputMaterialId) {
+    if (
+      validatedData.outputType === 'material' &&
+      !validatedData.outputMaterialId
+    ) {
       return NextResponse.json(
         { error: 'Output material is required when output type is material' },
         { status: 400 }
       );
     }
 
-    // Update recipe with ingredients in transaction
     await db.transaction(async (tx) => {
-      // Prepare update data
       const updateData: Record<string, unknown> = {
         updatedAt: new Date(),
       };
@@ -105,7 +108,8 @@ export async function PUT(
       if (validatedData.name) updateData.name = validatedData.name;
       if (validatedData.description !== undefined)
         updateData.description = validatedData.description;
-      if (validatedData.outputType) updateData.outputType = validatedData.outputType;
+      if (validatedData.outputType)
+        updateData.outputType = validatedData.outputType;
       if (validatedData.outputProductId !== undefined)
         updateData.outputProductId = validatedData.outputProductId;
       if (validatedData.outputMaterialId !== undefined)
@@ -117,37 +121,36 @@ export async function PUT(
       if (validatedData.updatedBy)
         updateData.updatedBy = validatedData.updatedBy;
 
-      // Update recipe
       await tx
         .update(productionRecipe)
         .set(updateData)
-        .where(eq(productionRecipe.id, params.id));
+        .where(eq(productionRecipe.id, id));
 
-      // Update ingredients if provided
       if (validatedData.ingredients) {
-        // Delete existing ingredients
         await tx
           .delete(productionRecipeIngredient)
-          .where(eq(productionRecipeIngredient.recipeId, params.id));
+          .where(eq(productionRecipeIngredient.recipeId, id));
 
-        // Insert new ingredients
-        const ingredientValues = validatedData.ingredients.map((ingredient) => ({
-          id: `recipe_ing_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`,
-          recipeId: params.id,
-          materialId: ingredient.materialId,
-          quantity: ingredient.quantity.toString(),
-          unitOfMeasure: ingredient.unitOfMeasure,
-          createdAt: new Date(),
-          updatedAt: new Date(),
-        }));
+        const ingredientValues = validatedData.ingredients.map(
+          (ingredient) => ({
+            id: `recipe_ing_${Date.now()}_${Math.random()
+              .toString(36)
+              .substring(2, 9)}`,
+            recipeId: id,
+            materialId: ingredient.materialId,
+            quantity: ingredient.quantity.toString(),
+            unitOfMeasure: ingredient.unitOfMeasure,
+            createdAt: new Date(),
+            updatedAt: new Date(),
+          })
+        );
 
         await tx.insert(productionRecipeIngredient).values(ingredientValues);
       }
     });
 
-    // Fetch the updated recipe with relations
     const updatedRecipe = await db.query.productionRecipe.findFirst({
-      where: eq(productionRecipe.id, params.id),
+      where: eq(productionRecipe.id, id),
       with: {
         outputProduct: true,
         outputMaterial: true,
@@ -180,11 +183,12 @@ export async function PUT(
 // DELETE /api/recipes/[id] - Deactivate recipe (soft delete)
 export async function DELETE(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  context: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await context.params;
     const existingRecipe = await db.query.productionRecipe.findFirst({
-      where: eq(productionRecipe.id, params.id),
+      where: eq(productionRecipe.id, id),
     });
 
     if (!existingRecipe) {
@@ -198,7 +202,7 @@ export async function DELETE(
         status: false,
         updatedAt: new Date(),
       })
-      .where(eq(productionRecipe.id, params.id));
+      .where(eq(productionRecipe.id, id));
 
     return NextResponse.json({ message: 'Recipe deactivated successfully' });
   } catch (error) {

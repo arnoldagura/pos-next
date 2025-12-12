@@ -49,51 +49,10 @@ import { useRouter } from 'next/navigation';
 import MaterialInventoryFormDialog from './material-inventory-form-dialog';
 import AddBatchDialog from './add-batch-dialog';
 import EditSettingsDialog from './edit-settings-dialog';
+import type { MaterialInventory } from '@/lib/types';
+import { MATERIAL_TYPES } from '@/lib/constants/material-types';
 
-interface MaterialInventory {
-  id: string;
-  materialId: string;
-  locationId: string;
-  alertThreshold: string;
-  unitOfMeasure: string | null;
-  totalQuantity: string;
-  material: {
-    id: string;
-    name: string;
-    sku: string | null;
-    unitOfMeasure: string;
-    type: string;
-    defaultCost: string | null;
-    image: string | null;
-    category?: {
-      id: string;
-      name: string;
-    } | null;
-    supplier?: {
-      id: string;
-      name: string;
-    } | null;
-  };
-  location: {
-    id: string;
-    name: string;
-  };
-  batches: Array<{
-    id: string;
-    batchNumber: string;
-    quantity: string;
-    cost: string;
-    expiryDate: string | null;
-  }>;
-}
 type ViewMode = 'cards' | 'table';
-
-const materialTypeLabels: Record<string, string> = {
-  raw_materials: 'Raw Materials',
-  goods_for_resale: 'Goods for Resale',
-  operation_supplies: 'Operation Supplies',
-  wip_products: 'WIP Products',
-};
 
 export default function MaterialInventoriesClient() {
   const router = useRouter();
@@ -189,15 +148,15 @@ export default function MaterialInventoriesClient() {
                   )}
                   <div>
                     <div>{inventory.material.name}</div>
-                    {inventory.material.sku && (
+                    {inventory.sku && (
                       <div className='text-xs text-muted-foreground font-normal'>
-                        SKU: {inventory.material.sku}
+                        SKU: {inventory.sku}
                       </div>
                     )}
                   </div>
                 </CardTitle>
                 <CardDescription>
-                  {materialTypeLabels[inventory.material.type] ||
+                  {MATERIAL_TYPES[inventory.material.type] ||
                     inventory.material.type}
                   {inventory.material.category && (
                     <span> • {inventory.material.category.name}</span>
@@ -217,10 +176,14 @@ export default function MaterialInventoriesClient() {
                     <PackagePlus className='h-4 w-4 mr-2' />
                     Add Batch
                   </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => handleViewMovements(inventory)}>
+                  <DropdownMenuItem
+                    onClick={() => handleViewMovements(inventory)}
+                  >
                     View Movements
                   </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => handleEditSettings(inventory)}>
+                  <DropdownMenuItem
+                    onClick={() => handleEditSettings(inventory)}
+                  >
                     Edit Settings
                   </DropdownMenuItem>
                 </DropdownMenuContent>
@@ -233,7 +196,7 @@ export default function MaterialInventoriesClient() {
                 <span className='text-muted-foreground'>Current Stock:</span>
                 <span className='font-bold text-lg'>
                   {parseFloat(inventory.totalQuantity).toFixed(2)}{' '}
-                  {inventory.material.unitOfMeasure}
+                  {inventory.unitOfMeasure}
                 </span>
               </div>
               {isLowStock(inventory) && (
@@ -246,7 +209,7 @@ export default function MaterialInventoriesClient() {
                 <span className='text-muted-foreground'>Alert Threshold:</span>
                 <span>
                   {parseFloat(inventory.alertThreshold).toFixed(2)}{' '}
-                  {inventory.material.unitOfMeasure}
+                  {inventory.unitOfMeasure}
                 </span>
               </div>
               <div className='flex justify-between'>
@@ -257,19 +220,17 @@ export default function MaterialInventoriesClient() {
                 <span className='text-muted-foreground'>Batches:</span>
                 <span className='font-medium'>{inventory.batches.length}</span>
               </div>
-              {inventory.material.supplier && (
+              {inventory.supplier && (
                 <div className='flex justify-between'>
                   <span className='text-muted-foreground'>Supplier:</span>
-                  <span className='font-medium'>
-                    {inventory.material.supplier.name}
-                  </span>
+                  <span className='font-medium'>{inventory.supplier.name}</span>
                 </div>
               )}
-              {inventory.material.defaultCost && (
+              {inventory.cost && (
                 <div className='flex justify-between pt-2 border-t'>
                   <span className='text-muted-foreground'>Default Cost:</span>
                   <span className='font-medium'>
-                    ${parseFloat(inventory.material.defaultCost).toFixed(2)}
+                    ${parseFloat(inventory.cost).toFixed(2)}
                   </span>
                 </div>
               )}
@@ -312,20 +273,20 @@ export default function MaterialInventoriesClient() {
                   {inventory.material.name}
                 </div>
               </TableCell>
-              <TableCell>{inventory.material.sku || '-'}</TableCell>
+              <TableCell>{inventory.sku || '-'}</TableCell>
               <TableCell>
                 <Badge variant='outline'>
-                  {materialTypeLabels[inventory.material.type]}
+                  {MATERIAL_TYPES[inventory.material.type]}
                 </Badge>
               </TableCell>
               <TableCell>{inventory.location.name}</TableCell>
               <TableCell className='text-right'>
                 {parseFloat(inventory.totalQuantity).toFixed(2)}{' '}
-                {inventory.material.unitOfMeasure}
+                {inventory.unitOfMeasure}
               </TableCell>
               <TableCell className='text-right'>
                 {parseFloat(inventory.alertThreshold).toFixed(2)}{' '}
-                {inventory.material.unitOfMeasure}
+                {inventory.unitOfMeasure}
               </TableCell>
               <TableCell>
                 {isLowStock(inventory) ? (
@@ -353,10 +314,14 @@ export default function MaterialInventoriesClient() {
                       <PackagePlus className='h-4 w-4 mr-2' />
                       Add Batch
                     </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => handleViewMovements(inventory)}>
+                    <DropdownMenuItem
+                      onClick={() => handleViewMovements(inventory)}
+                    >
                       View Movements
                     </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => handleEditSettings(inventory)}>
+                    <DropdownMenuItem
+                      onClick={() => handleEditSettings(inventory)}
+                    >
                       Edit Settings
                     </DropdownMenuItem>
                   </DropdownMenuContent>

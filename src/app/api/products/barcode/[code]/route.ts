@@ -1,10 +1,11 @@
 import { db } from '@/db/db';
-import { product } from '@/drizzle/schema/products';
+import { product, productInventory, location } from '@/drizzle/schema';
 import { ACTIONS, RESOURCES } from '@/lib/rbac';
 import { RouteContext, createDefaultRouteContext } from '@/lib/types';
 import { protectRoute } from '@/middleware/rbac';
 import { eq, and, isNull } from 'drizzle-orm';
 import { NextRequest, NextResponse } from 'next/server';
+import { getBulkStockLevels } from '@/lib/services/inventory-calculation';
 
 async function getProductByBarcodeHandler(
   req: NextRequest,
@@ -12,6 +13,8 @@ async function getProductByBarcodeHandler(
 ) {
   try {
     const { code } = await context.params;
+    const { searchParams } = new URL(req.url);
+    const locationId = searchParams.get('locationId');
 
     if (!code) {
       return NextResponse.json(
@@ -20,38 +23,52 @@ async function getProductByBarcodeHandler(
       );
     }
 
-    // Look up product by barcode - only return active, non-deleted products
-    const [foundProduct] = await db
+    // Look up product inventory by barcode - only return active, non-deleted products
+    const [foundInventory] = await db
       .select({
-        id: product.id,
-        name: product.name,
-        sku: product.sku,
-        barcode: product.barcode,
+        inventoryId: productInventory.id,
+        productId: productInventory.productId,
+        productName: product.name,
+        locationId: productInventory.locationId,
+        locationName: location.name,
+        variantName: productInventory.variantName,
+        sku: productInventory.sku,
+        barcode: productInventory.barcode,
         description: product.description,
-        sellingPrice: product.sellingPrice,
-        costPrice: product.costPrice,
+        unitPrice: productInventory.unitPrice,
+        costPrice: productInventory.costPrice,
         image: product.image,
-        unitOfMeasure: product.unitOfMeasure,
-        taxRate: product.taxRate,
+        unitOfMeasure: productInventory.unitOfMeasure,
+        taxRate: productInventory.taxRate,
       })
-      .from(product)
+      .from(productInventory)
+      .innerJoin(product, eq(productInventory.productId, product.id))
+      .innerJoin(location, eq(productInventory.locationId, location.id))
       .where(
         and(
-          eq(product.barcode, code),
+          eq(productInventory.barcode, code),
           eq(product.status, true),
-          isNull(product.deletedAt)
+          isNull(product.deletedAt),
+          locationId ? eq(productInventory.locationId, locationId) : undefined
         )
       )
       .limit(1);
 
-    if (!foundProduct) {
+    if (!foundInventory) {
       return NextResponse.json(
         { error: 'Product not found with this barcode' },
         { status: 404 }
       );
     }
 
-    return NextResponse.json(foundProduct);
+    // Get current stock level
+    const stockLevels = await getBulkStockLevels([foundInventory.inventoryId]);
+    const currentStock = stockLevels[foundInventory.inventoryId]?.currentStock || 0;
+
+    return NextResponse.json({
+      ...foundInventory,
+      currentStock,
+    });
   } catch (error) {
     console.error('Error fetching product by barcode:', error);
     return NextResponse.json(

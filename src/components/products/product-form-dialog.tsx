@@ -4,7 +4,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { Loader2, Upload, X, Shuffle } from 'lucide-react';
+import { Loader2, Upload, X } from 'lucide-react';
 import Image from 'next/image';
 import {
   Dialog,
@@ -34,29 +34,11 @@ import {
 } from '@/components/ui/select';
 import { Checkbox } from '@/components/ui/checkbox';
 import { toast } from 'sonner';
-import { generateSlug } from '@/lib/validations/product';
 
 const productFormSchema = z.object({
   name: z.string().min(1, 'Name is required').max(255, 'Name is too long'),
-  sku: z.string().max(100, 'SKU is too long').optional(),
-  barcode: z.string().max(100, 'Barcode is too long').optional(),
   description: z.string().optional(),
   categoryId: z.string().optional(),
-  sellingPrice: z
-    .string()
-    .min(1, 'Selling price is required')
-    .regex(/^\d+(\.\d{1,2})?$/, 'Invalid price format'),
-  costPrice: z
-    .string()
-    .regex(/^\d+(\.\d{1,2})?$/, 'Invalid price format')
-    .optional()
-    .or(z.literal('')),
-  taxRate: z
-    .string()
-    .regex(/^\d+(\.\d{1,2})?$/, 'Invalid tax rate')
-    .optional()
-    .or(z.literal('')),
-  unitOfMeasure: z.string().max(50, 'Unit of measure is too long').optional(),
   status: z.boolean(),
 });
 
@@ -65,16 +47,10 @@ type ProductFormValues = z.infer<typeof productFormSchema>;
 type Product = {
   id: string;
   name: string;
-  sku: string | null;
-  barcode: string | null;
   description: string | null;
-  sellingPrice: string;
-  costPrice: string | null;
   categoryId: string | null;
   image: string | null;
   status: boolean;
-  unitOfMeasure: string | null;
-  taxRate: string;
 };
 
 type Category = {
@@ -109,14 +85,8 @@ export function ProductFormDialog({
     resolver: zodResolver(productFormSchema),
     defaultValues: {
       name: product?.name || '',
-      sku: product?.sku || '',
-      barcode: product?.barcode || '',
       description: product?.description || '',
       categoryId: product?.categoryId || '',
-      sellingPrice: product?.sellingPrice || '',
-      costPrice: product?.costPrice || '',
-      taxRate: product?.taxRate || '0',
-      unitOfMeasure: product?.unitOfMeasure || '',
       status: product?.status ?? true,
     },
   });
@@ -142,28 +112,16 @@ export function ProductFormDialog({
     if (product) {
       form.reset({
         name: product.name,
-        sku: product.sku || '',
-        barcode: product.barcode || '',
         description: product.description || '',
         categoryId: product.categoryId || '',
-        sellingPrice: product.sellingPrice,
-        costPrice: product.costPrice || '',
-        taxRate: product.taxRate,
-        unitOfMeasure: product.unitOfMeasure || '',
         status: product.status,
       });
       setImagePreview(product.image);
     } else {
       form.reset({
         name: '',
-        sku: '',
-        barcode: '',
         description: '',
         categoryId: '',
-        sellingPrice: '',
-        costPrice: '',
-        taxRate: '0',
-        unitOfMeasure: '',
         status: true,
       });
       setImagePreview(null);
@@ -208,20 +166,6 @@ export function ProductFormDialog({
     setIsDirty(true);
   };
 
-  const generateSKU = () => {
-    const name = form.getValues('name');
-    if (!name) {
-      toast.error('Please enter a product name first');
-      return;
-    }
-    const sku =
-      generateSlug(name).toUpperCase().replace(/-/g, '') +
-      '-' +
-      Date.now().toString().slice(-6);
-    form.setValue('sku', sku);
-    setIsDirty(true);
-  };
-
   const uploadImage = async (productId: string): Promise<void> => {
     if (!imageFile) return;
 
@@ -244,9 +188,6 @@ export function ProductFormDialog({
 
       const payload = {
         ...data,
-        sellingPrice: parseFloat(data.sellingPrice),
-        costPrice: data.costPrice ? parseFloat(data.costPrice) : undefined,
-        taxRate: data.taxRate ? parseFloat(data.taxRate) : 0,
         categoryId: data.categoryId || null,
       };
 
@@ -279,17 +220,10 @@ export function ProductFormDialog({
       setIsDirty(false);
 
       if (saveAndAddAnother && !product) {
-        // Reset form for new entry
         form.reset({
           name: '',
-          sku: '',
-          barcode: '',
           description: '',
-          categoryId: data.categoryId, // Keep category
-          sellingPrice: '',
-          costPrice: '',
-          taxRate: data.taxRate, // Keep tax rate
-          unitOfMeasure: data.unitOfMeasure, // Keep UOM
+          categoryId: data.categoryId,
           status: true,
         });
         setImageFile(null);
@@ -394,45 +328,6 @@ export function ProductFormDialog({
               )}
             />
 
-            {/* SKU */}
-            <FormField
-              name='sku'
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>SKU</FormLabel>
-                  <div className='flex gap-2'>
-                    <FormControl>
-                      <Input placeholder='e.g., COFFEE-001' {...field} />
-                    </FormControl>
-                    <Button
-                      type='button'
-                      variant='outline'
-                      size='icon'
-                      onClick={generateSKU}
-                      title='Generate SKU'
-                    >
-                      <Shuffle className='h-4 w-4' />
-                    </Button>
-                  </div>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            {/* Barcode */}
-            <FormField
-              name='barcode'
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Barcode</FormLabel>
-                  <FormControl>
-                    <Input placeholder='e.g., 1234567890123' {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
             {/* Category */}
             <FormField
               name='categoryId'
@@ -453,77 +348,6 @@ export function ProductFormDialog({
                       ))}
                     </SelectContent>
                   </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            {/* Unit of Measure */}
-            <FormField
-              name='unitOfMeasure'
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Unit of Measure</FormLabel>
-                  <FormControl>
-                    <Input placeholder='e.g., kg, pcs, box' {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            {/* Selling Price */}
-            <FormField
-              name='sellingPrice'
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Selling Price *</FormLabel>
-                  <FormControl>
-                    <Input
-                      type='number'
-                      step='0.01'
-                      placeholder='0.00'
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            {/* Cost Price */}
-            <FormField
-              name='costPrice'
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Cost Price</FormLabel>
-                  <FormControl>
-                    <Input
-                      type='number'
-                      step='0.01'
-                      placeholder='0.00'
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            {/* Tax Rate */}
-            <FormField
-              name='taxRate'
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Tax Rate (%)</FormLabel>
-                  <FormControl>
-                    <Input
-                      type='number'
-                      step='0.01'
-                      placeholder='0.00'
-                      {...field}
-                    />
-                  </FormControl>
                   <FormMessage />
                 </FormItem>
               )}

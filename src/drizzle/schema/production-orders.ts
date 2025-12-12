@@ -9,9 +9,9 @@ import {
 } from 'drizzle-orm/pg-core';
 import { outputTypeEnum, productionRecipe } from './production-recipes';
 import { relations } from 'drizzle-orm';
-import { product } from './products';
-import { material } from './materials';
 import { location } from './locations';
+import { productInventory } from './product-inventories';
+import { materialInventory } from './material-inventories';
 
 export const productionOrderStatusEnum = pgEnum('production_order_status', [
   'draft',
@@ -48,12 +48,18 @@ export const productionOrder = pgTable(
       .default('draft')
       .notNull(),
     outputType: outputTypeEnum('output_type').notNull(),
-    outputProductId: text('output_product_id').references(() => product.id, {
-      onDelete: 'set null',
-    }),
-    outputMaterialId: text('output_material_id').references(() => material.id, {
-      onDelete: 'set null',
-    }),
+    outputProductInventoryId: text('output_product_inventory_id').references(
+      () => productInventory.id,
+      {
+        onDelete: 'set null',
+      }
+    ),
+    outputMaterialInventoryId: text('output_material_inventory_id').references(
+      () => materialInventory.id,
+      {
+        onDelete: 'set null',
+      }
+    ),
     scheduledDate: date('scheduled_date', { mode: 'date' }),
     startedAt: timestamp('started_at'),
     completedAt: timestamp('completed_at'),
@@ -101,12 +107,12 @@ export const productionOrder = pgTable(
   (table) => ({
     recipeIdx: index('production_order_recipe_idx').on(table.recipeId),
     locationIdx: index('production_order_location_idx').on(table.locationId),
-    outputProductIdx: index('production_order_output_product_idx').on(
-      table.outputProductId
-    ),
-    outputMaterialIdx: index('production_order_output_material_idx').on(
-      table.outputMaterialId
-    ),
+    outputProductInventoryIdx: index(
+      'production_order_output_product_inventory_idx'
+    ).on(table.outputProductInventoryId),
+    outputMaterialInventoryIdx: index(
+      'production_order_output_material_inventory_idx'
+    ).on(table.outputMaterialInventoryId),
     statusIdx: index('production_order_status_idx').on(table.status),
     scheduledDateIdx: index('production_order_scheduled_date_idx').on(
       table.scheduledDate
@@ -123,9 +129,9 @@ export const productionMaterial = pgTable(
       .references(() => productionOrder.id, {
         onDelete: 'cascade',
       }),
-    materialId: text('material_id')
+    materialInventoryId: text('material_inventory_id')
       .notNull()
-      .references(() => material.id, {
+      .references(() => materialInventory.id, {
         onDelete: 'restrict',
       }),
     plannedQuantity: numeric('planned_quantity', {
@@ -155,8 +161,8 @@ export const productionMaterial = pgTable(
     productionOrderIdx: index('production_material_production_order_idx').on(
       table.productionOrderId
     ),
-    materialIdx: index('production_material_material_idx').on(
-      table.materialId
+    materialInventoryIdx: index('production_material_material_inventory_idx').on(
+      table.materialInventoryId
     ),
   })
 );
@@ -198,13 +204,13 @@ export const productionOrderRelations = relations(
       fields: [productionOrder.locationId],
       references: [location.id],
     }),
-    outputProduct: one(product, {
-      fields: [productionOrder.outputProductId],
-      references: [product.id],
+    outputProductInventory: one(productInventory, {
+      fields: [productionOrder.outputProductInventoryId],
+      references: [productInventory.id],
     }),
-    outputMaterial: one(material, {
-      fields: [productionOrder.outputMaterialId],
-      references: [material.id],
+    outputMaterialInventory: one(materialInventory, {
+      fields: [productionOrder.outputMaterialInventoryId],
+      references: [materialInventory.id],
     }),
     materials: many(productionMaterial),
     qualityChecks: many(productionQualityCheck),
@@ -218,9 +224,9 @@ export const productionMaterialRelations = relations(
       fields: [productionMaterial.productionOrderId],
       references: [productionOrder.id],
     }),
-    material: one(material, {
-      fields: [productionMaterial.materialId],
-      references: [material.id],
+    materialInventory: one(materialInventory, {
+      fields: [productionMaterial.materialInventoryId],
+      references: [materialInventory.id],
     }),
   })
 );

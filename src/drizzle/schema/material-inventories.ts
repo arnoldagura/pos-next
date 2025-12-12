@@ -10,21 +10,28 @@ import {
 } from 'drizzle-orm/pg-core';
 import { material } from './materials';
 import { location } from './locations';
+import { supplier } from './suppliers';
 
 export const materialInventory = pgTable(
   'material_inventory',
   {
     id: text('id').primaryKey(),
+    variantName: text('variant_name'),
     materialId: text('material_id')
       .notNull()
       .references(() => material.id, { onDelete: 'cascade' }),
     locationId: text('location_id')
       .notNull()
       .references(() => location.id, { onDelete: 'cascade' }),
+    sku: text('sku').unique(),
+    defaultSupplierId: text('default_supplier_id').references(() => supplier.id, {
+      onDelete: 'set null',
+    }),
+    unitOfMeasure: text('unit_of_measure').notNull(),
+    cost: numeric('cost', { precision: 10, scale: 2 }),
     alertThreshold: numeric('alert_threshold', { precision: 10, scale: 2 })
       .default('0')
       .notNull(),
-    unitOfMeasure: text('unit_of_measure'),
     createdAt: timestamp('created_at').defaultNow().notNull(),
     updatedAt: timestamp('updated_at')
       .defaultNow()
@@ -37,6 +44,8 @@ export const materialInventory = pgTable(
     ).on(table.materialId, table.locationId),
     materialIdx: index('material_inventory_material_idx').on(table.materialId),
     locationIdx: index('material_inventory_location_idx').on(table.locationId),
+    skuIdx: index('material_sku_idx').on(table.sku),
+    supplierIdx: index('material_supplier_idx').on(table.defaultSupplierId),
   })
 );
 
@@ -51,6 +60,7 @@ export const materialBatch = pgTable(
     expiryDate: timestamp('expiry_date'),
     quantity: numeric('quantity', { precision: 10, scale: 2 }).notNull(),
     cost: numeric('cost', { precision: 10, scale: 2 }).notNull(),
+    remarks: text('remarks'),
     createdAt: timestamp('created_at').defaultNow().notNull(),
     updatedAt: timestamp('updated_at')
       .defaultNow()
@@ -126,6 +136,10 @@ export const materialInventoryRelations = relations(
     location: one(location, {
       fields: [materialInventory.locationId],
       references: [location.id],
+    }),
+    supplier: one(supplier, {
+      fields: [materialInventory.defaultSupplierId],
+      references: [supplier.id],
     }),
     batches: many(materialBatch),
     movements: many(materialInventoryMovement),

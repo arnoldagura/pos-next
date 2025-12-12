@@ -9,7 +9,6 @@ import {
   Download,
   PackagePlus,
   AlertTriangle,
-  Package,
 } from 'lucide-react';
 import {
   Table,
@@ -39,46 +38,16 @@ import { toast } from 'sonner';
 import { MaterialFormDialog } from './material-form-dialog';
 import { StockReceiptDialog } from './stock-receipt-dialog';
 import { ExpiryAlertsDialog } from './expiry-alerts-dialog';
-import type { MaterialType } from '@/lib/validations/material';
 import { MATERIAL_TYPES } from '@/lib/constants/material-types';
-
-type Material = {
-  id: string;
-  name: string;
-  sku: string | null;
-  description: string | null;
-  type: MaterialType;
-  categoryId: string | null;
-  supplierId: string | null;
-  unitOfMeasure: string;
-  defaultCost: string | null;
-  alertThreshold: string | null;
-  expiryTracking: boolean;
-  image: string | null;
-  status: boolean;
-  createdAt: string;
-  updatedAt: string;
-};
-
-type Category = {
-  id: string;
-  name: string;
-};
-
-type Supplier = {
-  id: string;
-  name: string;
-};
+import { Category, Material } from '@/lib/types';
 
 export function MaterialsClient() {
   const [materials, setMaterials] = useState<Material[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
-  const [suppliers, setSuppliers] = useState<Supplier[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [typeFilter, setTypeFilter] = useState<string>('all');
   const [categoryFilter, setCategoryFilter] = useState<string>('all');
-  const [supplierFilter, setSupplierFilter] = useState<string>('all');
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
@@ -100,17 +69,6 @@ export function MaterialsClient() {
     }
   };
 
-  const fetchSuppliers = async () => {
-    try {
-      const response = await fetch('/api/suppliers');
-      if (!response.ok) throw new Error('Failed to fetch suppliers');
-      const data = await response.json();
-      setSuppliers(data.suppliers || []);
-    } catch (error) {
-      console.error('Failed to load suppliers:', error);
-    }
-  };
-
   const fetchMaterials = async () => {
     try {
       setLoading(true);
@@ -123,8 +81,6 @@ export function MaterialsClient() {
       if (typeFilter && typeFilter !== 'all') params.append('type', typeFilter);
       if (categoryFilter && categoryFilter !== 'all')
         params.append('categoryId', categoryFilter);
-      if (supplierFilter && supplierFilter !== 'all')
-        params.append('supplierId', supplierFilter);
       if (statusFilter && statusFilter !== 'all')
         params.append('status', statusFilter);
 
@@ -144,13 +100,12 @@ export function MaterialsClient() {
 
   useEffect(() => {
     fetchCategories();
-    fetchSuppliers();
   }, []);
 
   useEffect(() => {
     fetchMaterials();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [page, search, typeFilter, categoryFilter, supplierFilter, statusFilter]);
+  }, [page, search, typeFilter, categoryFilter, statusFilter]);
 
   const handleToggleStatus = async (id: string, currentStatus: boolean) => {
     try {
@@ -194,8 +149,6 @@ export function MaterialsClient() {
       if (typeFilter && typeFilter !== 'all') params.append('type', typeFilter);
       if (categoryFilter && categoryFilter !== 'all')
         params.append('categoryId', categoryFilter);
-      if (supplierFilter && supplierFilter !== 'all')
-        params.append('supplierId', supplierFilter);
       if (statusFilter && statusFilter !== 'all')
         params.append('status', statusFilter);
 
@@ -219,7 +172,6 @@ export function MaterialsClient() {
         m.sku || '',
         MATERIAL_TYPES[m.type],
         categories.find((c) => c.id === m.categoryId)?.name || '',
-        suppliers.find((s) => s.id === m.supplierId)?.name || '',
         m.unitOfMeasure,
         m.status ? 'Active' : 'Inactive',
       ]);
@@ -291,20 +243,6 @@ export function MaterialsClient() {
           </SelectContent>
         </Select>
 
-        <Select value={supplierFilter} onValueChange={setSupplierFilter}>
-          <SelectTrigger className='w-full sm:w-[200px]'>
-            <SelectValue placeholder='Filter by supplier' />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value='all'>All Suppliers</SelectItem>
-            {suppliers.map((sup) => (
-              <SelectItem key={sup.id} value={sup.id}>
-                {sup.name}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-
         <Select value={statusFilter} onValueChange={setStatusFilter}>
           <SelectTrigger className='w-full sm:w-[150px]'>
             <SelectValue placeholder='Filter by status' />
@@ -362,12 +300,8 @@ export function MaterialsClient() {
               <TableHeader>
                 <TableRow>
                   <TableHead>Name</TableHead>
-                  <TableHead>SKU</TableHead>
                   <TableHead>Type</TableHead>
                   <TableHead>Category</TableHead>
-                  <TableHead>Supplier</TableHead>
-                  <TableHead>UOM</TableHead>
-                  <TableHead>Expiry Tracking</TableHead>
                   <TableHead>Status</TableHead>
                   <TableHead className='text-right'>Actions</TableHead>
                 </TableRow>
@@ -385,9 +319,6 @@ export function MaterialsClient() {
                       <TableCell className='font-medium'>
                         {material.name}
                       </TableCell>
-                      <TableCell className='text-gray-600'>
-                        {material.sku || '-'}
-                      </TableCell>
                       <TableCell>
                         <Badge variant='outline'>
                           {MATERIAL_TYPES[material.type]}
@@ -396,21 +327,6 @@ export function MaterialsClient() {
                       <TableCell>
                         {categories.find((c) => c.id === material.categoryId)
                           ?.name || '-'}
-                      </TableCell>
-                      <TableCell>
-                        {suppliers.find((s) => s.id === material.supplierId)
-                          ?.name || '-'}
-                      </TableCell>
-                      <TableCell>{material.unitOfMeasure}</TableCell>
-                      <TableCell>
-                        {material.expiryTracking ? (
-                          <Badge variant='secondary'>
-                            <Package className='h-3 w-3 mr-1' />
-                            Yes
-                          </Badge>
-                        ) : (
-                          <span className='text-gray-400'>No</span>
-                        )}
                       </TableCell>
                       <TableCell>
                         <button

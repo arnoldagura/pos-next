@@ -1,10 +1,8 @@
 import { db } from '@/drizzle/db';
 import { material } from '@/drizzle/schema/materials';
 import { ACTIONS, RESOURCES } from '@/lib/rbac';
-import {
-  createMaterialSchema,
-  type MaterialType,
-} from '@/lib/validations/material';
+import { MaterialType } from '@/lib/types';
+import { createMaterialSchema } from '@/lib/validations/material';
 import { protectRoute } from '@/middleware/rbac';
 import { randomUUID } from 'crypto';
 import { and, eq, ilike, or, isNull, count, desc } from 'drizzle-orm';
@@ -16,7 +14,6 @@ export async function getMaterialsHandler(req: NextRequest) {
     const { searchParams } = new URL(req.url);
     const statusParam = searchParams.get('status');
     const categoryId = searchParams.get('categoryId');
-    const supplierId = searchParams.get('supplierId');
     const type = searchParams.get('type');
     const search = searchParams.get('search');
     const includeDeleted = searchParams.get('includeDeleted') === 'true';
@@ -40,10 +37,6 @@ export async function getMaterialsHandler(req: NextRequest) {
       conditions.push(eq(material.categoryId, categoryId));
     }
 
-    if (supplierId) {
-      conditions.push(eq(material.supplierId, supplierId));
-    }
-
     if (type) {
       conditions.push(eq(material.type, type as MaterialType));
     }
@@ -52,7 +45,6 @@ export async function getMaterialsHandler(req: NextRequest) {
       conditions.push(
         or(
           ilike(material.name, `%${search}%`),
-          ilike(material.sku, `%${search}%`),
           ilike(material.description, `%${search}%`)
         )
       );
@@ -97,46 +89,11 @@ export async function createMaterialHandler(req: NextRequest) {
     const body = await req.json();
     const validatedData = createMaterialSchema.parse(body);
 
-    if (validatedData.sku) {
-      const existingSku = await db
-        .select()
-        .from(material)
-        .where(eq(material.sku, validatedData.sku))
-        .limit(1);
-
-      if (existingSku.length > 0) {
-        return NextResponse.json(
-          { error: 'A material with this SKU already exists' },
-          { status: 400 }
-        );
-      }
-    }
-
-    const defaultCost = validatedData.defaultCost
-      ? typeof validatedData.defaultCost === 'number'
-        ? validatedData.defaultCost.toString()
-        : validatedData.defaultCost
-      : undefined;
-
-    const alertThreshold = validatedData.alertThreshold
-      ? typeof validatedData.alertThreshold === 'number'
-        ? validatedData.alertThreshold.toString()
-        : validatedData.alertThreshold
-      : undefined;
-
-    const sku =
-      validatedData.sku && validatedData.sku.trim() !== ''
-        ? validatedData.sku
-        : null;
-
     const newMaterial = await db
       .insert(material)
       .values({
         id: randomUUID(),
         ...validatedData,
-        sku,
-        defaultCost,
-        alertThreshold,
       })
       .returning();
 

@@ -26,6 +26,7 @@ import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 import { Loader2 } from 'lucide-react';
 import { useState } from 'react';
+import { BatchDialogMaterialInventory } from '@/lib/types';
 
 const formSchema = z.object({
   batchNumber: z.string().min(1, 'Batch number is required'),
@@ -37,22 +38,10 @@ const formSchema = z.object({
 
 type FormValues = z.infer<typeof formSchema>;
 
-interface MaterialInventory {
-  id: string;
-  material: {
-    name: string;
-    unitOfMeasure: string;
-  };
-  location: {
-    id?: string;
-    name: string;
-  };
-}
-
 interface AddBatchDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  inventory: MaterialInventory;
+  inventory: BatchDialogMaterialInventory;
   onSuccess: () => void;
 }
 
@@ -88,7 +77,7 @@ export default function AddBatchDialog({
           body: JSON.stringify({
             ...values,
             materialId: inventory.id,
-            unitOfMeasure: inventory.material.unitOfMeasure,
+            unitOfMeasure: inventory.unitOfMeasure,
             locationId: inventory.location.id,
             quantity: parseFloat(values.quantity),
             cost: parseFloat(values.cost),
@@ -167,9 +156,7 @@ export default function AddBatchDialog({
                       {...field}
                     />
                   </FormControl>
-                  <FormDescription>
-                    {inventory.material.unitOfMeasure}
-                  </FormDescription>
+                  <FormDescription>{inventory.unitOfMeasure}</FormDescription>
                   <FormMessage />
                 </FormItem>
               )}

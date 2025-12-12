@@ -131,7 +131,7 @@ describe('ProductGrid', () => {
               }),
           });
         }
-        if (url.includes('/api/inventory')) {
+        if (url.includes('/api/product-inventory')) {
           return Promise.resolve({
             ok: true,
             json: () =>
@@ -256,7 +256,7 @@ describe('ProductGrid', () => {
 
     (global.fetch as unknown as ReturnType<typeof vi.fn>).mockImplementation(
       (url: string) => {
-        if (url.includes('/api/inventory')) {
+        if (url.includes('/api/product-inventory')) {
           return Promise.resolve({
             ok: true,
             json: () =>
@@ -308,7 +308,7 @@ describe('ProductGrid', () => {
 
     (global.fetch as unknown as ReturnType<typeof vi.fn>).mockImplementation(
       (url: string) => {
-        if (url.includes('/api/inventory')) {
+        if (url.includes('/api/product-inventory')) {
           return Promise.resolve({
             ok: true,
             json: () =>
@@ -370,7 +370,7 @@ describe('ProductGrid', () => {
             json: () => Promise.resolve({ categories: mockCategories }),
           });
         }
-        if (url.includes('/api/inventory')) {
+        if (url.includes('/api/product-inventory')) {
           return Promise.resolve({
             ok: true,
             json: () =>

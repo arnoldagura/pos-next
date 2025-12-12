@@ -84,26 +84,32 @@ export async function GET(request: NextRequest) {
             name: true,
           },
         },
-        outputProduct: {
+        outputProductInventory: {
           columns: {
             id: true,
-            name: true,
-            image: true,
+            variantName: true,
+          },
+          with: {
+            product: true,
           },
         },
-        outputMaterial: {
+        outputMaterialInventory: {
           columns: {
             id: true,
-            name: true,
+            variantName: true,
+          },
+          with: {
+            material: true,
           },
         },
         materials: {
           with: {
-            material: {
+            materialInventory: {
               columns: {
                 id: true,
-                name: true,
-                unitOfMeasure: true,
+              },
+              with: {
+                material: true,
               },
             },
           },
@@ -162,11 +168,11 @@ export async function POST(request: NextRequest) {
       with: {
         recipe: true,
         location: true,
-        outputProduct: true,
-        outputMaterial: true,
+        outputProductInventory: true,
+        outputMaterialInventory: true,
         materials: {
           with: {
-            material: true,
+            materialInventory: true,
           },
         },
       },

@@ -1,0 +1,1 @@
+ALTER TABLE "material_inventory" ALTER COLUMN "variant_name" DROP NOT NULL;

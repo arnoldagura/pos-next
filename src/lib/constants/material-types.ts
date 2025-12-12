@@ -1,4 +1,4 @@
-import type { MaterialType } from '@/lib/validations/material';
+import { MaterialType } from '../types/material';
 
 export const MATERIAL_TYPES: Record<MaterialType, string> = {
   raw_materials: 'Raw Materials',
@@ -14,4 +14,6 @@ export const MATERIAL_TYPE_OPTIONS = Object.entries(MATERIAL_TYPES).map(
   })
 );
 
-export const VALID_MATERIAL_TYPES = Object.keys(MATERIAL_TYPES) as MaterialType[];
+export const VALID_MATERIAL_TYPES = Object.keys(
+  MATERIAL_TYPES
+) as MaterialType[];

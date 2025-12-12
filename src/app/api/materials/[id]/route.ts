@@ -1,6 +1,5 @@
 import { db } from '@/db/db';
 import { material, materialCategory } from '@/drizzle/schema';
-import { supplier } from '@/drizzle/schema/suppliers';
 import { ACTIONS, RESOURCES } from '@/lib/rbac';
 import { RouteContext, createDefaultRouteContext } from '@/lib/types';
 import { updateMaterialSchema } from '@/lib/validations/material';
@@ -19,15 +18,9 @@ async function getMaterialHandler(
       .select({
         id: material.id,
         name: material.name,
-        sku: material.sku,
         description: material.description,
         type: material.type,
         categoryId: material.categoryId,
-        supplierId: material.supplierId,
-        unitOfMeasure: material.unitOfMeasure,
-        defaultCost: material.defaultCost,
-        alertThreshold: material.alertThreshold,
-        expiryTracking: material.expiryTracking,
         image: material.image,
         status: material.status,
         createdBy: material.createdBy,
@@ -40,14 +33,9 @@ async function getMaterialHandler(
           name: materialCategory.name,
           slug: materialCategory.slug,
         },
-        supplier: {
-          id: supplier.id,
-          name: supplier.name,
-        },
       })
       .from(material)
       .leftJoin(materialCategory, eq(material.categoryId, materialCategory.id))
-      .leftJoin(supplier, eq(material.supplierId, supplier.id))
       .where(and(eq(material.id, id), isNull(material.deletedAt)))
       .limit(1);
 
@@ -74,47 +62,9 @@ async function updateMaterialHandler(
     const body = await req.json();
     const validatedData = updateMaterialSchema.parse(body);
 
-    if (validatedData.sku) {
-      const existingSku = await db
-        .select()
-        .from(material)
-        .where(eq(material.sku, validatedData.sku))
-        .limit(1);
-
-      if (existingSku.length > 0 && existingSku[0].id !== id) {
-        return NextResponse.json(
-          { error: 'A material with this SKU already exists' },
-          { status: 400 }
-        );
-      }
-    }
-
-    const updateData: Record<string, unknown> = { ...validatedData };
-
-    if (validatedData.defaultCost !== undefined) {
-      updateData.defaultCost =
-        typeof validatedData.defaultCost === 'number'
-          ? validatedData.defaultCost.toString()
-          : validatedData.defaultCost;
-    }
-
-    if (validatedData.alertThreshold !== undefined) {
-      updateData.alertThreshold =
-        typeof validatedData.alertThreshold === 'number'
-          ? validatedData.alertThreshold.toString()
-          : validatedData.alertThreshold;
-    }
-
-    if (validatedData.sku !== undefined) {
-      updateData.sku =
-        validatedData.sku && validatedData.sku.trim() !== ''
-          ? validatedData.sku
-          : null;
-    }
-
     const [updatedMaterial] = await db
       .update(material)
-      .set({ ...updateData, updatedAt: new Date() })
+      .set({ ...validatedData, updatedAt: new Date() })
       .where(eq(material.id, id))
       .returning();
 

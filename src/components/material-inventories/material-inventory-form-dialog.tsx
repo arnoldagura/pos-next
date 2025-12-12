@@ -32,28 +32,20 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 import { Loader2 } from 'lucide-react';
+import type { Material, Location, Supplier } from '@/lib/types';
 
 const formSchema = z.object({
   materialId: z.string().min(1, 'Material is required'),
   locationId: z.string().min(1, 'Location is required'),
+  variantName: z.string().optional(),
+  sku: z.string().optional(),
+  defaultSupplierId: z.string().optional().nullable(),
+  unitOfMeasure: z.string().min(1, 'Unit of measure is required'),
+  cost: z.string().optional(),
   alertThreshold: z.string().optional(),
 });
 
 type FormValues = z.infer<typeof formSchema>;
-
-interface Material {
-  id: string;
-  name: string;
-  sku: string | null;
-  unitOfMeasure: string;
-  type: string;
-  category?: { id: string; name: string } | null;
-}
-
-interface Location {
-  id: string;
-  name: string;
-}
 
 interface MaterialInventoryFormDialogProps {
   open: boolean;
@@ -68,6 +60,7 @@ export default function MaterialInventoryFormDialog({
 }: MaterialInventoryFormDialogProps) {
   const [materials, setMaterials] = useState<Material[]>([]);
   const [locations, setLocations] = useState<Location[]>([]);
+  const [suppliers, setSuppliers] = useState<Supplier[]>([]);
   const [selectedMaterial, setSelectedMaterial] = useState<Material | null>(
     null
   );
@@ -79,6 +72,11 @@ export default function MaterialInventoryFormDialog({
     defaultValues: {
       materialId: '',
       locationId: '',
+      variantName: '',
+      sku: '',
+      defaultSupplierId: '',
+      unitOfMeasure: '',
+      cost: '',
       alertThreshold: '',
     },
   });
@@ -87,6 +85,7 @@ export default function MaterialInventoryFormDialog({
     if (open) {
       fetchMaterials();
       fetchLocations();
+      fetchSuppliers();
     }
   }, [open]);
 
@@ -118,20 +117,42 @@ export default function MaterialInventoryFormDialog({
     }
   };
 
+  const fetchSuppliers = async () => {
+    try {
+      const response = await fetch('/api/suppliers?limit=100');
+      if (!response.ok) throw new Error('Failed to fetch suppliers');
+      const data = await response.json();
+      setSuppliers(data.suppliers || []);
+    } catch (error) {
+      console.error('Error fetching suppliers:', error);
+      toast.error('Failed to load suppliers');
+    }
+  };
+
   const handleMaterialChange = (materialId: string) => {
     const material = materials.find((m) => m.id === materialId);
     setSelectedMaterial(material || null);
+
+    // Auto-populate unit of measure from selected material
+    if (material) {
+      form.setValue('unitOfMeasure', material.unitOfMeasure);
+    }
   };
 
   const onSubmit = async (values: FormValues) => {
     try {
       setSubmitting(true);
       const submitData = {
-        ...values,
+        materialId: values.materialId,
+        locationId: values.locationId,
+        variantName: values.variantName || undefined,
+        sku: values.sku || undefined,
+        defaultSupplierId: values.defaultSupplierId || null,
+        unitOfMeasure: values.unitOfMeasure,
+        cost: values.cost ? parseFloat(values.cost) : undefined,
         alertThreshold: values.alertThreshold
           ? parseFloat(values.alertThreshold)
-          : 0,
-        unitOfMeasure: selectedMaterial?.unitOfMeasure,
+          : undefined,
       };
       const response = await fetch('/api/material-inventories', {
         method: 'POST',
@@ -163,7 +184,7 @@ export default function MaterialInventoryFormDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className='sm:max-w-[500px]'>
+      <DialogContent className='sm:max-w-[600px] max-h-[90vh] overflow-y-auto'>
         <DialogHeader>
           <DialogTitle>Add Material to Inventory</DialogTitle>
           <DialogDescription>
@@ -249,6 +270,114 @@ export default function MaterialInventoryFormDialog({
                 </Select>
                 <FormDescription>
                   Location where this material will be stored
+                </FormDescription>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name='variantName'
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Variant Name (Optional)</FormLabel>
+                <FormControl>
+                  <Input
+                    placeholder='e.g., Standard, Large, Premium'
+                    {...field}
+                  />
+                </FormControl>
+                <FormDescription>
+                  Distinguishes different variants of the same material
+                </FormDescription>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name='sku'
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>SKU (Optional)</FormLabel>
+                <FormControl>
+                  <Input placeholder='Stock Keeping Unit' {...field} />
+                </FormControl>
+                <FormDescription>
+                  Unique identifier for this material variant
+                </FormDescription>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name='unitOfMeasure'
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Unit of Measure *</FormLabel>
+                <FormControl>
+                  <Input placeholder='e.g., kg, L, pcs' {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name='defaultSupplierId'
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Default Supplier (Optional)</FormLabel>
+                <Select
+                  onValueChange={(value) =>
+                    field.onChange(value === 'none' ? '' : value)
+                  }
+                  value={field.value || 'none'}
+                >
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder='Select supplier' />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    <SelectItem value='none'>No default supplier</SelectItem>
+                    {suppliers.map((supplier) => (
+                      <SelectItem key={supplier.id} value={supplier.id}>
+                        {supplier.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <FormDescription>
+                  Preferred supplier for this material variant
+                </FormDescription>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name='cost'
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Cost per Unit (Optional)</FormLabel>
+                <FormControl>
+                  <Input
+                    type='number'
+                    step='0.01'
+                    min='0'
+                    placeholder='0.00'
+                    {...field}
+                  />
+                </FormControl>
+                <FormDescription>
+                  Default cost per unit of measure
                 </FormDescription>
                 <FormMessage />
               </FormItem>

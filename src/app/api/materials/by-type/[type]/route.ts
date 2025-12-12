@@ -6,7 +6,7 @@ import { protectRoute } from '@/middleware/rbac';
 import { eq, and, isNull, count, desc } from 'drizzle-orm';
 import { NextRequest, NextResponse } from 'next/server';
 import { VALID_MATERIAL_TYPES } from '@/lib/constants/material-types';
-import type { MaterialType } from '@/lib/validations/material';
+import { MaterialType } from '@/lib/types';
 
 async function getMaterialsByTypeHandler(
   req: NextRequest,
@@ -30,7 +30,6 @@ async function getMaterialsByTypeHandler(
     const { searchParams } = new URL(req.url);
     const statusParam = searchParams.get('status');
     const categoryId = searchParams.get('categoryId');
-    const supplierId = searchParams.get('supplierId');
 
     const page = parseInt(searchParams.get('page') || '1', 10);
     const limit = parseInt(searchParams.get('limit') || '50', 10);
@@ -48,10 +47,6 @@ async function getMaterialsByTypeHandler(
 
     if (categoryId) {
       conditions.push(eq(material.categoryId, categoryId));
-    }
-
-    if (supplierId) {
-      conditions.push(eq(material.supplierId, supplierId));
     }
 
     const whereClause = and(...conditions);

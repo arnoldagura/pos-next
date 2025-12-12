@@ -2,7 +2,7 @@ import { db } from '@/drizzle/db';
 import { product } from '@/drizzle/schema/products';
 import { ACTIONS, RESOURCES } from '@/lib/rbac';
 import { protectRoute } from '@/middleware/rbac';
-import { and, eq, ilike, or, isNull } from 'drizzle-orm';
+import { and, eq, ilike, isNull } from 'drizzle-orm';
 import { NextRequest, NextResponse } from 'next/server';
 
 export async function searchProductsHandler(req: NextRequest) {
@@ -18,27 +18,19 @@ export async function searchProductsHandler(req: NextRequest) {
       );
     }
 
-    // Quick search for POS - search by name, SKU, or barcode
-    // Only return active, non-deleted products
     const products = await db
       .select({
         id: product.id,
         name: product.name,
-        sku: product.sku,
-        barcode: product.barcode,
-        sellingPrice: product.sellingPrice,
+        description: product.description,
         image: product.image,
-        unitOfMeasure: product.unitOfMeasure,
-        taxRate: product.taxRate,
+        categoryId: product.categoryId,
+        status: product.status,
       })
       .from(product)
       .where(
         and(
-          or(
-            ilike(product.name, `%${query}%`),
-            ilike(product.sku, `%${query}%`),
-            ilike(product.barcode, `%${query}%`)
-          ),
+          ilike(product.name, `%${query}%`),
           eq(product.status, true),
           isNull(product.deletedAt)
         )

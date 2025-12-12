@@ -15,7 +15,15 @@ export interface TestInventory {
 export interface TestMovement {
   id: string;
   inventoryId: string;
-  type: 'purchase' | 'sale' | 'adjustment' | 'waste' | 'transfer_in' | 'transfer_out' | 'production_output' | 'receive_from_material';
+  type:
+    | 'purchase'
+    | 'sale'
+    | 'adjustment'
+    | 'waste'
+    | 'transfer_in'
+    | 'transfer_out'
+    | 'production_output'
+    | 'receive_from_material';
   quantity: string;
   unitPrice: string | null;
   date: Date;
@@ -83,7 +91,7 @@ export const sampleMovements: TestMovement[] = [
  * Mock API responses for testing
  */
 export async function mockMovementsAPI(page: Page, movements: TestMovement[]) {
-  await page.route('**/api/inventory/movements*', async (route) => {
+  await page.route('**/api/product-inventory/movements*', async (route) => {
     const url = new URL(route.request().url());
     const inventoryId = url.searchParams.get('inventoryId');
     const type = url.searchParams.get('type');
@@ -94,23 +102,29 @@ export async function mockMovementsAPI(page: Page, movements: TestMovement[]) {
 
     // Filter by inventoryId
     if (inventoryId) {
-      filteredMovements = filteredMovements.filter(m => m.inventoryId === inventoryId);
+      filteredMovements = filteredMovements.filter(
+        (m) => m.inventoryId === inventoryId
+      );
     }
 
     // Filter by type
     if (type) {
-      filteredMovements = filteredMovements.filter(m => m.type === type);
+      filteredMovements = filteredMovements.filter((m) => m.type === type);
     }
 
     // Filter by date range
     if (startDate) {
       const start = new Date(startDate);
-      filteredMovements = filteredMovements.filter(m => new Date(m.date) >= start);
+      filteredMovements = filteredMovements.filter(
+        (m) => new Date(m.date) >= start
+      );
     }
 
     if (endDate) {
       const end = new Date(endDate);
-      filteredMovements = filteredMovements.filter(m => new Date(m.date) <= end);
+      filteredMovements = filteredMovements.filter(
+        (m) => new Date(m.date) <= end
+      );
     }
 
     await route.fulfill({
@@ -131,7 +145,7 @@ export async function mockMovementsAPI(page: Page, movements: TestMovement[]) {
  * Mock empty movements response
  */
 export async function mockEmptyMovementsAPI(page: Page) {
-  await page.route('**/api/inventory/movements*', async (route) => {
+  await page.route('**/api/product-inventory/movements*', async (route) => {
     await route.fulfill({
       status: 200,
       contentType: 'application/json',
@@ -150,7 +164,7 @@ export async function mockEmptyMovementsAPI(page: Page) {
  * Mock API error
  */
 export async function mockMovementsAPIError(page: Page) {
-  await page.route('**/api/inventory/movements*', async (route) => {
+  await page.route('**/api/product-inventory/movements*', async (route) => {
     await route.fulfill({
       status: 500,
       contentType: 'application/json',
@@ -164,7 +178,10 @@ export async function mockMovementsAPIError(page: Page) {
 /**
  * Helper to navigate to movement history page
  */
-export async function navigateToMovementHistory(page: Page, inventoryId: string) {
+export async function navigateToMovementHistory(
+  page: Page,
+  inventoryId: string
+) {
   await page.goto(`/inventory/${inventoryId}/movements`);
   await page.waitForLoadState('networkidle');
 }
@@ -199,7 +216,11 @@ export async function selectMovementType(page: Page, type: string) {
 /**
  * Helper to set date range filter
  */
-export async function setDateRange(page: Page, startDate: string, endDate: string) {
+export async function setDateRange(
+  page: Page,
+  startDate: string,
+  endDate: string
+) {
   await page.locator('#start-date').fill(startDate);
   await page.locator('#end-date').fill(endDate);
   await page.waitForTimeout(1000);
@@ -249,11 +270,19 @@ export function calculateRunningBalance(movements: TestMovement[]): number[] {
   const balances: number[] = [];
 
   // Sort by date (oldest first)
-  const sorted = [...movements].sort((a, b) => a.date.getTime() - b.date.getTime());
+  const sorted = [...movements].sort(
+    (a, b) => a.date.getTime() - b.date.getTime()
+  );
 
   for (const movement of sorted) {
     const quantity = parseFloat(movement.quantity);
-    const increaseTypes = ['purchase', 'transfer_in', 'production_output', 'receive_from_material', 'adjustment'];
+    const increaseTypes = [
+      'purchase',
+      'transfer_in',
+      'production_output',
+      'receive_from_material',
+      'adjustment',
+    ];
 
     if (increaseTypes.includes(movement.type)) {
       balance += quantity;

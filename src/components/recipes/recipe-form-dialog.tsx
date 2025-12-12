@@ -24,8 +24,6 @@ import { toast } from 'sonner';
 type Material = {
   id: string;
   name: string;
-  unitOfMeasure: string;
-  defaultCost: string | null;
 };
 
 type Product = {
@@ -96,7 +94,6 @@ export function RecipeFormDialog({
       fetchProducts();
 
       if (recipe) {
-        // Edit mode - populate form
         setName(recipe.name);
         setDescription(recipe.description || '');
         setOutputType(recipe.outputType);
@@ -112,7 +109,6 @@ export function RecipeFormDialog({
           }))
         );
       } else {
-        // Create mode - reset form
         resetForm();
       }
     }
@@ -131,7 +127,7 @@ export function RecipeFormDialog({
 
   const fetchMaterials = async () => {
     try {
-      const response = await fetch('/api/materials?status=true');
+      const response = await fetch('/api/materials?status=active');
       if (!response.ok) throw new Error('Failed to fetch materials');
       const data = await response.json();
       setMaterials(data.materials || []);
@@ -142,7 +138,7 @@ export function RecipeFormDialog({
 
   const fetchProducts = async () => {
     try {
-      const response = await fetch('/api/products?status=true');
+      const response = await fetch('/api/products?status=active');
       if (!response.ok) throw new Error('Failed to fetch products');
       const data = await response.json();
       setProducts(data.products || []);
@@ -175,17 +171,12 @@ export function RecipeFormDialog({
   };
 
   const handleMaterialChange = (index: number, materialId: string) => {
-    const material = materials.find((m) => m.id === materialId);
-    if (material) {
-      updateIngredient(index, 'materialId', materialId);
-      updateIngredient(index, 'unitOfMeasure', material.unitOfMeasure);
-    }
+    updateIngredient(index, 'materialId', materialId);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    // Validation
     if (!name.trim()) {
       toast.error('Recipe name is required');
       return;
@@ -274,7 +265,6 @@ export function RecipeFormDialog({
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className='space-y-6 mt-4'>
-          {/* Basic Information */}
           <div className='space-y-4'>
             <div>
               <Label htmlFor='name'>Recipe Name *</Label>
@@ -299,7 +289,6 @@ export function RecipeFormDialog({
             </div>
           </div>
 
-          {/* Output Configuration */}
           <div className='space-y-4'>
             <h3 className='text-lg font-medium'>Output</h3>
 
@@ -451,7 +440,6 @@ export function RecipeFormDialog({
                         updateIngredient(index, 'unitOfMeasure', e.target.value)
                       }
                       placeholder='kg, L'
-                      disabled
                     />
                   </div>
                   <Button

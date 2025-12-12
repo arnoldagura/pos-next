@@ -82,7 +82,7 @@ export function RecipesClient() {
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [outputTypeFilter, setOutputTypeFilter] = useState<string>('all');
-  const [statusFilter, setStatusFilter] = useState<string>('true');
+  const [statusFilter, setStatusFilter] = useState<string>('all');
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [showRecipeDialog, setShowRecipeDialog] = useState(false);
@@ -90,9 +90,9 @@ export function RecipesClient() {
     undefined
   );
   const [showCostEstimate, setShowCostEstimate] = useState(false);
-  const [costEstimateRecipe, setCostEstimateRecipe] = useState<Recipe | undefined>(
-    undefined
-  );
+  const [costEstimateRecipe, setCostEstimateRecipe] = useState<
+    Recipe | undefined
+  >(undefined);
 
   const fetchRecipes = async () => {
     try {
@@ -235,8 +235,8 @@ export function RecipesClient() {
             </SelectTrigger>
             <SelectContent>
               <SelectItem value='all'>All Status</SelectItem>
-              <SelectItem value='true'>Active</SelectItem>
-              <SelectItem value='false'>Inactive</SelectItem>
+              <SelectItem value='active'>Active</SelectItem>
+              <SelectItem value='inactive'>Inactive</SelectItem>
             </SelectContent>
           </Select>
         </div>

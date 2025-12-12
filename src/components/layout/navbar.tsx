@@ -49,10 +49,10 @@ export function Navbar() {
                 Materials
               </Link>
               <Link
-                href='/inventory'
+                href='/product-inventory'
                 className='text-gray-700 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium'
               >
-                Inventory
+                Product Inventories
               </Link>
               <Link
                 href='/material-inventories'

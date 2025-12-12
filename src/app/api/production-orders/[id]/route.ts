@@ -30,11 +30,11 @@ export async function GET(
           },
         },
         location: true,
-        outputProduct: true,
-        outputMaterial: true,
+        outputProductInventory: true,
+        outputMaterialInventory: true,
         materials: {
           with: {
-            material: true,
+            materialInventory: true,
           },
         },
         qualityChecks: true,
@@ -67,7 +67,6 @@ export async function PUT(
     const { id } = await params;
     const body = await request.json();
 
-    // Validate input
     const validation = updateProductionOrderSchema.safeParse(body);
 
     if (!validation.success) {
@@ -79,7 +78,6 @@ export async function PUT(
 
     const { scheduledDate, notes } = validation.data;
 
-    // Check if order exists
     const existingOrder = await db.query.productionOrder.findFirst({
       where: eq(productionOrder.id, id),
     });
@@ -91,7 +89,6 @@ export async function PUT(
       );
     }
 
-    // Only allow updates for draft orders
     if (existingOrder.status !== 'draft') {
       return NextResponse.json(
         {
@@ -101,7 +98,6 @@ export async function PUT(
       );
     }
 
-    // Update order
     await db
       .update(productionOrder)
       .set({
@@ -111,17 +107,16 @@ export async function PUT(
       })
       .where(eq(productionOrder.id, id));
 
-    // Fetch updated order
     const updatedOrder = await db.query.productionOrder.findFirst({
       where: eq(productionOrder.id, id),
       with: {
         recipe: true,
         location: true,
-        outputProduct: true,
-        outputMaterial: true,
+        outputProductInventory: true,
+        outputMaterialInventory: true,
         materials: {
           with: {
-            material: true,
+            materialInventory: true,
           },
         },
       },
@@ -150,7 +145,6 @@ export async function DELETE(
   try {
     const { id } = await params;
 
-    // Check if order exists
     const existingOrder = await db.query.productionOrder.findFirst({
       where: eq(productionOrder.id, id),
     });
@@ -162,7 +156,6 @@ export async function DELETE(
       );
     }
 
-    // Only allow deletion of draft orders
     if (existingOrder.status !== 'draft') {
       return NextResponse.json(
         {
@@ -172,7 +165,6 @@ export async function DELETE(
       );
     }
 
-    // Delete order (cascade will delete materials)
     await db.delete(productionOrder).where(eq(productionOrder.id, id));
 
     return NextResponse.json({ success: true });

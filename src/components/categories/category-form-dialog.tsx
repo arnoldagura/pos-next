@@ -34,8 +34,9 @@ import {
 import { Checkbox } from '@/components/ui/checkbox';
 import { toast } from 'sonner';
 import { generateSlug } from '@/lib/validations/category';
+import { Category, CategoryFormValues } from '@/lib/types';
 
-const categoryFormSchema = z.object({
+export const categoryFormSchema = z.object({
   name: z.string().min(1, 'Name is required').max(100, 'Name is too long'),
   slug: z
     .string()
@@ -51,18 +52,6 @@ const categoryFormSchema = z.object({
   displayOrder: z.number().int().min(0),
   isActive: z.boolean(),
 });
-
-type CategoryFormValues = z.infer<typeof categoryFormSchema>;
-
-type Category = {
-  id: string;
-  name: string;
-  slug: string;
-  description: string | null;
-  parentId: string | null;
-  displayOrder: number;
-  isActive: boolean;
-};
 
 type CategoryFormDialogProps = {
   category?: Category;

@@ -21,14 +21,14 @@ const addBatchSchema = z.object({
 // POST /api/material-inventories/[id]/add-batch - Add new batch to inventory
 export async function POST(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  context: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { id } = await params;
+    const { id } = await context.params;
+
     const body = await request.json();
 
     const validation = addBatchSchema.safeParse(body);
-    console.log('Validation result:', validation);
     if (!validation.success) {
       return NextResponse.json(
         { error: 'Validation failed', issues: validation.error.issues },
@@ -39,7 +39,6 @@ export async function POST(
     const { batchNumber, quantity, cost, expiryDate, remarks, createdBy } =
       validation.data;
 
-    // Verify material inventory exists
     const inventory = await db.query.materialInventory.findFirst({
       where: eq(materialInventory.id, id),
     });
@@ -51,7 +50,6 @@ export async function POST(
       );
     }
 
-    // Create batch
     const [newBatch] = await db
       .insert(materialBatch)
       .values({
@@ -61,10 +59,10 @@ export async function POST(
         quantity: quantity.toString(),
         cost: cost.toString(),
         expiryDate: expiryDate ? new Date(expiryDate) : null,
+        remarks: remarks || null,
       })
       .returning();
 
-    // Record movement
     await db.insert(materialInventoryMovement).values({
       id: randomUUID(),
       materialInventoryId: id,

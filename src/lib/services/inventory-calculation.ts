@@ -1,5 +1,5 @@
 import { db } from '@/db/db';
-import { inventory, inventoryMovement } from '@/drizzle/schema';
+import { productInventory, productInventoryMovement } from '@/drizzle/schema';
 import { eq, and, lte, inArray, sql } from 'drizzle-orm';
 
 // Types for service return values
@@ -115,27 +115,33 @@ export async function getCurrentStock(
 
   const result = await db
     .select({
-      inventoryId: inventoryMovement.inventoryId,
+      inventoryId: productInventoryMovement.productInventoryId,
       currentStock: sql<number>`
         COALESCE(
           SUM(
             CASE
-              WHEN ${inventoryMovement.type} IN ('purchase', 'transfer_in', 'production_output', 'receive_from_material', 'adjustment')
-              THEN CAST(${inventoryMovement.quantity} AS DECIMAL)
-              WHEN ${inventoryMovement.type} IN ('sale', 'transfer_out', 'waste')
-              THEN -CAST(${inventoryMovement.quantity} AS DECIMAL)
+              WHEN ${productInventoryMovement.type} IN ('purchase', 'transfer_in', 'production_output', 'receive_from_material', 'adjustment')
+              THEN CAST(${productInventoryMovement.quantity} AS DECIMAL)
+              WHEN ${productInventoryMovement.type} IN ('sale', 'transfer_out', 'waste')
+              THEN -CAST(${productInventoryMovement.quantity} AS DECIMAL)
               ELSE 0
             END
           ),
           0
         )
       `,
-      unitOfMeasure: inventory.unitOfMeasure,
+      unitOfMeasure: productInventory.unitOfMeasure,
     })
-    .from(inventoryMovement)
-    .innerJoin(inventory, eq(inventoryMovement.inventoryId, inventory.id))
-    .where(eq(inventoryMovement.inventoryId, inventoryId))
-    .groupBy(inventoryMovement.inventoryId, inventory.unitOfMeasure);
+    .from(productInventoryMovement)
+    .innerJoin(
+      productInventory,
+      eq(productInventoryMovement.productInventoryId, productInventory.id)
+    )
+    .where(eq(productInventoryMovement.productInventoryId, inventoryId))
+    .groupBy(
+      productInventoryMovement.productInventoryId,
+      productInventory.unitOfMeasure
+    );
 
   if (result.length === 0) return null;
 
@@ -159,32 +165,38 @@ export async function getStockAtDate(
 ): Promise<StockAtDate | null> {
   const result = await db
     .select({
-      inventoryId: inventoryMovement.inventoryId,
+      inventoryId: productInventoryMovement.productInventoryId,
       currentStock: sql<number>`
         COALESCE(
           SUM(
             CASE
-              WHEN ${inventoryMovement.type} IN ('purchase', 'transfer_in', 'production_output', 'receive_from_material', 'adjustment')
-              THEN CAST(${inventoryMovement.quantity} AS DECIMAL)
-              WHEN ${inventoryMovement.type} IN ('sale', 'transfer_out', 'waste')
-              THEN -CAST(${inventoryMovement.quantity} AS DECIMAL)
+              WHEN ${productInventoryMovement.type} IN ('purchase', 'transfer_in', 'production_output', 'receive_from_material', 'adjustment')
+              THEN CAST(${productInventoryMovement.quantity} AS DECIMAL)
+              WHEN ${productInventoryMovement.type} IN ('sale', 'transfer_out', 'waste')
+              THEN -CAST(${productInventoryMovement.quantity} AS DECIMAL)
               ELSE 0
             END
           ),
           0
         )
       `,
-      unitOfMeasure: inventory.unitOfMeasure,
+      unitOfMeasure: productInventory.unitOfMeasure,
     })
-    .from(inventoryMovement)
-    .innerJoin(inventory, eq(inventoryMovement.inventoryId, inventory.id))
+    .from(productInventoryMovement)
+    .innerJoin(
+      productInventory,
+      eq(productInventoryMovement.productInventoryId, productInventory.id)
+    )
     .where(
       and(
-        eq(inventoryMovement.inventoryId, inventoryId),
-        lte(inventoryMovement.date, date)
+        eq(productInventoryMovement.productInventoryId, inventoryId),
+        lte(productInventoryMovement.date, date)
       )
     )
-    .groupBy(inventoryMovement.inventoryId, inventory.unitOfMeasure);
+    .groupBy(
+      productInventoryMovement.productInventoryId,
+      productInventory.unitOfMeasure
+    );
 
   if (result.length === 0) return null;
 
@@ -209,29 +221,29 @@ export async function getWeightedAverageCost(
 
   const result = await db
     .select({
-      inventoryId: inventoryMovement.inventoryId,
+      inventoryId: productInventoryMovement.productInventoryId,
       totalCost: sql<number>`
         COALESCE(
-          SUM(CAST(${inventoryMovement.quantity} AS DECIMAL) * CAST(${inventoryMovement.unitPrice} AS DECIMAL)),
+          SUM(CAST(${productInventoryMovement.quantity} AS DECIMAL) * CAST(${productInventoryMovement.unitPrice} AS DECIMAL)),
           0
         )
       `,
       totalQuantity: sql<number>`
         COALESCE(
-          SUM(CAST(${inventoryMovement.quantity} AS DECIMAL)),
+          SUM(CAST(${productInventoryMovement.quantity} AS DECIMAL)),
           0
         )
       `,
     })
-    .from(inventoryMovement)
+    .from(productInventoryMovement)
     .where(
       and(
-        eq(inventoryMovement.inventoryId, inventoryId),
-        sql`${inventoryMovement.type} IN ('purchase', 'transfer_in', 'production_output')`,
-        sql`${inventoryMovement.unitPrice} IS NOT NULL`
+        eq(productInventoryMovement.productInventoryId, inventoryId),
+        sql`${productInventoryMovement.type} IN ('purchase', 'transfer_in', 'production_output')`,
+        sql`${productInventoryMovement.unitPrice} IS NOT NULL`
       )
     )
-    .groupBy(inventoryMovement.inventoryId);
+    .groupBy(productInventoryMovement.productInventoryId);
 
   if (result.length === 0 || Number(result[0].totalQuantity) === 0) {
     return null;
@@ -262,19 +274,19 @@ export async function getFIFOCost(
   // Get all purchase movements ordered by date (oldest first)
   const movements = await db
     .select({
-      date: inventoryMovement.date,
-      quantity: inventoryMovement.quantity,
-      unitPrice: inventoryMovement.unitPrice,
+      date: productInventoryMovement.date,
+      quantity: productInventoryMovement.quantity,
+      unitPrice: productInventoryMovement.unitPrice,
     })
-    .from(inventoryMovement)
+    .from(productInventoryMovement)
     .where(
       and(
-        eq(inventoryMovement.inventoryId, inventoryId),
-        sql`${inventoryMovement.type} IN ('purchase', 'transfer_in', 'production_output')`,
-        sql`${inventoryMovement.unitPrice} IS NOT NULL`
+        eq(productInventoryMovement.productInventoryId, inventoryId),
+        sql`${productInventoryMovement.type} IN ('purchase', 'transfer_in', 'production_output')`,
+        sql`${productInventoryMovement.unitPrice} IS NOT NULL`
       )
     )
-    .orderBy(inventoryMovement.date);
+    .orderBy(productInventoryMovement.date);
 
   if (movements.length === 0) return null;
 
@@ -349,27 +361,33 @@ export async function getBulkStockLevels(
 
   const results = await db
     .select({
-      inventoryId: inventoryMovement.inventoryId,
+      inventoryId: productInventoryMovement.productInventoryId,
       currentStock: sql<number>`
         COALESCE(
           SUM(
             CASE
-              WHEN ${inventoryMovement.type} IN ('purchase', 'transfer_in', 'production_output', 'receive_from_material', 'adjustment')
-              THEN CAST(${inventoryMovement.quantity} AS DECIMAL)
-              WHEN ${inventoryMovement.type} IN ('sale', 'transfer_out', 'waste')
-              THEN -CAST(${inventoryMovement.quantity} AS DECIMAL)
+              WHEN ${productInventoryMovement.type} IN ('purchase', 'transfer_in', 'production_output', 'receive_from_material', 'adjustment')
+              THEN CAST(${productInventoryMovement.quantity} AS DECIMAL)
+              WHEN ${productInventoryMovement.type} IN ('sale', 'transfer_out', 'waste')
+              THEN -CAST(${productInventoryMovement.quantity} AS DECIMAL)
               ELSE 0
             END
           ),
           0
         )
       `,
-      unitOfMeasure: inventory.unitOfMeasure,
+      unitOfMeasure: productInventory.unitOfMeasure,
     })
-    .from(inventoryMovement)
-    .innerJoin(inventory, eq(inventoryMovement.inventoryId, inventory.id))
-    .where(inArray(inventoryMovement.inventoryId, inventoryIds))
-    .groupBy(inventoryMovement.inventoryId, inventory.unitOfMeasure);
+    .from(productInventoryMovement)
+    .innerJoin(
+      productInventory,
+      eq(productInventoryMovement.productInventoryId, productInventory.id)
+    )
+    .where(inArray(productInventoryMovement.productInventoryId, inventoryIds))
+    .groupBy(
+      productInventoryMovement.productInventoryId,
+      productInventory.unitOfMeasure
+    );
 
   const bulkLevels: BulkStockLevels = {};
 
@@ -396,61 +414,58 @@ export async function getLowStockItems(
 
   const results = await db
     .select({
-      inventoryId: inventory.id,
-      productId: inventory.productId,
+      inventoryId: productInventory.id,
+      productId: productInventory.productId,
       productName: sql<string>`product.name`,
-      locationId: inventory.locationId,
+      locationId: productInventory.locationId,
       locationName: sql<string>`location.name`,
       currentStock: sql<number>`
         COALESCE(
           SUM(
             CASE
-              WHEN ${inventoryMovement.type} IN ('purchase', 'transfer_in', 'production_output', 'receive_from_material', 'adjustment')
-              THEN CAST(${inventoryMovement.quantity} AS DECIMAL)
-              WHEN ${inventoryMovement.type} IN ('sale', 'transfer_out', 'waste')
-              THEN -CAST(${inventoryMovement.quantity} AS DECIMAL)
+              WHEN ${productInventoryMovement.type} IN ('purchase', 'transfer_in', 'production_output', 'receive_from_material', 'adjustment')
+              THEN CAST(${productInventoryMovement.quantity} AS DECIMAL)
+              WHEN ${productInventoryMovement.type} IN ('sale', 'transfer_out', 'waste')
+              THEN -CAST(${productInventoryMovement.quantity} AS DECIMAL)
               ELSE 0
             END
           ),
           0
         )
       `,
-      alertThreshold: inventory.alertThreshold,
-      unitOfMeasure: inventory.unitOfMeasure,
+      alertThreshold: productInventory.alertThreshold,
+      unitOfMeasure: productInventory.unitOfMeasure,
     })
-    .from(inventory)
-    .innerJoin(
-      sql`product`,
-      sql`product.id = ${inventory.productId}`
+    .from(productInventory)
+    .innerJoin(sql`product`, sql`product.id = ${productInventory.productId}`)
+    .innerJoin(sql`location`, sql`location.id = ${productInventory.locationId}`)
+    .leftJoin(
+      productInventoryMovement,
+      eq(productInventoryMovement.productInventoryId, productInventory.id)
     )
-    .innerJoin(
-      sql`location`,
-      sql`location.id = ${inventory.locationId}`
-    )
-    .leftJoin(inventoryMovement, eq(inventoryMovement.inventoryId, inventory.id))
-    .where(eq(inventory.locationId, locationId))
+    .where(eq(productInventory.locationId, locationId))
     .groupBy(
-      inventory.id,
-      inventory.productId,
+      productInventory.id,
+      productInventory.productId,
       sql`product.name`,
-      inventory.locationId,
+      productInventory.locationId,
       sql`location.name`,
-      inventory.alertThreshold,
-      inventory.unitOfMeasure
+      productInventory.alertThreshold,
+      productInventory.unitOfMeasure
     )
     .having(
       sql`COALESCE(
         SUM(
           CASE
-            WHEN ${inventoryMovement.type} IN ('purchase', 'transfer_in', 'production_output', 'receive_from_material', 'adjustment')
-            THEN CAST(${inventoryMovement.quantity} AS DECIMAL)
-            WHEN ${inventoryMovement.type} IN ('sale', 'transfer_out', 'waste')
-            THEN -CAST(${inventoryMovement.quantity} AS DECIMAL)
+            WHEN ${productInventoryMovement.type} IN ('purchase', 'transfer_in', 'production_output', 'receive_from_material', 'adjustment')
+            THEN CAST(${productInventoryMovement.quantity} AS DECIMAL)
+            WHEN ${productInventoryMovement.type} IN ('sale', 'transfer_out', 'waste')
+            THEN -CAST(${productInventoryMovement.quantity} AS DECIMAL)
             ELSE 0
           END
         ),
         0
-      ) <= CAST(${inventory.alertThreshold} AS DECIMAL)`
+      ) <= CAST(${productInventory.alertThreshold} AS DECIMAL)`
     );
 
   const lowStockItems: LowStockItem[] = results.map((result) => ({

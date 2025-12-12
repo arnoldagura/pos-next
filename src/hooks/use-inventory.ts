@@ -55,12 +55,15 @@ export function useInventory(params?: {
     queryKey: ['inventory', params],
     queryFn: async () => {
       const searchParams = new URLSearchParams();
-      if (params?.locationId) searchParams.append('locationId', params.locationId);
+      if (params?.locationId)
+        searchParams.append('locationId', params.locationId);
       if (params?.productId) searchParams.append('productId', params.productId);
       if (params?.page) searchParams.append('page', params.page.toString());
       if (params?.limit) searchParams.append('limit', params.limit.toString());
 
-      const response = await fetch(`/api/inventory?${searchParams.toString()}`);
+      const response = await fetch(
+        `/api/product-inventory?${searchParams.toString()}`
+      );
       if (!response.ok) throw new Error('Failed to fetch inventory');
       return response.json();
     },
@@ -72,7 +75,9 @@ export function useLowStockItems(locationId?: string) {
     queryKey: ['inventory', 'low-stock', locationId],
     queryFn: async () => {
       if (!locationId) return { items: [], count: 0 };
-      const response = await fetch(`/api/inventory/low-stock?locationId=${locationId}`);
+      const response = await fetch(
+        `/api/product-inventory/low-stock?locationId=${locationId}`
+      );
       if (!response.ok) throw new Error('Failed to fetch low stock items');
       return response.json();
     },
@@ -85,7 +90,7 @@ export function useAdjustStock() {
 
   return useMutation({
     mutationFn: async (data: AdjustmentData) => {
-      const response = await fetch('/api/inventory/adjust', {
+      const response = await fetch('/api/product-inventory/adjust', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data),
@@ -118,7 +123,7 @@ export function useCreateInventory() {
       alertThreshold: number;
       unitOfMeasure?: string;
     }) => {
-      const response = await fetch('/api/inventory', {
+      const response = await fetch('/api/product-inventory', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data),

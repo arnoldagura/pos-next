@@ -4,20 +4,13 @@ import { materialInventoryMovement, materialBatch } from '@/drizzle/schema';
 import { eq, desc, and, sql } from 'drizzle-orm';
 import { z } from 'zod';
 import { randomUUID } from 'crypto';
-
-export enum MaterialMovementType {
-  Purchase = 'purchase',
-  ProductionConsumption = 'production_consumption',
-  Adjustment = 'adjustment',
-  Waste = 'waste',
-  Expired = 'expired',
-  TransferIn = 'transfer_in',
-  TransferOut = 'transfer_out',
-  TransferToPOS = 'transfer_to_pos',
-}
+import {
+  MaterialMovementType,
+  materialMovementTypeSchema,
+} from '@/lib/validations/material';
 
 const createMovementSchema = z.object({
-  type: z.enum(MaterialMovementType),
+  type: materialMovementTypeSchema,
   quantity: z.number(),
   unitPrice: z.number().optional(),
   batchId: z.string().optional(),
@@ -30,10 +23,10 @@ const createMovementSchema = z.object({
 // GET /api/material-inventories/[id]/movements - Get movements for a material inventory
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  context: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { id } = await params;
+    const { id } = await context.params;
     const searchParams = request.nextUrl.searchParams;
     const page = parseInt(searchParams.get('page') || '1');
     const limit = parseInt(searchParams.get('limit') || '50');
@@ -93,10 +86,10 @@ export async function GET(
 // POST /api/material-inventories/[id]/movements - Create a new movement
 export async function POST(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  context: { params: Promise<{ id: string }> }
 ) {
   try {
-    const id = params.id;
+    const { id } = await context.params;
     const body = await request.json();
 
     const validation = createMovementSchema.safeParse(body);
@@ -119,7 +112,6 @@ export async function POST(
       createdBy,
     } = validation.data;
 
-    // Verify material inventory exists
     const inventory = await db.query.materialInventory.findFirst({
       where: eq(materialInventoryMovement.materialInventoryId, id),
     });
@@ -131,7 +123,6 @@ export async function POST(
       );
     }
 
-    // If batchId is provided, verify it exists and belongs to this inventory
     if (batchId) {
       const batch = await db.query.materialBatch.findFirst({
         where: eq(materialBatch.id, batchId),
@@ -144,7 +135,6 @@ export async function POST(
         );
       }
 
-      // For consumption, waste, expired movements (negative quantity), verify sufficient stock in batch
       const isNegativeMovement = [
         'production_consumption',
         'waste',
@@ -163,7 +153,6 @@ export async function POST(
           );
         }
 
-        // Update batch quantity
         await db
           .update(materialBatch)
           .set({
@@ -171,7 +160,6 @@ export async function POST(
           })
           .where(eq(materialBatch.id, batchId));
       } else {
-        // For positive movements (purchase, adjustment in, transfer in)
         await db
           .update(materialBatch)
           .set({
@@ -181,7 +169,6 @@ export async function POST(
       }
     }
 
-    // Create the movement record
     const [movement] = await db
       .insert(materialInventoryMovement)
       .values({

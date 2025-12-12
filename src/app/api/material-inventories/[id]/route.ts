@@ -5,29 +5,33 @@ import { eq } from 'drizzle-orm';
 import { z } from 'zod';
 
 const updateMaterialInventorySchema = z.object({
+  variantName: z.string().optional().nullable(),
+  sku: z.string().optional(),
+  defaultSupplierId: z.string().optional().nullable(),
+  unitOfMeasure: z.string().optional(),
+  cost: z.number().min(0).optional(),
   alertThreshold: z
     .number()
     .nonnegative('Alert threshold must be non-negative')
     .optional(),
-  unitOfMeasure: z.string().optional(),
 });
 
 // GET /api/material-inventories/[id] - Get single material inventory
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  context: { params: Promise<{ id: string }> }
 ) {
-  const { id } = await params;
   try {
+    const { id } = await context.params;
     const inventory = await db.query.materialInventory.findFirst({
       where: eq(materialInventory.id, id),
       with: {
         material: {
           with: {
             category: true,
-            supplier: true,
           },
         },
+        supplier: true,
         location: true,
         batches: {
           orderBy: (batches, { asc }) => [asc(batches.expiryDate)],
@@ -68,10 +72,10 @@ export async function GET(
 // PATCH /api/material-inventories/[id] - Update material inventory
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  context: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { id } = await params;
+    const { id } = await context.params;
     const body = await request.json();
 
     const validation = updateMaterialInventorySchema.safeParse(body);
@@ -83,16 +87,39 @@ export async function PATCH(
       );
     }
 
-    const { alertThreshold, unitOfMeasure } = validation.data;
+    const {
+      variantName,
+      sku,
+      defaultSupplierId,
+      unitOfMeasure,
+      cost,
+      alertThreshold,
+    } = validation.data;
 
-    const updateData: { alertThreshold?: string; unitOfMeasure?: string } = {};
+    const updateData: Partial<typeof materialInventory.$inferInsert> = {};
 
-    if (alertThreshold !== undefined) {
-      updateData.alertThreshold = alertThreshold.toString();
+    if (variantName !== undefined) {
+      updateData.variantName = variantName;
+    }
+
+    if (sku !== undefined) {
+      updateData.sku = sku || null;
+    }
+
+    if (defaultSupplierId !== undefined) {
+      updateData.defaultSupplierId = defaultSupplierId;
     }
 
     if (unitOfMeasure !== undefined) {
       updateData.unitOfMeasure = unitOfMeasure;
+    }
+
+    if (cost !== undefined) {
+      updateData.cost = cost.toString();
+    }
+
+    if (alertThreshold !== undefined) {
+      updateData.alertThreshold = alertThreshold.toString();
     }
 
     const [updated] = await db
@@ -115,9 +142,9 @@ export async function PATCH(
         material: {
           with: {
             category: true,
-            supplier: true,
           },
         },
+        supplier: true,
         location: true,
         batches: true,
       },
@@ -141,10 +168,10 @@ export async function PATCH(
 // DELETE /api/material-inventories/[id] - Delete material inventory
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  context: { params: Promise<{ id: string }> }
 ) {
-  const { id } = await params;
   try {
+    const { id } = await context.params;
     const [deleted] = await db
       .delete(materialInventory)
       .where(eq(materialInventory.id, id))

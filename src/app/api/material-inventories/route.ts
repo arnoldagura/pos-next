@@ -8,11 +8,15 @@ import { randomUUID } from 'crypto';
 const createMaterialInventorySchema = z.object({
   materialId: z.string().min(1, 'Material is required'),
   locationId: z.string().min(1, 'Location is required'),
+  variantName: z.string().optional(),
+  sku: z.string().optional(),
+  defaultSupplierId: z.string().optional().nullable(),
+  unitOfMeasure: z.string().min(1, 'Unit of measure is required'),
+  cost: z.number().min(0).optional(),
   alertThreshold: z
     .number()
     .nonnegative('Alert threshold must be non-negative')
     .optional(),
-  unitOfMeasure: z.string().optional(),
 });
 
 // GET /api/material-inventories - List material inventories with filters
@@ -51,10 +55,7 @@ export async function GET(request: NextRequest) {
           columns: {
             id: true,
             name: true,
-            sku: true,
-            unitOfMeasure: true,
             type: true,
-            defaultCost: true,
             image: true,
           },
           with: {
@@ -64,15 +65,15 @@ export async function GET(request: NextRequest) {
                 name: true,
               },
             },
-            supplier: {
-              columns: {
-                id: true,
-                name: true,
-              },
-            },
           },
         },
         location: {
+          columns: {
+            id: true,
+            name: true,
+          },
+        },
+        supplier: {
           columns: {
             id: true,
             name: true,
@@ -112,7 +113,8 @@ export async function GET(request: NextRequest) {
       filteredInventories = inventoriesWithQuantity.filter(
         (inv) =>
           inv.material.name.toLowerCase().includes(searchLower) ||
-          inv.material.sku?.toLowerCase().includes(searchLower) ||
+          inv.sku?.toLowerCase().includes(searchLower) ||
+          inv.variantName?.toLowerCase().includes(searchLower) ||
           inv.location.name.toLowerCase().includes(searchLower)
       );
     }
@@ -149,8 +151,16 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const { materialId, locationId, alertThreshold, unitOfMeasure } =
-      validation.data;
+    const {
+      materialId,
+      locationId,
+      variantName,
+      sku,
+      defaultSupplierId,
+      unitOfMeasure,
+      cost,
+      alertThreshold,
+    } = validation.data;
 
     const existing = await db.query.materialInventory.findFirst({
       where: and(
@@ -175,8 +185,12 @@ export async function POST(request: NextRequest) {
         id: randomUUID(),
         materialId,
         locationId,
-        alertThreshold: alertThreshold?.toString() || '0',
+        variantName: variantName || null,
+        sku: sku || null,
+        defaultSupplierId: defaultSupplierId || null,
         unitOfMeasure,
+        cost: cost?.toString(),
+        alertThreshold: alertThreshold?.toString() || '0',
       })
       .returning();
 
@@ -186,9 +200,9 @@ export async function POST(request: NextRequest) {
         material: {
           with: {
             category: true,
-            supplier: true,
           },
         },
+        supplier: true,
         location: true,
         batches: true,
       },

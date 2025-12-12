@@ -35,7 +35,6 @@ export async function GET(req: NextRequest) {
     const limit = parseInt(searchParams.get('limit') || '20', 10);
     const offset = (page - 1) * limit;
 
-    console.log('arnold', statusParam);
     const conditions = [];
 
     if (search) {
@@ -104,7 +103,6 @@ export async function POST(req: NextRequest) {
     const body = await req.json();
     const validatedData = createRecipeSchema.parse(body);
 
-    // Validate output selection
     if (
       validatedData.outputType === 'product' &&
       !validatedData.outputProductId
@@ -125,14 +123,11 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Generate recipe ID
     const recipeId = `recipe_${Date.now()}_${Math.random()
       .toString(36)
       .substring(2, 9)}`;
 
-    // Create recipe with ingredients in transaction
     await db.transaction(async (tx) => {
-      // Insert recipe
       await tx.insert(productionRecipe).values({
         id: recipeId,
         name: validatedData.name,
@@ -148,7 +143,6 @@ export async function POST(req: NextRequest) {
         updatedAt: new Date(),
       });
 
-      // Insert ingredients
       const ingredientValues = validatedData.ingredients.map((ingredient) => ({
         id: `recipe_ing_${Date.now()}_${Math.random()
           .toString(36)
@@ -164,7 +158,6 @@ export async function POST(req: NextRequest) {
       await tx.insert(productionRecipeIngredient).values(ingredientValues);
     });
 
-    // Fetch the created recipe with relations
     const createdRecipe = await db.query.productionRecipe.findFirst({
       where: eq(productionRecipe.id, recipeId),
       with: {

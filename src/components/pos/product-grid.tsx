@@ -25,7 +25,6 @@ type Product = {
   name: string;
   slug: string;
   sku: string | null;
-  barcode: string | null;
   description: string | null;
   sellingPrice: string;
   costPrice: string | null;
@@ -51,6 +50,10 @@ type InventoryItem = {
   locationId: string;
   currentStock: number;
   belowThreshold: boolean;
+  unitPrice: string;
+  taxRate: string;
+  unitOfMeasure: string;
+  barcode: string | null;
 };
 
 interface ProductGridProps {
@@ -119,7 +122,7 @@ export function ProductGrid({ locationId }: ProductGridProps) {
         limit: '1000',
       });
 
-      const response = await fetch(`/api/inventory?${params}`);
+      const response = await fetch(`/api/product-inventory?${params}`);
       if (!response.ok) throw new Error('Failed to fetch inventory');
 
       const data = await response.json();
@@ -209,19 +212,32 @@ export function ProductGrid({ locationId }: ProductGridProps) {
     (product: Product) => {
       const stockItem = inventory.get(product.id);
 
+      if (locationId && !stockItem) {
+        toast.error('Product not available at this location');
+        return;
+      }
+
       if (locationId && stockItem && stockItem.currentStock <= 0) {
         toast.error('Product is out of stock');
         return;
       }
 
+      // Use inventory pricing if available, otherwise fall back to product pricing
+      const price = stockItem?.unitPrice
+        ? parseFloat(stockItem.unitPrice)
+        : parseFloat(product.sellingPrice);
+      const taxRate = stockItem?.taxRate
+        ? parseFloat(stockItem.taxRate)
+        : parseFloat(product.taxRate);
+
       addItem({
         productId: product.id,
         name: product.name,
-        price: parseFloat(product.sellingPrice),
+        price,
         quantity: 1,
         discount: 0,
         discountType: 'fixed',
-        taxRate: parseFloat(product.taxRate),
+        taxRate,
         image: product.image || undefined,
         sku: product.sku || undefined,
       });
@@ -232,21 +248,48 @@ export function ProductGrid({ locationId }: ProductGridProps) {
   );
 
   const handleBarcodeSubmit = useCallback(
-    (barcode: string) => {
-      const product = allProducts.find(
-        (p) => p.barcode === barcode || p.sku === barcode
-      );
+    async (barcode: string) => {
+      try {
+        // Search by barcode in product inventory
+        const params = new URLSearchParams({ code: barcode });
+        if (locationId) params.append('locationId', locationId);
 
-      if (product) {
+        const response = await fetch(`/api/products/barcode/${barcode}?${params}`);
+
+        if (!response.ok) {
+          toast.error('Product not found');
+          setBarcodeInput('');
+          return;
+        }
+
+        const inventoryItem = await response.json();
+
+        // Find the product to add to cart
+        const product = allProducts.find((p) => p.id === inventoryItem.productId);
+
+        if (!product) {
+          toast.error('Product not found');
+          setBarcodeInput('');
+          return;
+        }
+
+        // Check stock if location is selected
+        if (locationId && inventoryItem.currentStock <= 0) {
+          toast.error('Product is out of stock');
+          setBarcodeInput('');
+          return;
+        }
+
         handleAddToCart(product);
         setBarcodeInput('');
         toast.success(`${product.name} added to cart`);
-      } else {
-        toast.error('Product not found');
+      } catch (error) {
+        console.error('Error scanning barcode:', error);
+        toast.error('Failed to scan barcode');
         setBarcodeInput('');
       }
     },
-    [allProducts, handleAddToCart]
+    [allProducts, handleAddToCart, locationId]
   );
 
   const getStockStatus = (product: Product) => {
@@ -433,6 +476,7 @@ export function ProductGrid({ locationId }: ProductGridProps) {
                 key={product.id}
                 product={product}
                 stockStatus={getStockStatus(product)}
+                inventoryItem={inventory.get(product.id)}
                 onAddToCart={handleAddToCart}
               />
             ))}
@@ -446,12 +490,25 @@ export function ProductGrid({ locationId }: ProductGridProps) {
 interface ProductCardProps {
   product: Product;
   stockStatus: { status: string; stock: number } | null;
+  inventoryItem?: InventoryItem;
   onAddToCart: (product: Product) => void;
 }
 
-function ProductCard({ product, stockStatus, onAddToCart }: ProductCardProps) {
+function ProductCard({
+  product,
+  stockStatus,
+  inventoryItem,
+  onAddToCart,
+}: ProductCardProps) {
   const isOutOfStock = stockStatus?.status === 'out';
   const isLowStock = stockStatus?.status === 'low';
+
+  // Use inventory pricing if available, otherwise fall back to product pricing
+  const displayPrice = inventoryItem?.unitPrice
+    ? parseFloat(inventoryItem.unitPrice)
+    : parseFloat(product.sellingPrice);
+  const displayUnit =
+    inventoryItem?.unitOfMeasure || product.unitOfMeasure || 'units';
 
   return (
     <button
@@ -514,12 +571,12 @@ function ProductCard({ product, stockStatus, onAddToCart }: ProductCardProps) {
 
         <div className='mt-auto'>
           <p className='text-lg font-bold text-blue-600'>
-            ${parseFloat(product.sellingPrice).toFixed(2)}
+            ${displayPrice.toFixed(2)}
           </p>
 
           {stockStatus && stockStatus.stock > 0 && (
             <p className='text-xs text-gray-500'>
-              {stockStatus.stock} {product.unitOfMeasure || 'units'} available
+              {stockStatus.stock} {displayUnit} available
             </p>
           )}
         </div>
