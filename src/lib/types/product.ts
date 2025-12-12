@@ -8,3 +8,47 @@ export type Product = {
   createdAt: string;
   updatedAt: string;
 };
+
+export interface ProductInventoryItem {
+  id: string;
+  productId: string;
+  productName: string;
+  productSku: string | null;
+  locationId: string;
+  locationName: string;
+  alertThreshold: string;
+  unitOfMeasure: string | null;
+  currentStock: number;
+  belowThreshold: boolean;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface ProductInventoryResponse {
+  inventory: ProductInventoryItem[];
+  pagination: {
+    page: number;
+    limit: number;
+    total: number;
+    totalPages: number;
+  };
+}
+
+export interface LowStockItem {
+  inventoryId: string;
+  productId: string;
+  productName: string;
+  locationId: string;
+  locationName: string;
+  currentStock: number;
+  alertThreshold: number;
+  difference: number;
+  unitOfMeasure: string | null;
+}
+
+export interface AdjustmentData {
+  inventoryId: string;
+  quantity: number;
+  remarks: string;
+  createdBy?: string;
+}

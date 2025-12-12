@@ -1,57 +1,18 @@
+import {
+  AdjustmentData,
+  LowStockItem,
+  ProductInventoryResponse,
+} from '@/lib/types';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 
-interface InventoryItem {
-  id: string;
-  productId: string;
-  productName: string;
-  productSku: string | null;
-  locationId: string;
-  locationName: string;
-  alertThreshold: string;
-  unitOfMeasure: string | null;
-  currentStock: number;
-  belowThreshold: boolean;
-  createdAt: Date;
-  updatedAt: Date;
-}
-
-interface InventoryResponse {
-  inventory: InventoryItem[];
-  pagination: {
-    page: number;
-    limit: number;
-    total: number;
-    totalPages: number;
-  };
-}
-
-interface LowStockItem {
-  inventoryId: string;
-  productId: string;
-  productName: string;
-  locationId: string;
-  locationName: string;
-  currentStock: number;
-  alertThreshold: number;
-  difference: number;
-  unitOfMeasure: string | null;
-}
-
-interface AdjustmentData {
-  inventoryId: string;
-  quantity: number;
-  remarks: string;
-  createdBy?: string;
-}
-
-export function useInventory(params?: {
+export function useProductInventory(params?: {
   locationId?: string;
   productId?: string;
   page?: number;
   limit?: number;
 }) {
-  return useQuery<InventoryResponse>({
+  return useQuery<ProductInventoryResponse>({
     queryKey: ['inventory', params],
     queryFn: async () => {
       const searchParams = new URLSearchParams();

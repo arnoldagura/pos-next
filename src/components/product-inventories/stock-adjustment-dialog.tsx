@@ -30,7 +30,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { useAdjustStock } from '@/hooks/use-inventory';
+import { useAdjustStock } from '@/hooks/use-product-inventory';
 
 const adjustmentSchema = z.object({
   adjustmentType: z.enum(['add', 'subtract']),
@@ -96,87 +96,84 @@ export function StockAdjustmentDialog({
           </DialogDescription>
         </DialogHeader>
 
-        <Form form={form} onSubmit={onSubmit} className="space-y-4">
-            <FormField
-              control={form.control}
-              name="adjustmentType"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Adjustment Type</FormLabel>
-                  <Select
-                    onValueChange={field.onChange}
-                    defaultValue={field.value}
-                  >
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select adjustment type" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      <SelectItem value="add">Add Stock</SelectItem>
-                      <SelectItem value="subtract">Subtract Stock</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  <FormDescription>
-                    Choose whether to add or remove stock
-                  </FormDescription>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="quantity"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Quantity</FormLabel>
+        <Form form={form} onSubmit={onSubmit} className='space-y-4'>
+          <FormField
+            control={form.control}
+            name='adjustmentType'
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Adjustment Type</FormLabel>
+                <Select
+                  onValueChange={field.onChange}
+                  defaultValue={field.value}
+                >
                   <FormControl>
-                    <Input
-                      type="number"
-                      placeholder="Enter quantity"
-                      {...field}
-                      onChange={(e) => field.onChange(Number(e.target.value))}
-                    />
+                    <SelectTrigger>
+                      <SelectValue placeholder='Select adjustment type' />
+                    </SelectTrigger>
                   </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+                  <SelectContent>
+                    <SelectItem value='add'>Add Stock</SelectItem>
+                    <SelectItem value='subtract'>Subtract Stock</SelectItem>
+                  </SelectContent>
+                </Select>
+                <FormDescription>
+                  Choose whether to add or remove stock
+                </FormDescription>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
 
-            <FormField
-              control={form.control}
-              name="remarks"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Remarks</FormLabel>
-                  <FormControl>
-                    <Textarea
-                      placeholder="Reason for adjustment..."
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormDescription>
-                    Provide a reason for this stock adjustment
-                  </FormDescription>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+          <FormField
+            control={form.control}
+            name='quantity'
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Quantity</FormLabel>
+                <FormControl>
+                  <Input
+                    type='number'
+                    placeholder='Enter quantity'
+                    {...field}
+                    onChange={(e) => field.onChange(Number(e.target.value))}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
 
-            <div className="flex gap-3 justify-end">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => onOpenChange(false)}
-                disabled={isSubmitting}
-              >
-                Cancel
-              </Button>
-              <Button type="submit" disabled={isSubmitting}>
-                {isSubmitting ? 'Adjusting...' : 'Adjust Stock'}
-              </Button>
-            </div>
+          <FormField
+            control={form.control}
+            name='remarks'
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Remarks</FormLabel>
+                <FormControl>
+                  <Textarea placeholder='Reason for adjustment...' {...field} />
+                </FormControl>
+                <FormDescription>
+                  Provide a reason for this stock adjustment
+                </FormDescription>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <div className='flex gap-3 justify-end'>
+            <Button
+              type='button'
+              variant='outline'
+              onClick={() => onOpenChange(false)}
+              disabled={isSubmitting}
+            >
+              Cancel
+            </Button>
+            <Button type='submit' disabled={isSubmitting}>
+              {isSubmitting ? 'Adjusting...' : 'Adjust Stock'}
+            </Button>
+          </div>
         </Form>
       </DialogContent>
     </Dialog>

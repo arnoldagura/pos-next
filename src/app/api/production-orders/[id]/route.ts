@@ -34,7 +34,11 @@ export async function GET(
         outputMaterialInventory: true,
         materials: {
           with: {
-            materialInventory: true,
+            materialInventory: {
+              with: {
+                material: true,
+              },
+            },
           },
         },
         qualityChecks: true,

@@ -28,6 +28,7 @@ import {
 } from 'lucide-react';
 import CompleteProductionDialog from './complete-production-dialog';
 import FinalizeCostsDialog from './finalize-costs-dialog';
+import { MaterialInventory } from '@/lib/types';
 
 type ProductionOrderStatus =
   | 'draft'
@@ -88,26 +89,26 @@ interface ProductionOrder {
     name: string;
     image: string | null;
   };
-  outputMaterial?: {
-    id: string;
-    name: string;
+  outputMaterial?: Pick<MaterialInventory, 'id'> & {
+    material: Pick<MaterialInventory['material'], 'name'>;
   };
-  materials: Array<{
-    id: string;
-    materialId: string;
-    plannedQuantity: string;
-    actualQuantity: string | null;
-    unitOfMeasure: string;
-    unitCost: string | null;
-    totalCost: string | null;
-    material: {
-      id: string;
-      name: string;
-      unitOfMeasure: string;
-    };
-  }>;
+  materials: Array<ProductionMaterial>;
 }
-
+interface ProductionMaterial {
+  id: string;
+  materialInventoryId: string;
+  plannedQuantity: string;
+  actualQuantity: string | null;
+  unitOfMeasure: string;
+  unitCost: string | null;
+  totalCost: string | null;
+  materialInventory: Pick<
+    MaterialInventory,
+    'id' & 'name' & 'unitOfMeasure'
+  > & {
+    material: Pick<MaterialInventory['material'], 'name'>;
+  };
+}
 interface MaterialAvailability {
   materialId: string;
   required: number;
@@ -155,6 +156,7 @@ export default function ProductionOrderDetailClient({
       const response = await fetch(`/api/production-orders/${orderId}`);
       if (!response.ok) throw new Error('Failed to fetch order');
       const data = await response.json();
+      console.log('data', data);
       setOrder(data);
     } catch (error) {
       console.error('Error fetching order:', error);
@@ -313,7 +315,7 @@ export default function ProductionOrderDetailClient({
         <div>
           <h1 className='text-3xl font-bold'>{order.recipe.name}</h1>
           <p className='text-muted-foreground'>
-            {order.outputProduct?.name || order.outputMaterial?.name}
+            {order.outputProduct?.name || order.outputMaterial?.material?.name}
           </p>
         </div>
         <div className='flex flex-wrap gap-2'>
@@ -521,7 +523,7 @@ export default function ProductionOrderDetailClient({
           <div className='space-y-4'>
             {order.materials.map((material) => {
               const availabilityInfo = availability.find(
-                (a) => a.materialId === material.materialId
+                (a) => a.materialId === material.id
               );
 
               return (
@@ -530,7 +532,9 @@ export default function ProductionOrderDetailClient({
                   className='flex items-center justify-between p-3 border rounded-lg'
                 >
                   <div className='flex-1'>
-                    <p className='font-medium'>{material.material?.name}</p>
+                    <p className='font-medium'>
+                      {material.materialInventory.material?.name}
+                    </p>
                     <div className='flex items-center gap-4 text-sm text-muted-foreground mt-1'>
                       <span>
                         Planned: {material.plannedQuantity}{' '}

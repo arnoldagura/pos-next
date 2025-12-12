@@ -19,7 +19,10 @@ import { InventoryFilters } from '@/components/product-inventories/inventory-fil
 import { StockAdjustmentDialog } from '@/components/product-inventories/stock-adjustment-dialog';
 import EditInventorySettingsDialog from '@/components/product-inventories/edit-inventory-settings-dialog';
 import CreateInventoryDialog from '@/components/product-inventories/create-inventory-dialog';
-import { useInventory, useLowStockItems } from '@/hooks/use-inventory';
+import {
+  useProductInventory,
+  useLowStockItems,
+} from '@/hooks/use-product-inventory';
 
 export default function InventoryPage() {
   const [selectedLocation, setSelectedLocation] = useState<string>('');
@@ -34,7 +37,7 @@ export default function InventoryPage() {
     useState<InventoryItem>({} as InventoryItem);
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
 
-  const { data: inventoryData, isLoading } = useInventory({
+  const { data: inventoryData, isLoading } = useProductInventory({
     locationId: selectedLocation || undefined,
     page,
     limit: 50,
