@@ -91,7 +91,7 @@ export const sampleMovements: TestMovement[] = [
  * Mock API responses for testing
  */
 export async function mockMovementsAPI(page: Page, movements: TestMovement[]) {
-  await page.route('**/api/product-inventory/movements*', async (route) => {
+  await page.route('**/api/product-inventories/movements*', async (route) => {
     const url = new URL(route.request().url());
     const inventoryId = url.searchParams.get('inventoryId');
     const type = url.searchParams.get('type');
@@ -145,7 +145,7 @@ export async function mockMovementsAPI(page: Page, movements: TestMovement[]) {
  * Mock empty movements response
  */
 export async function mockEmptyMovementsAPI(page: Page) {
-  await page.route('**/api/product-inventory/movements*', async (route) => {
+  await page.route('**/api/product-inventories/movements*', async (route) => {
     await route.fulfill({
       status: 200,
       contentType: 'application/json',
@@ -164,7 +164,7 @@ export async function mockEmptyMovementsAPI(page: Page) {
  * Mock API error
  */
 export async function mockMovementsAPIError(page: Page) {
-  await page.route('**/api/product-inventory/movements*', async (route) => {
+  await page.route('**/api/product-inventories/movements*', async (route) => {
     await route.fulfill({
       status: 500,
       contentType: 'application/json',
@@ -182,7 +182,7 @@ export async function navigateToMovementHistory(
   page: Page,
   inventoryId: string
 ) {
-  await page.goto(`/inventory/${inventoryId}/movements`);
+  await page.goto(`/product-inventories/${inventoryId}/movements`);
   await page.waitForLoadState('networkidle');
 }
 

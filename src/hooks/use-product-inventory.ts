@@ -37,7 +37,7 @@ export function useLowStockItems(locationId?: string) {
     queryFn: async () => {
       if (!locationId) return { items: [], count: 0 };
       const response = await fetch(
-        `/api/product-inventory/low-stock?locationId=${locationId}`
+        `/api/product-inventories/low-stock?locationId=${locationId}`
       );
       if (!response.ok) throw new Error('Failed to fetch low stock items');
       return response.json();
@@ -51,7 +51,7 @@ export function useAdjustStock() {
 
   return useMutation({
     mutationFn: async (data: AdjustmentData) => {
-      const response = await fetch('/api/product-inventory/adjust', {
+      const response = await fetch('/api/product-inventories/adjust', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data),

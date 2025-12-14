@@ -102,11 +102,13 @@ interface ProductionMaterial {
   unitOfMeasure: string;
   unitCost: string | null;
   totalCost: string | null;
-  materialInventory: Pick<
-    MaterialInventory,
-    'id' & 'name' & 'unitOfMeasure'
-  > & {
-    material: Pick<MaterialInventory['material'], 'name'>;
+  materialInventory: {
+    id: string;
+    variantName: string | null;
+    material: {
+      id: string;
+      name: string;
+    };
   };
 }
 interface MaterialAvailability {
@@ -173,6 +175,7 @@ export default function ProductionOrderDetailClient({
       );
       if (!response.ok) throw new Error('Failed to check availability');
       const data = await response.json();
+      console.log('data.availability', data.availability);
       setAvailability(data.availability || []);
     } catch (error) {
       console.error('Error checking availability:', error);
@@ -396,68 +399,98 @@ export default function ProductionOrderDetailClient({
           <CardHeader>
             <CardTitle>Order Information</CardTitle>
           </CardHeader>
-          <CardContent className='space-y-3'>
-            <div className='flex justify-between'>
-              <span className='text-muted-foreground'>
-                <MapPin className='h-4 w-4 inline mr-2' />
-                Location:
-              </span>
-              <span className='font-medium'>{order.location.name}</span>
+          <CardContent className='space-y-4'>
+            <div className='grid grid-cols-1 gap-3'>
+              <div className='flex items-start justify-between p-3 rounded-lg bg-muted/50'>
+                <div className='flex items-center gap-2'>
+                  <MapPin className='h-4 w-4 text-primary' />
+                  <span className='text-sm text-muted-foreground'>
+                    Location
+                  </span>
+                </div>
+                <span className='font-medium text-sm'>
+                  {order.location.name}
+                </span>
+              </div>
+
+              <div className='flex items-start justify-between p-3 rounded-lg bg-muted/50'>
+                <div className='flex items-center gap-2'>
+                  <Package className='h-4 w-4 text-primary' />
+                  <span className='text-sm text-muted-foreground'>
+                    Planned Quantity
+                  </span>
+                </div>
+                <span className='font-medium text-sm'>
+                  {order.plannedQuantity} {order.recipe.unitOfMeasure}
+                </span>
+              </div>
+
+              {order.actualQuantity && (
+                <div className='flex items-start justify-between p-3 rounded-lg bg-green-50 border border-green-200'>
+                  <div className='flex items-center gap-2'>
+                    <CheckCircle className='h-4 w-4 text-green-600' />
+                    <span className='text-sm text-green-900'>
+                      Actual Quantity
+                    </span>
+                  </div>
+                  <span className='font-medium text-sm text-green-900'>
+                    {order.actualQuantity} {order.recipe.unitOfMeasure}
+                  </span>
+                </div>
+              )}
+
+              {order.scheduledDate && (
+                <div className='flex items-start justify-between p-3 rounded-lg bg-muted/50'>
+                  <div className='flex items-center gap-2'>
+                    <Calendar className='h-4 w-4 text-primary' />
+                    <span className='text-sm text-muted-foreground'>
+                      Scheduled Date
+                    </span>
+                  </div>
+                  <span className='font-medium text-sm'>
+                    {new Date(order.scheduledDate).toLocaleDateString()}
+                  </span>
+                </div>
+              )}
+
+              {order.startedAt && (
+                <div className='flex items-start justify-between p-3 rounded-lg bg-muted/50'>
+                  <div className='flex items-center gap-2'>
+                    <Clock className='h-4 w-4 text-primary' />
+                    <span className='text-sm text-muted-foreground'>
+                      Started
+                    </span>
+                  </div>
+                  <span className='font-medium text-sm'>
+                    {new Date(order.startedAt).toLocaleString()}
+                  </span>
+                </div>
+              )}
+
+              {order.completedAt && (
+                <div className='flex items-start justify-between p-3 rounded-lg bg-muted/50'>
+                  <div className='flex items-center gap-2'>
+                    <CheckCircle className='h-4 w-4 text-primary' />
+                    <span className='text-sm text-muted-foreground'>
+                      Completed
+                    </span>
+                  </div>
+                  <span className='font-medium text-sm'>
+                    {new Date(order.completedAt).toLocaleString()}
+                  </span>
+                </div>
+              )}
             </div>
-            <div className='flex justify-between'>
-              <span className='text-muted-foreground'>
-                <Package className='h-4 w-4 inline mr-2' />
-                Planned Quantity:
-              </span>
-              <span className='font-medium'>
-                {order.plannedQuantity} {order.recipe.unitOfMeasure}
-              </span>
-            </div>
-            {order.actualQuantity && (
-              <div className='flex justify-between'>
-                <span className='text-muted-foreground'>Actual Quantity:</span>
-                <span className='font-medium'>
-                  {order.actualQuantity} {order.recipe.unitOfMeasure}
-                </span>
-              </div>
-            )}
-            {order.scheduledDate && (
-              <div className='flex justify-between'>
-                <span className='text-muted-foreground'>
-                  <Calendar className='h-4 w-4 inline mr-2' />
-                  Scheduled:
-                </span>
-                <span className='font-medium'>
-                  {new Date(order.scheduledDate).toLocaleDateString()}
-                </span>
-              </div>
-            )}
-            {order.startedAt && (
-              <div className='flex justify-between'>
-                <span className='text-muted-foreground'>
-                  <Clock className='h-4 w-4 inline mr-2' />
-                  Started:
-                </span>
-                <span className='font-medium'>
-                  {new Date(order.startedAt).toLocaleString()}
-                </span>
-              </div>
-            )}
-            {order.completedAt && (
-              <div className='flex justify-between'>
-                <span className='text-muted-foreground'>
-                  <CheckCircle className='h-4 w-4 inline mr-2' />
-                  Completed:
-                </span>
-                <span className='font-medium'>
-                  {new Date(order.completedAt).toLocaleString()}
-                </span>
-              </div>
-            )}
+
             <Separator />
-            <div className='flex justify-between'>
-              <span className='text-muted-foreground'>Scaling Factor:</span>
-              <span className='font-medium'>{scalingFactor.toFixed(2)}x</span>
+
+            <div className='flex items-center justify-between p-3 rounded-lg bg-primary/5'>
+              <span className='text-sm font-medium text-primary'>
+                Recipe Scaling Factor
+              </span>
+              <span className='font-bold text-primary'>
+                {scalingFactor.toFixed(2)}x
+              </span>
             </div>
           </CardContent>
         </Card>
@@ -516,54 +549,101 @@ export default function ProductionOrderDetailClient({
         <CardHeader>
           <CardTitle>Material Requirements</CardTitle>
           <CardDescription>
-            Scaled ingredients for this production order
+            Ingredients and material inventories for this production order
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <div className='space-y-4'>
-            {order.materials.map((material) => {
+          <div className='space-y-3'>
+            {order.materials.map((material, index) => {
               const availabilityInfo = availability.find(
-                (a) => a.materialId === material.id
+                (a) => a.materialId === material.materialInventory.material?.id
               );
-
+              console.log('availabilityInfo', availabilityInfo);
               return (
-                <div
-                  key={material.id}
-                  className='flex items-center justify-between p-3 border rounded-lg'
-                >
-                  <div className='flex-1'>
-                    <p className='font-medium'>
-                      {material.materialInventory.material?.name}
-                    </p>
-                    <div className='flex items-center gap-4 text-sm text-muted-foreground mt-1'>
-                      <span>
-                        Planned: {material.plannedQuantity}{' '}
-                        {material.unitOfMeasure}
-                      </span>
+                <Card key={material.id}>
+                  <CardContent className='pt-4 pb-4'>
+                    <div className='flex items-start justify-between mb-3'>
+                      <div className='flex-1'>
+                        <div className='flex items-center gap-2 mb-1'>
+                          <span className='text-xs font-medium text-muted-foreground'>
+                            Ingredient #{index + 1}
+                          </span>
+                          <span className='text-sm font-semibold text-primary'>
+                            {material.materialInventory.material?.name}
+                          </span>
+                        </div>
+                        <div className='text-xs text-muted-foreground'>
+                          From inventory:{' '}
+                          {material.materialInventory.variantName ||
+                            material.materialInventory.material?.name}
+                        </div>
+                      </div>
+                      {availabilityInfo && (
+                        <div className='flex items-center gap-2'>
+                          {availabilityInfo.sufficient ? (
+                            <Badge
+                              variant='outline'
+                              className='bg-green-50 text-green-700'
+                            >
+                              <CheckCircle className='h-3 w-3 mr-1' />
+                              Available: {availabilityInfo.available.toFixed(2)}
+                            </Badge>
+                          ) : (
+                            <Badge
+                              variant='outline'
+                              className='bg-red-50 text-red-700'
+                            >
+                              <AlertCircle className='h-3 w-3 mr-1' />
+                              Insufficient:{' '}
+                              {availabilityInfo.available.toFixed(2)}
+                            </Badge>
+                          )}
+                        </div>
+                      )}
+                    </div>
+
+                    <div className='grid grid-cols-2 md:grid-cols-4 gap-4 text-sm'>
+                      <div>
+                        <div className='text-muted-foreground text-xs mb-1'>
+                          Planned Quantity
+                        </div>
+                        <div className='font-medium'>
+                          {material.plannedQuantity} {material.unitOfMeasure}
+                        </div>
+                      </div>
                       {material.actualQuantity && (
-                        <span>
-                          Actual: {material.actualQuantity}{' '}
-                          {material.unitOfMeasure}
-                        </span>
+                        <div>
+                          <div className='text-muted-foreground text-xs mb-1'>
+                            Actual Quantity
+                          </div>
+                          <div className='font-medium'>
+                            {material.actualQuantity} {material.unitOfMeasure}
+                          </div>
+                        </div>
+                      )}
+                      {material.unitCost && (
+                        <div>
+                          <div className='text-muted-foreground text-xs mb-1'>
+                            Unit Cost
+                          </div>
+                          <div className='font-medium'>
+                            ${Number(material.unitCost).toFixed(2)}
+                          </div>
+                        </div>
+                      )}
+                      {material.totalCost && (
+                        <div>
+                          <div className='text-muted-foreground text-xs mb-1'>
+                            Total Cost
+                          </div>
+                          <div className='font-medium'>
+                            ${Number(material.totalCost).toFixed(2)}
+                          </div>
+                        </div>
                       )}
                     </div>
-                  </div>
-                  {availabilityInfo && (
-                    <div className='flex items-center gap-2'>
-                      {availabilityInfo.sufficient ? (
-                        <Badge variant='outline' className='bg-green-50'>
-                          <CheckCircle className='h-3 w-3 mr-1' />
-                          Available: {availabilityInfo.available.toFixed(2)}
-                        </Badge>
-                      ) : (
-                        <Badge variant='outline' className='bg-red-50'>
-                          <AlertCircle className='h-3 w-3 mr-1' />
-                          Insufficient: {availabilityInfo.available.toFixed(2)}
-                        </Badge>
-                      )}
-                    </div>
-                  )}
-                </div>
+                  </CardContent>
+                </Card>
               );
             })}
           </div>

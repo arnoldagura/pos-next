@@ -104,7 +104,7 @@ export function StockAdjustmentForm({
 
   const adjustmentMutation = useMutation({
     mutationFn: async (values: AdjustmentFormValues) => {
-      const response = await fetch('/api/product-inventory/adjust', {
+      const response = await fetch('/api/product-inventories/adjust', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

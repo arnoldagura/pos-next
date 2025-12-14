@@ -75,7 +75,7 @@ export async function getMovementsHandler(req: NextRequest) {
   }
 }
 
-// GET /api/product-inventory/movements - Movement history
+// GET /api/product-inventories/movements - Movement history
 export const GET = protectRoute(getMovementsHandler, {
   resource: RESOURCES.INVENTORY,
   action: ACTIONS.READ,

@@ -117,7 +117,7 @@ export default function CreateInventoryDialog({
     try {
       setSubmitting(true);
 
-      const response = await fetch('/api/product-inventory', {
+      const response = await fetch('/api/product-inventories', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

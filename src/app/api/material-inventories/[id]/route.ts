@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/db/db';
-import { materialInventory } from '@/drizzle/schema';
+import { materialInventory, materialInventoryMovement } from '@/drizzle/schema';
 import { eq } from 'drizzle-orm';
 import { z } from 'zod';
 
@@ -96,6 +96,18 @@ export async function PATCH(
       alertThreshold,
     } = validation.data;
 
+    // Fetch current inventory to check for cost changes
+    const currentInventory = await db.query.materialInventory.findFirst({
+      where: eq(materialInventory.id, id),
+    });
+
+    if (!currentInventory) {
+      return NextResponse.json(
+        { error: 'Material inventory not found' },
+        { status: 404 }
+      );
+    }
+
     const updateData: Partial<typeof materialInventory.$inferInsert> = {};
 
     if (variantName !== undefined) {
@@ -122,13 +134,34 @@ export async function PATCH(
       updateData.alertThreshold = alertThreshold.toString();
     }
 
-    const [updated] = await db
-      .update(materialInventory)
-      .set(updateData)
-      .where(eq(materialInventory.id, id))
-      .returning();
+    const result = await db.transaction(async (tx) => {
+      const [updated] = await tx
+        .update(materialInventory)
+        .set(updateData)
+        .where(eq(materialInventory.id, id))
+        .returning();
 
-    if (!updated) {
+      if (cost !== undefined && Number(currentInventory.cost || 0) !== cost) {
+        await tx.insert(materialInventoryMovement).values({
+          id: `mat_mov_${Date.now()}_${Math.random()
+            .toString(36)
+            .substring(2, 9)}`,
+          materialInventoryId: id,
+          type: 'adjustment',
+          quantity: '0',
+          unitPrice: currentInventory.cost || '0',
+          date: new Date(),
+          remarks: `Cost updated from $${
+            currentInventory.cost || '0'
+          } to $${cost}`,
+          createdAt: new Date(),
+        });
+      }
+
+      return updated;
+    });
+
+    if (!result) {
       return NextResponse.json(
         { error: 'Material inventory not found' },
         { status: 404 }

@@ -245,19 +245,19 @@ export async function deleteInventoryHandler(
   }
 }
 
-// GET /api/product-inventory/[id] - Get single inventory with movements
+// GET /api/product-inventories/[id] - Get single inventory with movements
 export const GET = protectRoute(getInventoryByIdHandler, {
   resource: RESOURCES.INVENTORY,
   action: ACTIONS.READ,
 });
 
-// PATCH /api/product-inventory/[id] - Update inventory record
+// PATCH /api/product-inventories/[id] - Update inventory record
 export const PATCH = protectRoute(updateInventoryHandler, {
   resource: RESOURCES.INVENTORY,
   action: ACTIONS.UPDATE,
 });
 
-// DELETE /api/product-inventory/[id] - Delete inventory record
+// DELETE /api/product-inventories/[id] - Delete inventory record
 export const DELETE = protectRoute(deleteInventoryHandler, {
   resource: RESOURCES.INVENTORY,
   action: ACTIONS.DELETE,

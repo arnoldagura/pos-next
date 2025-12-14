@@ -1,6 +1,6 @@
 import { db } from '@/db/db';
 import { ACTIONS, RESOURCES } from '@/lib/rbac';
-import { createMovementSchema } from '@/lib/validations/product';
+import { wasteSchema } from '@/lib/validations/product';
 import { protectRoute } from '@/middleware/rbac';
 import { randomUUID } from 'crypto';
 import { eq } from 'drizzle-orm';
@@ -8,15 +8,16 @@ import { NextRequest, NextResponse } from 'next/server';
 import { ZodError } from 'zod';
 import {
   validateStockAvailability,
+  getCurrentStock,
   invalidateInventoryCache,
   invalidateLocationCache,
 } from '@/lib/services/inventory-calculation';
 import { productInventory, productInventoryMovement } from '@/drizzle/schema';
 
-export async function createMovementHandler(req: NextRequest) {
+export async function recordWasteHandler(req: NextRequest) {
   try {
     const body = await req.json();
-    const validatedData = createMovementSchema.parse(body);
+    const validatedData = wasteSchema.parse(body);
 
     const productInventoryRecord = await db
       .select()
@@ -26,47 +27,42 @@ export async function createMovementHandler(req: NextRequest) {
 
     if (productInventoryRecord.length === 0) {
       return NextResponse.json(
-        { error: 'Inventory not found' },
+        { error: 'Product Inventory not found' },
         { status: 404 }
       );
     }
 
-    const decreaseTypes = ['sale', 'transfer_out', 'waste'];
-    if (decreaseTypes.includes(validatedData.type)) {
-      const validation = await validateStockAvailability(
-        validatedData.productInventoryId,
-        validatedData.quantity
-      );
+    const validation = await validateStockAvailability(
+      validatedData.productInventoryId,
+      validatedData.quantity
+    );
 
-      if (!validation.available) {
-        return NextResponse.json(
-          {
-            error: 'Insufficient stock',
-            currentStock: validation.currentStock,
-            requested: validation.requestedQuantity,
-            shortfall: validation.shortfall,
-          },
-          { status: 400 }
-        );
-      }
+    if (!validation.available) {
+      return NextResponse.json(
+        {
+          error: 'Insufficient stock to record waste',
+          currentStock: validation.currentStock,
+          requested: validation.requestedQuantity,
+          shortfall: validation.shortfall,
+        },
+        { status: 400 }
+      );
     }
 
-    const movementDate = validatedData.date
-      ? new Date(validatedData.date)
-      : new Date();
+    const currentStockLevel = await getCurrentStock(
+      validatedData.productInventoryId
+    );
+    const currentStock = currentStockLevel?.currentStock || 0;
 
-    const newMovement = await db
+    const waste = await db
       .insert(productInventoryMovement)
       .values({
         id: randomUUID(),
         productInventoryId: validatedData.productInventoryId,
-        type: validatedData.type,
+        type: 'waste',
         quantity: validatedData.quantity.toString(),
-        unitPrice: validatedData.unitPrice?.toString(),
-        date: movementDate,
+        date: new Date(),
         remarks: validatedData.remarks,
-        referenceType: validatedData.referenceType,
-        referenceId: validatedData.referenceId,
         createdBy: validatedData.createdBy,
       })
       .returning();
@@ -74,9 +70,21 @@ export async function createMovementHandler(req: NextRequest) {
     invalidateInventoryCache(validatedData.productInventoryId);
     invalidateLocationCache(productInventoryRecord[0].locationId);
 
-    return NextResponse.json(newMovement[0], { status: 201 });
+    const newStockLevel = await getCurrentStock(
+      validatedData.productInventoryId
+    );
+
+    return NextResponse.json(
+      {
+        waste: waste[0],
+        previousStock: currentStock,
+        newStock: newStockLevel?.currentStock || 0,
+        wasteQuantity: validatedData.quantity,
+      },
+      { status: 201 }
+    );
   } catch (error) {
-    console.error('Error creating movement:', error);
+    console.error('Error recording waste:', error);
 
     if (error instanceof ZodError) {
       return NextResponse.json(
@@ -86,14 +94,14 @@ export async function createMovementHandler(req: NextRequest) {
     }
 
     return NextResponse.json(
-      { error: 'Failed to create movement' },
+      { error: 'Failed to record waste' },
       { status: 500 }
     );
   }
 }
 
-// POST /api/product-inventory/movement - Record movement
-export const POST = protectRoute(createMovementHandler, {
+// POST /api/product-inventories/waste - Record waste
+export const POST = protectRoute(recordWasteHandler, {
   resource: RESOURCES.INVENTORY,
   action: ACTIONS.UPDATE,
 });

@@ -123,6 +123,9 @@ export async function POST(
       );
     }
 
+    // Use provided unitPrice or fallback to current inventory cost
+    const finalUnitPrice = unitPrice ?? Number(inventory.cost || 0);
+
     if (batchId) {
       const batch = await db.query.materialBatch.findFirst({
         where: eq(materialBatch.id, batchId),
@@ -177,7 +180,7 @@ export async function POST(
         batchId: batchId || null,
         type,
         quantity: quantity.toString(),
-        unitPrice: unitPrice?.toString() || null,
+        unitPrice: finalUnitPrice.toFixed(2),
         remarks: remarks || null,
         referenceType: referenceType || null,
         referenceId: referenceId || null,

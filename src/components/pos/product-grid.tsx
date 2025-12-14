@@ -122,7 +122,7 @@ export function ProductGrid({ locationId }: ProductGridProps) {
         limit: '1000',
       });
 
-      const response = await fetch(`/api/product-inventory?${params}`);
+      const response = await fetch(`/api/product-inventories?${params}`);
       if (!response.ok) throw new Error('Failed to fetch inventory');
 
       const data = await response.json();
@@ -254,7 +254,9 @@ export function ProductGrid({ locationId }: ProductGridProps) {
         const params = new URLSearchParams({ code: barcode });
         if (locationId) params.append('locationId', locationId);
 
-        const response = await fetch(`/api/products/barcode/${barcode}?${params}`);
+        const response = await fetch(
+          `/api/products/barcode/${barcode}?${params}`
+        );
 
         if (!response.ok) {
           toast.error('Product not found');
@@ -265,7 +267,9 @@ export function ProductGrid({ locationId }: ProductGridProps) {
         const inventoryItem = await response.json();
 
         // Find the product to add to cart
-        const product = allProducts.find((p) => p.id === inventoryItem.productId);
+        const product = allProducts.find(
+          (p) => p.id === inventoryItem.productId
+        );
 
         if (!product) {
           toast.error('Product not found');

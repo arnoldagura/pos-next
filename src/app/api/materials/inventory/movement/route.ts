@@ -13,22 +13,20 @@ export async function createMaterialMovementHandler(req: NextRequest) {
     const body = await req.json();
     const validatedData = createMaterialMovementSchema.parse(body);
 
-    const inventoryExists = await db
-      .select()
-      .from(materialInventory)
-      .where(eq(materialInventory.id, validatedData.materialInventoryId))
-      .limit(1);
+    const inventory = await db.query.materialInventory.findFirst({
+      where: eq(materialInventory.id, validatedData.materialInventoryId),
+    });
 
-    if (inventoryExists.length === 0) {
+    if (!inventory) {
       return NextResponse.json(
         { error: 'Material inventory not found' },
         { status: 404 }
       );
     }
 
-    const unitPrice = validatedData.unitPrice
-      ? validatedData.unitPrice.toString()
-      : null;
+    // Use provided unitPrice or fallback to current inventory cost
+    const finalUnitPrice = validatedData.unitPrice ?? Number(inventory.cost || 0);
+    const unitPrice = finalUnitPrice.toFixed(2);
 
     const quantity = validatedData.quantity.toString();
 

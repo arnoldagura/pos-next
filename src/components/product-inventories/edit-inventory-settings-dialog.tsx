@@ -77,7 +77,7 @@ export default function EditInventorySettingsDialog({
     try {
       setSubmitting(true);
 
-      const response = await fetch(`/api/product-inventory/${inventory.id}`, {
+      const response = await fetch(`/api/product-inventories/${inventory.id}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

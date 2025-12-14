@@ -3,7 +3,7 @@ import { db } from '@/db/db';
 import { eq, desc, and, sql } from 'drizzle-orm';
 import { z } from 'zod';
 import { randomUUID } from 'crypto';
-import { product, productInventoryMovement } from '@/drizzle/schema';
+import { productInventory, productInventoryMovement } from '@/drizzle/schema';
 
 export enum InventoryMovementType {
   Purchase = 'purchase',
@@ -26,7 +26,7 @@ const createMovementSchema = z.object({
   createdBy: z.string().optional(),
 });
 
-// GET /api/product-inventory/[id]/movements - Get movements for a specific inventory
+// GET /api/product-inventories/[id]/movements - Get movements for a specific inventory
 export async function GET(
   request: NextRequest,
   context: { params: Promise<{ id: string }> }
@@ -51,7 +51,7 @@ export async function GET(
 
     const countResult = await db
       .select({ count: sql<number>`count(*)` })
-      .from(product)
+      .from(productInventoryMovement)
       .where(and(...whereConditions));
 
     const total = Number(countResult[0]?.count || 0);
@@ -81,7 +81,7 @@ export async function GET(
   }
 }
 
-// POST /api/product-inventory/[id]/movements - Create a new movement
+// POST /api/product-inventories/[id]/movements - Create a new movement
 export async function POST(
   request: NextRequest,
   context: { params: Promise<{ id: string }> }
@@ -110,7 +110,7 @@ export async function POST(
     } = validation.data;
 
     const inventoryRecord = await db.query.productInventory.findFirst({
-      where: eq(productInventoryMovement.id, id),
+      where: eq(productInventory.id, id),
     });
 
     if (!inventoryRecord) {

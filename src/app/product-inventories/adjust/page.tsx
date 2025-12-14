@@ -42,7 +42,7 @@ async function fetchInventory(locationId?: string): Promise<InventoryItem[]> {
     params.append('locationId', locationId);
   }
 
-  const response = await fetch(`/api/product-inventory?${params.toString()}`);
+  const response = await fetch(`/api/product-inventories?${params.toString()}`);
   if (!response.ok) {
     throw new Error('Failed to fetch inventory');
   }

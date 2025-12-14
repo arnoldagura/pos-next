@@ -21,7 +21,7 @@ export interface MaterialInventory {
   sku: string | null;
   defaultSupplierId: string | null;
   unitOfMeasure: string;
-  cost: string | null;
+  cost: number;
   alertThreshold: string;
   totalQuantity: string;
   material: Material;

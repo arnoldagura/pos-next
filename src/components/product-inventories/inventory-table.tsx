@@ -281,7 +281,9 @@ export function InventoryTable({
                         </DropdownMenuItem>
                         <DropdownMenuItem
                           onClick={() =>
-                            router.push(`/inventory/${item.id}/movements`)
+                            router.push(
+                              `/product-inventories/${item.id}/movements`
+                            )
                           }
                         >
                           <History className='h-4 w-4 mr-2' />

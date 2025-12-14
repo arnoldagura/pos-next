@@ -102,7 +102,7 @@ export async function calculateMaterialCost(
       prodMaterial.actualQuantity || prodMaterial.plannedQuantity
     );
     const unitCost = Number(
-      prodMaterial.unitCost || prodMaterial.materialInventory || 0
+      prodMaterial.unitCost || prodMaterial.materialInventory?.cost || 0
     );
     const materialTotalCost = quantity * unitCost;
 

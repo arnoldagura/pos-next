@@ -12,6 +12,7 @@ import { relations } from 'drizzle-orm';
 import { location } from './locations';
 import { productInventory } from './product-inventories';
 import { materialInventory } from './material-inventories';
+import { material } from './materials';
 
 export const productionOrderStatusEnum = pgEnum('production_order_status', [
   'draft',
@@ -129,6 +130,11 @@ export const productionMaterial = pgTable(
       .references(() => productionOrder.id, {
         onDelete: 'cascade',
       }),
+    materialId: text('material_id')
+      .notNull()
+      .references(() => material.id, {
+        onDelete: 'restrict',
+      }),
     materialInventoryId: text('material_inventory_id')
       .notNull()
       .references(() => materialInventory.id, {
@@ -161,6 +167,7 @@ export const productionMaterial = pgTable(
     productionOrderIdx: index('production_material_production_order_idx').on(
       table.productionOrderId
     ),
+    materialIdx: index('production_material_material_idx').on(table.materialId),
     materialInventoryIdx: index('production_material_material_inventory_idx').on(
       table.materialInventoryId
     ),
@@ -223,6 +230,10 @@ export const productionMaterialRelations = relations(
     productionOrder: one(productionOrder, {
       fields: [productionMaterial.productionOrderId],
       references: [productionOrder.id],
+    }),
+    material: one(material, {
+      fields: [productionMaterial.materialId],
+      references: [material.id],
     }),
     materialInventory: one(materialInventory, {
       fields: [productionMaterial.materialInventoryId],

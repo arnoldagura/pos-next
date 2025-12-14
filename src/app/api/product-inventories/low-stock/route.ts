@@ -31,7 +31,7 @@ export async function getLowStockHandler(req: NextRequest) {
   }
 }
 
-// GET /api/product-inventory/low-stock - Get items below threshold
+// GET /api/product-inventories/low-stock - Get items below threshold
 export const GET = protectRoute(getLowStockHandler, {
   resource: RESOURCES.INVENTORY,
   action: ACTIONS.READ,

@@ -28,7 +28,8 @@ import { Loader2 } from 'lucide-react';
 
 const formSchema = z.object({
   alertThreshold: z.string().min(1, 'Alert threshold is required'),
-  unitOfMeasure: z.string().optional(),
+  unitOfMeasure: z.string().min(1, 'Unit of measure is required'),
+  cost: z.string().optional(),
 });
 
 type FormValues = z.infer<typeof formSchema>;
@@ -37,6 +38,7 @@ interface MaterialInventory {
   id: string;
   alertThreshold: string;
   unitOfMeasure: string | null;
+  cost: string;
   material: {
     name: string;
     unitOfMeasure: string;
@@ -60,13 +62,14 @@ export default function EditSettingsDialog({
   onSuccess,
 }: EditSettingsDialogProps) {
   const [submitting, setSubmitting] = useState(false);
-
+  console.log('inventory', inventory);
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       alertThreshold: inventory.alertThreshold,
       unitOfMeasure:
         inventory.unitOfMeasure || inventory.material.unitOfMeasure,
+      cost: inventory.cost || '',
     },
   });
 
@@ -76,6 +79,7 @@ export default function EditSettingsDialog({
         alertThreshold: inventory.alertThreshold,
         unitOfMeasure:
           inventory.unitOfMeasure || inventory.material.unitOfMeasure,
+        cost: inventory.cost || '',
       });
     }
   }, [open, inventory, form]);
@@ -92,6 +96,7 @@ export default function EditSettingsDialog({
           body: JSON.stringify({
             alertThreshold: parseFloat(values.alertThreshold),
             unitOfMeasure: values.unitOfMeasure,
+            cost: values.cost ? parseFloat(values.cost) : 0,
           }),
         }
       );
@@ -127,6 +132,29 @@ export default function EditSettingsDialog({
         <Form form={form} onSubmit={onSubmit} className='space-y-4'>
           <FormField
             control={form.control}
+            name='cost'
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Cost per Unit</FormLabel>
+                <FormControl>
+                  <Input
+                    type='number'
+                    step='0.01'
+                    min='0'
+                    placeholder='0.00'
+                    {...field}
+                  />
+                </FormControl>
+                <FormDescription>
+                  Default cost per unit of measure (optional)
+                </FormDescription>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
             name='alertThreshold'
             render={({ field }) => (
               <FormItem>
@@ -155,7 +183,7 @@ export default function EditSettingsDialog({
             name='unitOfMeasure'
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Unit of Measure (Optional)</FormLabel>
+                <FormLabel>Unit of Measure</FormLabel>
                 <FormControl>
                   <Input
                     placeholder={`Default: ${inventory.material.unitOfMeasure}`}

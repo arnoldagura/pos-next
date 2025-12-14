@@ -108,7 +108,7 @@ export default function InventoryMovementsClient({
 
   const fetchInventoryDetails = async () => {
     try {
-      const response = await fetch(`/api/product-inventory/${inventoryId}`);
+      const response = await fetch(`/api/product-inventories/${inventoryId}`);
       if (!response.ok) throw new Error('Failed to fetch inventory');
       const data = await response.json();
       setInventoryDetails(data);
@@ -131,7 +131,7 @@ export default function InventoryMovementsClient({
       }
 
       const response = await fetch(
-        `/api/product-inventory/${inventoryId}/movements?${params}`
+        `/api/product-inventories/${inventoryId}/movements?${params}`
       );
       if (!response.ok) throw new Error('Failed to fetch movements');
 
@@ -156,7 +156,7 @@ export default function InventoryMovementsClient({
         <Button
           variant='ghost'
           size='sm'
-          onClick={() => router.push('/inventory')}
+          onClick={() => router.push('/product-inventories')}
         >
           <ArrowLeft className='h-4 w-4 mr-2' />
           Back to Inventory

@@ -1,23 +1,22 @@
 import { db } from '@/db/db';
 import { ACTIONS, RESOURCES } from '@/lib/rbac';
-import { wasteSchema } from '@/lib/validations/product';
+import { adjustmentSchema } from '@/lib/validations/product';
 import { protectRoute } from '@/middleware/rbac';
 import { randomUUID } from 'crypto';
 import { eq } from 'drizzle-orm';
 import { NextRequest, NextResponse } from 'next/server';
 import { ZodError } from 'zod';
 import {
-  validateStockAvailability,
   getCurrentStock,
   invalidateInventoryCache,
   invalidateLocationCache,
 } from '@/lib/services/inventory-calculation';
 import { productInventory, productInventoryMovement } from '@/drizzle/schema';
 
-export async function recordWasteHandler(req: NextRequest) {
+export async function adjustStockHandler(req: NextRequest) {
   try {
     const body = await req.json();
-    const validatedData = wasteSchema.parse(body);
+    const validatedData = adjustmentSchema.parse(body);
 
     const productInventoryRecord = await db
       .select()
@@ -32,35 +31,33 @@ export async function recordWasteHandler(req: NextRequest) {
       );
     }
 
-    const validation = await validateStockAvailability(
-      validatedData.productInventoryId,
-      validatedData.quantity
-    );
-
-    if (!validation.available) {
-      return NextResponse.json(
-        {
-          error: 'Insufficient stock to record waste',
-          currentStock: validation.currentStock,
-          requested: validation.requestedQuantity,
-          shortfall: validation.shortfall,
-        },
-        { status: 400 }
-      );
-    }
-
     const currentStockLevel = await getCurrentStock(
       validatedData.productInventoryId
     );
     const currentStock = currentStockLevel?.currentStock || 0;
 
-    const waste = await db
+    if (validatedData.quantity < 0) {
+      const requiredStock = Math.abs(validatedData.quantity);
+      if (currentStock < requiredStock) {
+        return NextResponse.json(
+          {
+            error: 'Insufficient stock for adjustment',
+            currentStock,
+            requested: requiredStock,
+            shortfall: requiredStock - currentStock,
+          },
+          { status: 400 }
+        );
+      }
+    }
+
+    const adjustment = await db
       .insert(productInventoryMovement)
       .values({
         id: randomUUID(),
         productInventoryId: validatedData.productInventoryId,
-        type: 'waste',
-        quantity: validatedData.quantity.toString(),
+        type: 'adjustment',
+        quantity: Math.abs(validatedData.quantity).toString(),
         date: new Date(),
         remarks: validatedData.remarks,
         createdBy: validatedData.createdBy,
@@ -76,15 +73,15 @@ export async function recordWasteHandler(req: NextRequest) {
 
     return NextResponse.json(
       {
-        waste: waste[0],
+        adjustment: adjustment[0],
         previousStock: currentStock,
         newStock: newStockLevel?.currentStock || 0,
-        wasteQuantity: validatedData.quantity,
+        change: validatedData.quantity,
       },
       { status: 201 }
     );
   } catch (error) {
-    console.error('Error recording waste:', error);
+    console.error('Error adjusting stock:', error);
 
     if (error instanceof ZodError) {
       return NextResponse.json(
@@ -94,14 +91,14 @@ export async function recordWasteHandler(req: NextRequest) {
     }
 
     return NextResponse.json(
-      { error: 'Failed to record waste' },
+      { error: 'Failed to adjust stock' },
       { status: 500 }
     );
   }
 }
 
-// POST /api/product-inventory/waste - Record waste
-export const POST = protectRoute(recordWasteHandler, {
+// POST /api/product-inventories/adjust - Stock adjustment
+export const POST = protectRoute(adjustStockHandler, {
   resource: RESOURCES.INVENTORY,
   action: ACTIONS.UPDATE,
 });

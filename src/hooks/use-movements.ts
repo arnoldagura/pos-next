@@ -55,7 +55,7 @@ export function useMovements(params?: UseMovementsParams) {
       if (params?.limit) searchParams.append('limit', params.limit.toString());
 
       const response = await fetch(
-        `/api/product-inventory/movements?${searchParams.toString()}`
+        `/api/product-inventories/movements?${searchParams.toString()}`
       );
       if (!response.ok) throw new Error('Failed to fetch movements');
       return response.json();

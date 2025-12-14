@@ -8,12 +8,21 @@ import {
 import { eq, desc, and, gte, lte, sql } from 'drizzle-orm';
 import { z } from 'zod';
 
+const ingredientSchema = z.object({
+  materialId: z.string().min(1, 'Material ID is required'),
+  materialInventoryId: z.string().optional(),
+  quantity: z.number().positive('Quantity must be positive'),
+  unitOfMeasure: z.string().min(1, 'Unit of measure is required'),
+  cost: z.number().nonnegative('Cost must be non-negative').optional(),
+});
+
 const createProductionOrderSchema = z.object({
   recipeId: z.string().min(1, 'Recipe is required'),
   locationId: z.string().min(1, 'Location is required'),
   plannedQuantity: z.number().positive('Quantity must be positive'),
   scheduledDate: z.string().optional(),
   createdBy: z.string().optional(),
+  ingredients: z.array(ingredientSchema).optional(),
 });
 
 // GET /api/production-orders - List production orders with filters
@@ -152,8 +161,14 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const { recipeId, locationId, plannedQuantity, scheduledDate, createdBy } =
-      validation.data;
+    const {
+      recipeId,
+      locationId,
+      plannedQuantity,
+      scheduledDate,
+      createdBy,
+      ingredients,
+    } = validation.data;
 
     const orderId = await createFromRecipe({
       recipeId,
@@ -161,6 +176,7 @@ export async function POST(request: NextRequest) {
       plannedQuantity,
       scheduledDate: scheduledDate ? new Date(scheduledDate) : undefined,
       createdBy,
+      ingredients,
     });
 
     const order = await db.query.productionOrder.findFirst({

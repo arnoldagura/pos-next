@@ -1,22 +1,22 @@
 import { db } from '@/db/db';
 import { ACTIONS, RESOURCES } from '@/lib/rbac';
-import { adjustmentSchema } from '@/lib/validations/product';
+import { createMovementSchema } from '@/lib/validations/product';
 import { protectRoute } from '@/middleware/rbac';
 import { randomUUID } from 'crypto';
 import { eq } from 'drizzle-orm';
 import { NextRequest, NextResponse } from 'next/server';
 import { ZodError } from 'zod';
 import {
-  getCurrentStock,
+  validateStockAvailability,
   invalidateInventoryCache,
   invalidateLocationCache,
 } from '@/lib/services/inventory-calculation';
 import { productInventory, productInventoryMovement } from '@/drizzle/schema';
 
-export async function adjustStockHandler(req: NextRequest) {
+export async function createMovementHandler(req: NextRequest) {
   try {
     const body = await req.json();
-    const validatedData = adjustmentSchema.parse(body);
+    const validatedData = createMovementSchema.parse(body);
 
     const productInventoryRecord = await db
       .select()
@@ -26,40 +26,47 @@ export async function adjustStockHandler(req: NextRequest) {
 
     if (productInventoryRecord.length === 0) {
       return NextResponse.json(
-        { error: 'Product Inventory not found' },
+        { error: 'Inventory not found' },
         { status: 404 }
       );
     }
 
-    const currentStockLevel = await getCurrentStock(
-      validatedData.productInventoryId
-    );
-    const currentStock = currentStockLevel?.currentStock || 0;
+    const decreaseTypes = ['sale', 'transfer_out', 'waste'];
+    if (decreaseTypes.includes(validatedData.type)) {
+      const validation = await validateStockAvailability(
+        validatedData.productInventoryId,
+        validatedData.quantity
+      );
 
-    if (validatedData.quantity < 0) {
-      const requiredStock = Math.abs(validatedData.quantity);
-      if (currentStock < requiredStock) {
+      if (!validation.available) {
         return NextResponse.json(
           {
-            error: 'Insufficient stock for adjustment',
-            currentStock,
-            requested: requiredStock,
-            shortfall: requiredStock - currentStock,
+            error: 'Insufficient stock',
+            currentStock: validation.currentStock,
+            requested: validation.requestedQuantity,
+            shortfall: validation.shortfall,
           },
           { status: 400 }
         );
       }
     }
 
-    const adjustment = await db
+    const movementDate = validatedData.date
+      ? new Date(validatedData.date)
+      : new Date();
+
+    const newMovement = await db
       .insert(productInventoryMovement)
       .values({
         id: randomUUID(),
         productInventoryId: validatedData.productInventoryId,
-        type: 'adjustment',
-        quantity: Math.abs(validatedData.quantity).toString(),
-        date: new Date(),
+        type: validatedData.type,
+        quantity: validatedData.quantity.toString(),
+        unitPrice: validatedData.unitPrice?.toString(),
+        date: movementDate,
         remarks: validatedData.remarks,
+        referenceType: validatedData.referenceType,
+        referenceId: validatedData.referenceId,
         createdBy: validatedData.createdBy,
       })
       .returning();
@@ -67,21 +74,9 @@ export async function adjustStockHandler(req: NextRequest) {
     invalidateInventoryCache(validatedData.productInventoryId);
     invalidateLocationCache(productInventoryRecord[0].locationId);
 
-    const newStockLevel = await getCurrentStock(
-      validatedData.productInventoryId
-    );
-
-    return NextResponse.json(
-      {
-        adjustment: adjustment[0],
-        previousStock: currentStock,
-        newStock: newStockLevel?.currentStock || 0,
-        change: validatedData.quantity,
-      },
-      { status: 201 }
-    );
+    return NextResponse.json(newMovement[0], { status: 201 });
   } catch (error) {
-    console.error('Error adjusting stock:', error);
+    console.error('Error creating movement:', error);
 
     if (error instanceof ZodError) {
       return NextResponse.json(
@@ -91,14 +86,14 @@ export async function adjustStockHandler(req: NextRequest) {
     }
 
     return NextResponse.json(
-      { error: 'Failed to adjust stock' },
+      { error: 'Failed to create movement' },
       { status: 500 }
     );
   }
 }
 
-// POST /api/product-inventory/adjust - Stock adjustment
-export const POST = protectRoute(adjustStockHandler, {
+// POST /api/product-inventories/movement - Record movement
+export const POST = protectRoute(createMovementHandler, {
   resource: RESOURCES.INVENTORY,
   action: ACTIONS.UPDATE,
 });

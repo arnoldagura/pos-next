@@ -12,6 +12,8 @@ export default async function InventoryMovementsPage({
   params: { id: string };
 }) {
   const { id } = await params;
+
+  console.log('sad');
   return (
     <div className='container mx-auto py-6 space-y-6'>
       <InventoryMovementsClient inventoryId={id} />
