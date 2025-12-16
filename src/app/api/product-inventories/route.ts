@@ -1,14 +1,20 @@
 import { db } from '@/db/db';
-import { productInventory, product, location } from '@/drizzle/schema';
+import {
+  productInventory,
+  product,
+  location,
+  productInventoryMovement,
+} from '@/drizzle/schema';
 import { ACTIONS, RESOURCES } from '@/lib/rbac';
 import { createProductInventorySchema } from '@/lib/validations/product';
 import { protectRoute } from '@/middleware/rbac';
 import { randomUUID } from 'crypto';
-import { eq, and, count, desc, ilike, or, gte, lte } from 'drizzle-orm';
+import { eq, and, count, desc, ilike, or, gte, lte, isNull } from 'drizzle-orm';
 import { NextRequest, NextResponse } from 'next/server';
 import { ZodError } from 'zod';
 import { getBulkStockLevels } from '@/lib/services/inventory-calculation';
 import { generateSku, generateSlug } from '@/lib/validations';
+import { InventoryMovementType } from './[id]/movements/route';
 
 export async function getInventoryHandler(req: NextRequest) {
   try {
@@ -69,7 +75,7 @@ export async function getInventoryHandler(req: NextRequest) {
         sku: productInventory.sku,
         barcode: productInventory.barcode,
         unitPrice: productInventory.unitPrice,
-        costPrice: productInventory.costPrice,
+        cost: productInventory.cost,
         unitOfMeasure: productInventory.unitOfMeasure,
         taxRate: productInventory.taxRate,
         alertThreshold: productInventory.alertThreshold,
@@ -124,7 +130,10 @@ export async function createInventoryHandler(req: NextRequest) {
       .where(
         and(
           eq(productInventory.productId, validatedData.productId),
-          eq(productInventory.locationId, validatedData.locationId)
+          eq(productInventory.locationId, validatedData.locationId),
+          validatedData.variantName
+            ? eq(productInventory.variantName, validatedData.variantName)
+            : isNull(productInventory.variantName)
         )
       )
       .limit(1);
@@ -146,15 +155,9 @@ export async function createInventoryHandler(req: NextRequest) {
       return NextResponse.json({ error: 'Product not found' }, { status: 404 });
     }
 
-    const sku = generateSku(
-      productExists.values.name,
-      validatedData.variantName
-    );
+    const sku = generateSku(productExists[0].name, validatedData.variantName);
 
-    const slug = generateSlug(
-      productExists.values.name,
-      validatedData.variantName
-    );
+    const slug = generateSlug(productExists[0].name, validatedData.variantName);
 
     const existingSku = await db
       .select()
@@ -208,14 +211,32 @@ export async function createInventoryHandler(req: NextRequest) {
         sku,
         barcode: validatedData.barcode,
         unitPrice: validatedData.unitPrice.toString(),
-        costPrice: validatedData.costPrice?.toString(),
+        cost: validatedData.cost?.toString() ?? '0.00',
+        currentQuantity: validatedData.currentQuantity?.toString() ?? '0.00',
         unitOfMeasure: validatedData.unitOfMeasure,
         taxRate: validatedData.taxRate.toString(),
         alertThreshold: validatedData.alertThreshold.toString(),
       })
       .returning();
 
-    return NextResponse.json(newInventory[0], { status: 201 });
+    await db.insert(productInventoryMovement).values({
+      id: randomUUID(),
+      productInventoryId: newInventory[0].id,
+      type: InventoryMovementType.Adjustment,
+      quantity: validatedData.currentQuantity?.toString() ?? '0.00',
+      unitPrice: validatedData.unitPrice.toString(),
+      remarks: `initial unit price setup`,
+      referenceType: null,
+      referenceId: null,
+    });
+
+    return NextResponse.json(
+      {
+        ...newInventory[0],
+        productName: productExists[0].name,
+      },
+      { status: 201 }
+    );
   } catch (error) {
     console.error('Error creating inventory:', error);
 

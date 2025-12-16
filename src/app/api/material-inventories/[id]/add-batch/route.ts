@@ -8,6 +8,7 @@ import {
 import { eq } from 'drizzle-orm';
 import { z } from 'zod';
 import { randomUUID } from 'crypto';
+import { getMaterialCurrentStock } from '@/lib/services/material-inventory-calculation';
 
 const addBatchSchema = z.object({
   batchNumber: z.string().min(1, 'Batch number is required'),
@@ -74,6 +75,15 @@ export async function POST(
       remarks: remarks || `Added batch ${batchNumber}`,
       createdBy,
     });
+
+    const stockLevel = await getMaterialCurrentStock(id);
+    await db
+      .update(materialInventory)
+      .set({
+        currentQuantity: stockLevel?.currentStock.toString() ?? '0.00',
+      })
+      .where(eq(materialInventory.id, id))
+      .returning();
 
     return NextResponse.json(newBatch, { status: 201 });
   } catch (error) {

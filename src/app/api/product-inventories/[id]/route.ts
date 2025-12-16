@@ -34,7 +34,7 @@ export async function getInventoryByIdHandler(
         slug: productInventory.slug,
         barcode: productInventory.barcode,
         unitPrice: productInventory.unitPrice,
-        costPrice: productInventory.costPrice,
+        cost: productInventory.cost,
         unitOfMeasure: productInventory.unitOfMeasure,
         taxRate: productInventory.taxRate,
         alertThreshold: productInventory.alertThreshold,
@@ -172,8 +172,8 @@ export async function updateInventoryHandler(
       updateData.unitPrice = validatedData.unitPrice.toString();
     }
 
-    if (validatedData.costPrice !== undefined) {
-      updateData.costPrice = validatedData.costPrice.toString();
+    if (validatedData.cost !== undefined) {
+      updateData.cost = validatedData.cost.toString();
     }
 
     if (validatedData.unitOfMeasure !== undefined) {

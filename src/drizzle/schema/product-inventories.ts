@@ -26,7 +26,11 @@ export const productInventory = pgTable(
     sku: text('sku').unique(),
     barcode: text('barcode').unique(),
     unitPrice: numeric('unit_price', { precision: 10, scale: 2 }).notNull(),
-    costPrice: numeric('cost_price', { precision: 10, scale: 2 }),
+    cost: numeric('cost', { precision: 10, scale: 2 }),
+    currentQuantity: numeric('current_quantity', {
+      precision: 10,
+      scale: 2,
+    }).notNull(),
     unitOfMeasure: text('unit_of_measure').notNull(),
     taxRate: numeric('tax_rate', { precision: 5, scale: 2 })
       .default('0')
@@ -41,9 +45,9 @@ export const productInventory = pgTable(
       .notNull(),
   },
   (table) => ({
-    productInventoryLocationUnique: unique(
-      'product_inventory_product_location_unique'
-    ).on(table.productId, table.locationId),
+    productInventoryLocationVariantUnique: unique(
+      'product_inventory_product_location_variant_unique'
+    ).on(table.productId, table.locationId, table.variantName),
     productIdx: index('product_inventory_product_idx').on(table.productId),
     locationIdx: index('inventory_location_idx').on(table.locationId),
     slugIdx: index('product_slug_idx').on(table.slug),

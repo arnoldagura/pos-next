@@ -115,7 +115,9 @@ export default function MaterialInventoryMovementsClient({
 
       {inventory && (
         <div>
-          <h1 className='text-3xl font-bold'>{inventory.material.name}</h1>
+          <h1 className='text-3xl font-bold'>
+            {inventory.material.name} {inventory.variantName}
+          </h1>
           <p className='text-muted-foreground'>
             {inventory.location.name}
             {inventory.sku && ` • SKU: ${inventory.sku}`}
@@ -129,7 +131,7 @@ export default function MaterialInventoryMovementsClient({
             <CardDescription>Current Stock</CardDescription>
             <CardTitle className='text-3xl'>
               {inventory
-                ? `${parseFloat(inventory.totalQuantity).toFixed(2)} ${
+                ? `${parseFloat(inventory.currentQuantity).toFixed(2)} ${
                     inventory.unitOfMeasure
                   }`
                 : '-'}

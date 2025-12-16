@@ -119,7 +119,7 @@ export default function MaterialInventoriesClient() {
   };
 
   const isLowStock = (inventory: MaterialInventory) => {
-    const quantity = parseFloat(inventory.totalQuantity);
+    const quantity = parseFloat(inventory.currentQuantity);
     const threshold = parseFloat(inventory.alertThreshold);
     return quantity <= threshold;
   };
@@ -147,7 +147,9 @@ export default function MaterialInventoriesClient() {
                     <Package className='h-10 w-10 text-muted-foreground' />
                   )}
                   <div>
-                    <div>{inventory.material.name}</div>
+                    <div>
+                      {inventory.material.name} {inventory.variantName}
+                    </div>
                     {inventory.sku && (
                       <div className='text-xs text-muted-foreground font-normal'>
                         SKU: {inventory.sku}
@@ -195,7 +197,7 @@ export default function MaterialInventoriesClient() {
               <div className='flex justify-between items-center'>
                 <span className='text-muted-foreground'>Current Stock:</span>
                 <span className='font-bold text-lg'>
-                  {parseFloat(inventory.totalQuantity).toFixed(2)}{' '}
+                  {parseFloat(inventory.currentQuantity).toFixed(2)}{' '}
                   {inventory.unitOfMeasure}
                 </span>
               </div>
@@ -281,7 +283,7 @@ export default function MaterialInventoriesClient() {
               </TableCell>
               <TableCell>{inventory.location.name}</TableCell>
               <TableCell className='text-right'>
-                {parseFloat(inventory.totalQuantity).toFixed(2)}{' '}
+                {parseFloat(inventory.currentQuantity).toFixed(2)}{' '}
                 {inventory.unitOfMeasure}
               </TableCell>
               <TableCell className='text-right'>

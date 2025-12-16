@@ -28,27 +28,13 @@ import {
 import { useRouter } from 'next/navigation';
 import { cn } from '@/lib/utils';
 import * as XLSX from 'xlsx';
-
-export interface InventoryItem {
-  id: string;
-  productId: string;
-  productName: string;
-  productSku: string | null;
-  locationId: string;
-  locationName: string;
-  alertThreshold: string;
-  unitOfMeasure: string | null;
-  currentStock: number;
-  belowThreshold: boolean;
-  createdAt: Date;
-  updatedAt: Date;
-}
+import { ProductInventoryItem } from '@/lib/types';
 
 interface InventoryTableProps {
-  data: InventoryItem[];
+  data: ProductInventoryItem[];
   isLoading: boolean;
   onAdjustStock: (inventoryId: string) => void;
-  onEditSettings?: (item: InventoryItem) => void;
+  onEditSettings?: (item: ProductInventoryItem) => void;
   locationId?: string;
 }
 
@@ -60,7 +46,7 @@ export function InventoryTable({
   locationId,
 }: InventoryTableProps) {
   const router = useRouter();
-  const getStockStatus = (item: InventoryItem) => {
+  const getStockStatus = (item: ProductInventoryItem) => {
     if (item.belowThreshold) {
       return { label: 'Low Stock', variant: 'destructive' as const };
     }
@@ -70,21 +56,20 @@ export function InventoryTable({
     return { label: 'In Stock', variant: 'default' as const };
   };
 
-  const getStockIndicator = (item: InventoryItem) => {
+  const getStockIndicator = (item: ProductInventoryItem) => {
     if (item.currentStock === 0) return 'bg-red-500';
     if (item.belowThreshold) return 'bg-yellow-500';
     return 'bg-green-500';
   };
 
-  const calculateValue = (item: InventoryItem) => {
-    // Placeholder calculation - should use actual cost price
+  const calculateValue = (item: ProductInventoryItem) => {
     return item.currentStock * 10;
   };
 
   const exportToExcel = () => {
     const exportData = data.map((item) => ({
-      'Product Name': item.productName,
-      SKU: item.productSku || 'N/A',
+      'Product Name': `${item.productName} ${item.variantName}`,
+      SKU: item.sku || 'N/A',
       Location: item.locationName,
       'Current Stock': item.currentStock,
       'Alert Threshold': item.alertThreshold,
@@ -143,7 +128,7 @@ export function InventoryTable({
                 <th>Stock</th>
                 <th>Alert Level</th>
                 <th>Status</th>
-                <th>Value</th>
+                <th>Unit Price</th>
               </tr>
             </thead>
             <tbody>
@@ -158,13 +143,13 @@ export function InventoryTable({
                       : 'in-stock';
                   return `
                   <tr>
-                    <td>${item.productName}</td>
-                    <td>${item.productSku || 'N/A'}</td>
+                    <td>${item.productName} ${item.variantName}</td>
+                    <td>${item.sku || 'N/A'}</td>
                     <td>${item.locationName}</td>
                     <td>${item.currentStock} ${item.unitOfMeasure || 'pcs'}</td>
                     <td>${item.alertThreshold}</td>
                     <td class="${statusClass}">${status.label}</td>
-                    <td>$${calculateValue(item).toFixed(2)}</td>
+                    <td>$${item.unitPrice}</td>
                   </tr>
                 `;
                 })
@@ -228,7 +213,7 @@ export function InventoryTable({
               <TableHead className='text-right'>Stock</TableHead>
               <TableHead className='text-right'>Alert Level</TableHead>
               <TableHead>Status</TableHead>
-              <TableHead className='text-right'>Value</TableHead>
+              <TableHead className='text-right'>Unit Price</TableHead>
               <TableHead className='w-[70px]'></TableHead>
             </TableRow>
           </TableHeader>
@@ -246,10 +231,10 @@ export function InventoryTable({
                     />
                   </TableCell>
                   <TableCell className='font-medium'>
-                    {item.productName}
+                    {item.productName} {item.variantName}
                   </TableCell>
                   <TableCell className='text-muted-foreground'>
-                    {item.productSku || 'N/A'}
+                    {item.sku || 'N/A'}
                   </TableCell>
                   <TableCell>{item.locationName}</TableCell>
                   <TableCell className='text-right'>
@@ -262,7 +247,7 @@ export function InventoryTable({
                     <Badge variant={status.variant}>{status.label}</Badge>
                   </TableCell>
                   <TableCell className='text-right'>
-                    ${calculateValue(item).toFixed(2)}
+                    ${item.unitPrice}
                   </TableCell>
                   <TableCell>
                     <DropdownMenu>

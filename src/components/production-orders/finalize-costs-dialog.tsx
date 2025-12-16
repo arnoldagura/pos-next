@@ -221,7 +221,6 @@ export default function FinalizeCostsDialog({
           </div>
         ) : (
           <Form form={form} onSubmit={onSubmit} className='space-y-4'>
-            {/* Material Costs Section */}
             {fields.length > 0 && (
               <div className='space-y-3'>
                 <div className='flex items-center gap-2 text-sm font-medium'>
@@ -288,37 +287,6 @@ export default function FinalizeCostsDialog({
               </div>
             )}
 
-            <div className='rounded-lg border p-4 bg-muted/50'>
-              <div className='space-y-2 text-sm'>
-                <div className='flex justify-between'>
-                  <span className='text-muted-foreground'>Material Cost:</span>
-                  <span className='font-medium'>
-                    ${calculatedMaterialCost.toFixed(2)}
-                  </span>
-                </div>
-                {laborCost > 0 && (
-                  <div className='flex justify-between'>
-                    <span className='text-muted-foreground'>Labor Cost:</span>
-                    <span className='font-medium'>${laborCost.toFixed(2)}</span>
-                  </div>
-                )}
-                {overheadCost > 0 && (
-                  <div className='flex justify-between'>
-                    <span className='text-muted-foreground'>
-                      Overhead Cost:
-                    </span>
-                    <span className='font-medium'>
-                      ${overheadCost.toFixed(2)}
-                    </span>
-                  </div>
-                )}
-                <div className='flex justify-between pt-2 border-t'>
-                  <span className='font-semibold'>Total Cost:</span>
-                  <span className='font-bold'>${totalCost.toFixed(2)}</span>
-                </div>
-              </div>
-            </div>
-
             <FormField
               control={form.control}
               name='laborCost'
@@ -370,6 +338,37 @@ export default function FinalizeCostsDialog({
                 </FormItem>
               )}
             />
+
+            <div className='rounded-lg border p-4 bg-muted/50'>
+              <div className='space-y-2 text-sm'>
+                <div className='flex justify-between'>
+                  <span className='text-muted-foreground'>Material Cost:</span>
+                  <span className='font-medium'>
+                    ${calculatedMaterialCost.toFixed(2)}
+                  </span>
+                </div>
+                {laborCost > 0 && (
+                  <div className='flex justify-between'>
+                    <span className='text-muted-foreground'>Labor Cost:</span>
+                    <span className='font-medium'>${laborCost.toFixed(2)}</span>
+                  </div>
+                )}
+                {overheadCost > 0 && (
+                  <div className='flex justify-between'>
+                    <span className='text-muted-foreground'>
+                      Overhead Cost:
+                    </span>
+                    <span className='font-medium'>
+                      ${overheadCost.toFixed(2)}
+                    </span>
+                  </div>
+                )}
+                <div className='flex justify-between pt-2 border-t'>
+                  <span className='font-semibold'>Total Cost:</span>
+                  <span className='font-bold'>${totalCost.toFixed(2)}</span>
+                </div>
+              </div>
+            </div>
 
             <div className='rounded-lg border p-4 bg-blue-50 border-blue-200'>
               <p className='text-sm text-blue-900'>

@@ -23,6 +23,8 @@ const createProductionOrderSchema = z.object({
   scheduledDate: z.string().optional(),
   createdBy: z.string().optional(),
   ingredients: z.array(ingredientSchema).optional(),
+  outputProductInventoryId: z.string().optional(),
+  outputMaterialInventoryId: z.string().optional(),
 });
 
 // GET /api/production-orders - List production orders with filters
@@ -75,7 +77,6 @@ export async function GET(request: NextRequest) {
 
     const total = Number(countResult[0]?.count || 0);
 
-    // Get orders with relations
     const orders = await db.query.productionOrder.findMany({
       where: whereConditions.length > 0 ? and(...whereConditions) : undefined,
       with: {
@@ -168,6 +169,8 @@ export async function POST(request: NextRequest) {
       scheduledDate,
       createdBy,
       ingredients,
+      outputProductInventoryId,
+      outputMaterialInventoryId,
     } = validation.data;
 
     const orderId = await createFromRecipe({
@@ -177,6 +180,8 @@ export async function POST(request: NextRequest) {
       scheduledDate: scheduledDate ? new Date(scheduledDate) : undefined,
       createdBy,
       ingredients,
+      outputProductInventoryId,
+      outputMaterialInventoryId,
     });
 
     const order = await db.query.productionOrder.findFirst({

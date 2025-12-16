@@ -9,7 +9,9 @@ import { getBulkStockLevels } from '@/lib/services/inventory-calculation';
 
 async function getProductByBarcodeHandler(
   req: NextRequest,
-  context: RouteContext<{ code: string }> = createDefaultRouteContext({ code: '' })
+  context: RouteContext<{ code: string }> = createDefaultRouteContext({
+    code: '',
+  })
 ) {
   try {
     const { code } = await context.params;
@@ -23,7 +25,6 @@ async function getProductByBarcodeHandler(
       );
     }
 
-    // Look up product inventory by barcode - only return active, non-deleted products
     const [foundInventory] = await db
       .select({
         inventoryId: productInventory.id,
@@ -36,7 +37,7 @@ async function getProductByBarcodeHandler(
         barcode: productInventory.barcode,
         description: product.description,
         unitPrice: productInventory.unitPrice,
-        costPrice: productInventory.costPrice,
+        cost: productInventory.cost,
         image: product.image,
         unitOfMeasure: productInventory.unitOfMeasure,
         taxRate: productInventory.taxRate,
@@ -63,7 +64,8 @@ async function getProductByBarcodeHandler(
 
     // Get current stock level
     const stockLevels = await getBulkStockLevels([foundInventory.inventoryId]);
-    const currentStock = stockLevels[foundInventory.inventoryId]?.currentStock || 0;
+    const currentStock =
+      stockLevels[foundInventory.inventoryId]?.currentStock || 0;
 
     return NextResponse.json({
       ...foundInventory,

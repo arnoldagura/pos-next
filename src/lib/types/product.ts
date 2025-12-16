@@ -13,7 +13,9 @@ export interface ProductInventoryItem {
   id: string;
   productId: string;
   productName: string;
-  productSku: string | null;
+  variantName?: string;
+  sku: string | null;
+  unitPrice: string | null;
   locationId: string;
   locationName: string;
   alertThreshold: string;
@@ -47,7 +49,7 @@ export interface LowStockItem {
 }
 
 export interface AdjustmentData {
-  inventoryId: string;
+  productInventoryId: string;
   quantity: number;
   remarks: string;
   createdBy?: string;

@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/db/db';
 import { productionMaterial, productionOrder } from '@/drizzle/schema';
-import { eq, and, sql } from 'drizzle-orm';
+import { eq, and } from 'drizzle-orm';
 import { z } from 'zod';
 
 const materialCostUpdateSchema = z.object({
@@ -33,7 +33,6 @@ export async function POST(
 
     const { materials } = validation.data;
 
-    // Verify the order exists and is in completed status
     const order = await db.query.productionOrder.findFirst({
       where: eq(productionOrder.id, orderId),
     });
@@ -52,7 +51,6 @@ export async function POST(
       );
     }
 
-    // Update material costs
     await db.transaction(async (tx) => {
       for (const material of materials) {
         await tx
@@ -70,7 +68,6 @@ export async function POST(
           );
       }
 
-      // Recalculate total material cost
       const totalMaterialCost = materials.reduce(
         (sum, m) => sum + m.totalCost,
         0

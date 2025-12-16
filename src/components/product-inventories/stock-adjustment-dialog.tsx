@@ -43,14 +43,14 @@ type AdjustmentFormValues = z.infer<typeof adjustmentSchema>;
 interface StockAdjustmentDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  inventoryId: string;
+  productInventoryId: string;
   onSuccess?: () => void;
 }
 
 export function StockAdjustmentDialog({
   open,
   onOpenChange,
-  inventoryId,
+  productInventoryId,
   onSuccess,
 }: StockAdjustmentDialogProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -70,9 +70,9 @@ export function StockAdjustmentDialog({
     try {
       const adjustmentQuantity =
         data.adjustmentType === 'subtract' ? -data.quantity : data.quantity;
-
+      console.log('productInventoryId', productInventoryId);
       await adjustStockMutation.mutateAsync({
-        inventoryId,
+        productInventoryId,
         quantity: adjustmentQuantity,
         remarks: data.remarks,
       });

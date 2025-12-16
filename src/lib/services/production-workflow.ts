@@ -8,7 +8,7 @@ import {
   productInventory,
   productInventoryMovement,
 } from '@/drizzle/schema';
-import { eq, and, desc } from 'drizzle-orm';
+import { eq, and, desc, isNotNull } from 'drizzle-orm';
 import { getMaterialCurrentStock } from './material-inventory-calculation';
 import {
   calculateFullCost,
@@ -39,6 +39,8 @@ export interface CreateProductionOrderInput {
   scheduledDate?: Date;
   createdBy?: string;
   ingredients?: ProductionOrderIngredient[]; // Custom ingredients, overrides recipe if provided
+  outputProductInventoryId?: string; // Manually specify product inventory to output to
+  outputMaterialInventoryId?: string; // Manually specify material inventory to output to
 }
 
 export interface MaterialAvailability {
@@ -122,6 +124,8 @@ export async function createFromRecipe(
     scheduledDate,
     createdBy,
     ingredients: customIngredients,
+    outputProductInventoryId: manualProductInventoryId,
+    outputMaterialInventoryId: manualMaterialInventoryId,
   } = input;
 
   // Fetch recipe with ingredients
@@ -153,31 +157,77 @@ export async function createFromRecipe(
     let outputMaterialInventoryId = null;
 
     if (recipe.outputType === 'product' && recipe.outputProductId) {
-      const prodInv = await tx.query.productInventory.findFirst({
-        where: and(
-          eq(productInventory.productId, recipe.outputProductId),
-          eq(productInventory.locationId, locationId)
-        ),
-      });
-      if (!prodInv) {
-        throw new ProductionWorkflowError(
-          `Product inventory not found for product ${recipe.outputProductId} at location ${locationId}. Please create product inventory first.`
-        );
+      // Use manually specified product inventory if provided
+      if (manualProductInventoryId) {
+        const prodInv = await tx.query.productInventory.findFirst({
+          where: eq(productInventory.id, manualProductInventoryId),
+        });
+        if (!prodInv) {
+          throw new ProductionWorkflowError(
+            `Product inventory ${manualProductInventoryId} not found.`
+          );
+        }
+        // Verify it matches the product and location
+        if (
+          prodInv.productId !== recipe.outputProductId ||
+          prodInv.locationId !== locationId
+        ) {
+          throw new ProductionWorkflowError(
+            `Product inventory ${manualProductInventoryId} does not match product ${recipe.outputProductId} at location ${locationId}.`
+          );
+        }
+        outputProductInventoryId = prodInv.id;
+      } else {
+        // Auto-select first available product inventory
+        const prodInv = await tx.query.productInventory.findFirst({
+          where: and(
+            eq(productInventory.productId, recipe.outputProductId),
+            eq(productInventory.locationId, locationId)
+          ),
+        });
+        if (!prodInv) {
+          throw new ProductionWorkflowError(
+            `Product inventory not found for product ${recipe.outputProductId} at location ${locationId}. Please create product inventory first.`
+          );
+        }
+        outputProductInventoryId = prodInv.id;
       }
-      outputProductInventoryId = prodInv.id;
     } else if (recipe.outputType === 'material' && recipe.outputMaterialId) {
-      const matInv = await tx.query.materialInventory.findFirst({
-        where: and(
-          eq(materialInventory.materialId, recipe.outputMaterialId),
-          eq(materialInventory.locationId, locationId)
-        ),
-      });
-      if (!matInv) {
-        throw new ProductionWorkflowError(
-          `Material inventory not found for material ${recipe.outputMaterialId} at location ${locationId}. Please create material inventory first.`
-        );
+      // Use manually specified material inventory if provided
+      if (manualMaterialInventoryId) {
+        const matInv = await tx.query.materialInventory.findFirst({
+          where: eq(materialInventory.id, manualMaterialInventoryId),
+        });
+        if (!matInv) {
+          throw new ProductionWorkflowError(
+            `Material inventory ${manualMaterialInventoryId} not found.`
+          );
+        }
+        // Verify it matches the material and location
+        if (
+          matInv.materialId !== recipe.outputMaterialId ||
+          matInv.locationId !== locationId
+        ) {
+          throw new ProductionWorkflowError(
+            `Material inventory ${manualMaterialInventoryId} does not match material ${recipe.outputMaterialId} at location ${locationId}.`
+          );
+        }
+        outputMaterialInventoryId = matInv.id;
+      } else {
+        // Auto-select first available material inventory
+        const matInv = await tx.query.materialInventory.findFirst({
+          where: and(
+            eq(materialInventory.materialId, recipe.outputMaterialId),
+            eq(materialInventory.locationId, locationId)
+          ),
+        });
+        if (!matInv) {
+          throw new ProductionWorkflowError(
+            `Material inventory not found for material ${recipe.outputMaterialId} at location ${locationId}. Please create material inventory first.`
+          );
+        }
+        outputMaterialInventoryId = matInv.id;
       }
-      outputMaterialInventoryId = matInv.id;
     }
 
     await tx.insert(productionOrder).values({
@@ -203,7 +253,11 @@ export async function createFromRecipe(
     const ingredientsToUse = customIngredients || [];
 
     // If no custom ingredients, scale recipe ingredients
-    if (!customIngredients && recipe.ingredients && recipe.ingredients.length > 0) {
+    if (
+      !customIngredients &&
+      recipe.ingredients &&
+      recipe.ingredients.length > 0
+    ) {
       for (const ingredient of recipe.ingredients) {
         const scaledQuantity = Number(ingredient.quantity) * scalingFactor;
         ingredientsToUse.push({
@@ -233,7 +287,10 @@ export async function createFromRecipe(
           }
 
           // Verify it matches the material and location
-          if (matInv.materialId !== ingredient.materialId || matInv.locationId !== locationId) {
+          if (
+            matInv.materialId !== ingredient.materialId ||
+            matInv.locationId !== locationId
+          ) {
             throw new ProductionWorkflowError(
               `Material inventory ${ingredient.materialInventoryId} does not match material ${ingredient.materialId} at location ${locationId}.`
             );
@@ -264,7 +321,9 @@ export async function createFromRecipe(
           plannedQuantity: ingredient.quantity.toFixed(2),
           unitOfMeasure: ingredient.unitOfMeasure,
           unitCost: ingredient.cost ? ingredient.cost.toFixed(2) : null,
-          totalCost: ingredient.cost ? (ingredient.cost * ingredient.quantity).toFixed(2) : null,
+          totalCost: ingredient.cost
+            ? (ingredient.cost * ingredient.quantity).toFixed(2)
+            : null,
           createdAt: new Date(),
           updatedAt: new Date(),
         });
@@ -400,7 +459,6 @@ export async function startProduction(
     let totalMaterialCost = 0;
 
     for (const material of order.materials || []) {
-      // Get material inventory to capture unit cost
       const matInv = await tx.query.materialInventory.findFirst({
         where: eq(materialInventory.id, material.materialInventoryId),
       });
@@ -411,18 +469,20 @@ export async function startProduction(
         );
       }
 
-      // Try to get unit cost from inventory cost field, or from latest purchase movement
       let unitCost = Number(matInv.cost || 0);
 
       if (unitCost === 0) {
-        // Fallback: get the most recent purchase price from movements
-        const latestPurchase = await tx.query.materialInventoryMovement.findFirst({
-          where: and(
-            eq(materialInventoryMovement.materialInventoryId, material.materialInventoryId),
-            eq(materialInventoryMovement.type, 'purchase')
-          ),
-          orderBy: [desc(materialInventoryMovement.date)],
-        });
+        const latestPurchase =
+          await tx.query.materialInventoryMovement.findFirst({
+            where: and(
+              eq(
+                materialInventoryMovement.materialInventoryId,
+                material.materialInventoryId
+              ),
+              isNotNull(materialInventoryMovement.unitPrice)
+            ),
+            orderBy: [desc(materialInventoryMovement.date)],
+          });
 
         if (latestPurchase?.unitPrice) {
           unitCost = Number(latestPurchase.unitPrice);
@@ -432,7 +492,6 @@ export async function startProduction(
       const totalCost = unitCost * quantity;
       totalMaterialCost += totalCost;
 
-      // Material already has the materialInventoryId from creation
       const movementId = `mat_mov_${Date.now()}_${Math.random()
         .toString(36)
         .substring(2, 9)}`;

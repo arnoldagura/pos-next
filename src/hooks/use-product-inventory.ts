@@ -23,7 +23,7 @@ export function useProductInventory(params?: {
       if (params?.limit) searchParams.append('limit', params.limit.toString());
 
       const response = await fetch(
-        `/api/product-inventory?${searchParams.toString()}`
+        `/api/product-inventories?${searchParams.toString()}`
       );
       if (!response.ok) throw new Error('Failed to fetch inventory');
       return response.json();

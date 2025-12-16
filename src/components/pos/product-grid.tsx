@@ -27,7 +27,7 @@ type Product = {
   sku: string | null;
   description: string | null;
   sellingPrice: string;
-  costPrice: string | null;
+  cost: string | null;
   categoryId: string | null;
   image: string | null;
   status: boolean;

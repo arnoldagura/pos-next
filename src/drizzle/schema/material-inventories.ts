@@ -24,11 +24,18 @@ export const materialInventory = pgTable(
       .notNull()
       .references(() => location.id, { onDelete: 'cascade' }),
     sku: text('sku').unique(),
-    defaultSupplierId: text('default_supplier_id').references(() => supplier.id, {
-      onDelete: 'set null',
-    }),
+    defaultSupplierId: text('default_supplier_id').references(
+      () => supplier.id,
+      {
+        onDelete: 'set null',
+      }
+    ),
     unitOfMeasure: text('unit_of_measure').notNull(),
     cost: numeric('cost', { precision: 10, scale: 2 }),
+    currentQuantity: numeric('current_quantity', {
+      precision: 10,
+      scale: 2,
+    }).notNull(),
     alertThreshold: numeric('alert_threshold', { precision: 10, scale: 2 })
       .default('0')
       .notNull(),

@@ -40,7 +40,7 @@ const formSchema = z.object({
   variantName: z.string().optional(),
   barcode: z.string().optional(),
   unitPrice: z.string().min(1, 'Unit price is required'),
-  costPrice: z.string().optional(),
+  cost: z.string().optional(),
   unitOfMeasure: z.string().min(1, 'Unit of measure is required'),
   taxRate: z.number().min(0, 'tax rate must be positive'),
   alertThreshold: z.number().positive('alert threshold must be positive'),
@@ -72,7 +72,7 @@ export default function CreateInventoryDialog({
       variantName: '',
       barcode: '',
       unitPrice: '',
-      costPrice: '',
+      cost: '',
       unitOfMeasure: '',
       taxRate: 0,
       alertThreshold: 10,
@@ -126,9 +126,7 @@ export default function CreateInventoryDialog({
           variantName: values.variantName || undefined,
           barcode: values.barcode || undefined,
           unitPrice: parseFloat(values.unitPrice),
-          costPrice: values.costPrice
-            ? parseFloat(values.costPrice)
-            : undefined,
+          cost: values.cost ? parseFloat(values.cost) : undefined,
           unitOfMeasure: values.unitOfMeasure,
           taxRate: values.taxRate ? values.taxRate : 0,
           alertThreshold: values.alertThreshold ? values.alertThreshold : 0,
@@ -299,7 +297,7 @@ export default function CreateInventoryDialog({
 
             <FormField
               control={form.control}
-              name='costPrice'
+              name='cost'
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Cost Price</FormLabel>

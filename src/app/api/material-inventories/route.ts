@@ -11,6 +11,7 @@ const createMaterialInventorySchema = z.object({
   variantName: z.string().optional(),
   sku: z.string().optional(),
   defaultSupplierId: z.string().optional().nullable(),
+  currentQuantity: z.number().optional(),
   unitOfMeasure: z.string().min(1, 'Unit of measure is required'),
   cost: z.number().min(0).optional(),
   alertThreshold: z
@@ -96,21 +97,10 @@ export async function GET(request: NextRequest) {
       orderBy: [desc(materialInventory.updatedAt)],
     });
 
-    const inventoriesWithQuantity = inventories.map((inv) => {
-      const totalQuantity = inv.batches.reduce(
-        (sum, batch) => sum + parseFloat(batch.quantity),
-        0
-      );
-      return {
-        ...inv,
-        totalQuantity: totalQuantity.toString(),
-      };
-    });
-
-    let filteredInventories = inventoriesWithQuantity;
+    let filteredInventories = inventories;
     if (search) {
       const searchLower = search.toLowerCase();
-      filteredInventories = inventoriesWithQuantity.filter(
+      filteredInventories = inventories.filter(
         (inv) =>
           inv.material.name.toLowerCase().includes(searchLower) ||
           inv.sku?.toLowerCase().includes(searchLower) ||
@@ -159,6 +149,7 @@ export async function POST(request: NextRequest) {
       defaultSupplierId,
       unitOfMeasure,
       cost,
+      currentQuantity,
       alertThreshold,
     } = validation.data;
 
@@ -190,6 +181,7 @@ export async function POST(request: NextRequest) {
         defaultSupplierId: defaultSupplierId || null,
         unitOfMeasure,
         cost: cost?.toString(),
+        currentQuantity: currentQuantity?.toString() ?? '0.00',
         alertThreshold: alertThreshold?.toString() || '0',
       })
       .returning();

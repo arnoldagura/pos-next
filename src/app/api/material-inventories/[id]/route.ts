@@ -33,9 +33,9 @@ export async function GET(
         },
         supplier: true,
         location: true,
-        batches: {
-          orderBy: (batches, { asc }) => [asc(batches.expiryDate)],
-        },
+        // batches: {
+        //   orderBy: (batches, { asc }) => [asc(batches.expiryDate)],
+        // },
         movements: {
           orderBy: (movements, { desc }) => [desc(movements.date)],
           limit: 50,
@@ -50,16 +50,7 @@ export async function GET(
       );
     }
 
-    // Calculate total quantity from batches
-    const totalQuantity = inventory.batches.reduce(
-      (sum, batch) => sum + parseFloat(batch.quantity),
-      0
-    );
-
-    return NextResponse.json({
-      ...inventory,
-      totalQuantity: totalQuantity.toString(),
-    });
+    return NextResponse.json(inventory);
   } catch (error) {
     console.error('Error fetching material inventory:', error);
     return NextResponse.json(

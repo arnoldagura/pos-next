@@ -21,9 +21,9 @@ export interface MaterialInventory {
   sku: string | null;
   defaultSupplierId: string | null;
   unitOfMeasure: string;
-  cost: number;
+  cost: string;
   alertThreshold: string;
-  totalQuantity: string;
+  currentQuantity: string;
   material: Material;
   location: Location;
   supplier?: Supplier | null;
@@ -58,7 +58,7 @@ export interface MovementsMaterialInventory {
   sku: string | null;
   unitOfMeasure: string;
   location: Location;
-  totalQuantity: string;
+  currentQuantity: string;
 }
 
 export type BatchDialogMaterialInventory = Pick<

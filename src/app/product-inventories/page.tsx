@@ -10,10 +10,7 @@ import {
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import {
-  InventoryItem,
-  InventoryTable,
-} from '@/components/product-inventories/inventory-table';
+import { InventoryTable } from '@/components/product-inventories/inventory-table';
 import { LocationSelector } from '@/components/product-inventories/location-selector';
 import { InventoryFilters } from '@/components/product-inventories/inventory-filters';
 import { StockAdjustmentDialog } from '@/components/product-inventories/stock-adjustment-dialog';
@@ -23,6 +20,7 @@ import {
   useProductInventory,
   useLowStockItems,
 } from '@/hooks/use-product-inventory';
+import { ProductInventoryItem } from '@/lib/types';
 
 export default function InventoryPage() {
   const [selectedLocation, setSelectedLocation] = useState<string>('');
@@ -34,7 +32,7 @@ export default function InventoryPage() {
   const [isAdjustmentOpen, setIsAdjustmentOpen] = useState(false);
   const [isEditSettingsOpen, setIsEditSettingsOpen] = useState(false);
   const [selectedInventoryForEdit, setSelectedInventoryForEdit] =
-    useState<InventoryItem>({} as InventoryItem);
+    useState<ProductInventoryItem>({} as ProductInventoryItem);
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
 
   const { data: inventoryData, isLoading } = useProductInventory({
@@ -63,7 +61,7 @@ export default function InventoryPage() {
     inventoryData?.inventory.filter(
       (item) =>
         item.productName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        item.productSku?.toLowerCase().includes(searchQuery.toLowerCase())
+        item.sku?.toLowerCase().includes(searchQuery.toLowerCase())
     ) || [];
 
   const handleAdjustStock = (inventoryId: string) => {
@@ -71,7 +69,7 @@ export default function InventoryPage() {
     setIsAdjustmentOpen(true);
   };
 
-  const handleEditSettings = (item: InventoryItem) => {
+  const handleEditSettings = (item: ProductInventoryItem) => {
     setSelectedInventoryForEdit(item);
     setIsEditSettingsOpen(true);
   };
@@ -187,7 +185,7 @@ export default function InventoryPage() {
       <StockAdjustmentDialog
         open={isAdjustmentOpen}
         onOpenChange={setIsAdjustmentOpen}
-        inventoryId={selectedInventoryId || ''}
+        productInventoryId={selectedInventoryId || ''}
         onSuccess={() => {
           setIsAdjustmentOpen(false);
           setSelectedInventoryId(null);
@@ -202,7 +200,7 @@ export default function InventoryPage() {
           inventory={selectedInventoryForEdit}
           onSuccess={() => {
             setIsEditSettingsOpen(false);
-            setSelectedInventoryForEdit({} as InventoryItem);
+            setSelectedInventoryForEdit({} as ProductInventoryItem);
             // Refetch inventory data
             window.location.reload();
           }}
