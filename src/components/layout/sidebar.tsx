@@ -18,6 +18,8 @@ import {
   PanelLeftClose,
   PanelLeft,
   Store,
+  ShoppingCart,
+  UserCircle,
 } from 'lucide-react';
 import { Suspense, useState } from 'react';
 import { Button } from '@/components/ui/button';
@@ -42,6 +44,13 @@ const navGroups: NavGroup[] = [
     items: [
       { title: 'POS', href: '/pos', icon: Store },
       { title: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
+    ],
+  },
+  {
+    title: 'Sales',
+    items: [
+      { title: 'Orders', href: '/orders', icon: ShoppingCart },
+      { title: 'Customers', href: '/customers', icon: UserCircle },
     ],
   },
   {
