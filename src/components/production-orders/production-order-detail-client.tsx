@@ -120,7 +120,7 @@ interface MaterialAvailability {
 }
 
 const statusColors: Record<ProductionOrderStatus, string> = {
-  draft: 'bg-gray-500',
+  draft: '0',
   scheduled: 'bg-blue-500',
   in_progress: 'bg-yellow-500',
   completed: 'bg-green-500',

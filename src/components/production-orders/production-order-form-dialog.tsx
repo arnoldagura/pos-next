@@ -289,10 +289,13 @@ export default function ProductionOrderFormDialog({
           taxRate: 0,
         }),
       });
-
+      console.log('response', response);
       if (!response.ok) {
         const error = await response.json();
-        throw new Error(error.error || 'Failed to create product inventory');
+        const errorMessage =
+          error.error || 'Failed to create product inventory';
+        toast.error(`Failed to create product inventory: ${errorMessage}`);
+        throw new Error(errorMessage);
       }
 
       const newInventory = await response.json();
@@ -308,11 +311,13 @@ export default function ProductionOrderFormDialog({
       });
     } catch (error) {
       console.error('Error creating product inventory:', error);
-      toast.error(
-        error instanceof Error
-          ? error.message
-          : 'Failed to create product inventory'
-      );
+      // Only show toast if we haven't already shown one for a response error
+      if (
+        error instanceof Error &&
+        !error.message.includes('Failed to create')
+      ) {
+        toast.error(`Failed to create product inventory: ${error.message}`);
+      }
     } finally {
       setCreatingInventory(false);
     }
@@ -341,7 +346,10 @@ export default function ProductionOrderFormDialog({
 
       if (!response.ok) {
         const error = await response.json();
-        throw new Error(error.error || 'Failed to create material inventory');
+        const errorMessage =
+          error.error || 'Failed to create material inventory';
+        toast.error(`Failed to create material inventory: ${errorMessage}`);
+        throw new Error(errorMessage);
       }
 
       const newInventory = await response.json();
@@ -354,11 +362,13 @@ export default function ProductionOrderFormDialog({
       form.setValue('outputMaterialInventoryId', newInventory.id);
     } catch (error) {
       console.error('Error creating material inventory:', error);
-      toast.error(
-        error instanceof Error
-          ? error.message
-          : 'Failed to create material inventory'
-      );
+      // Only show toast if we haven't already shown one for a response error
+      if (
+        error instanceof Error &&
+        !error.message.includes('Failed to create')
+      ) {
+        toast.error(`Failed to create material inventory: ${error.message}`);
+      }
     } finally {
       setCreatingInventory(false);
     }

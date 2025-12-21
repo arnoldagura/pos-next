@@ -67,7 +67,7 @@ export function DeleteUserDialog({
           </DialogDescription>
         </DialogHeader>
 
-        <div className='bg-gray-50 rounded-md p-4'>
+        <div className=' rounded-md p-4'>
           <div className='space-y-1'>
             <p className='text-sm font-medium'>User Details:</p>
             <p className='text-sm text-gray-600'>

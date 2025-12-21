@@ -47,12 +47,16 @@ export default function InventoryPage() {
   const lowStockCount = lowStockData?.count || 0;
   const totalValue =
     inventoryData?.inventory.reduce((sum, item) => {
-      return sum + item.currentStock * 10;
+      return (
+        sum +
+        parseFloat(item.currentQuantity ?? '0') *
+          parseFloat(item.unitPrice ?? '0')
+      );
     }, 0) || 0;
   const averageStock =
     totalItems > 0
       ? (inventoryData?.inventory.reduce(
-          (sum, item) => sum + item.currentStock,
+          (sum, item) => sum + parseFloat(item.currentQuantity ?? '0'),
           0
         ) ?? 0) / totalItems
       : 0;

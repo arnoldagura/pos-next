@@ -152,7 +152,8 @@ export function CostEstimateDialog({
                 placeholder={`Default: ${recipe.outputQuantity} ${recipe.unitOfMeasure}`}
               />
               <p className='text-xs text-gray-500 mt-1'>
-                Base recipe yield: {recipe.outputQuantity} {recipe.unitOfMeasure}
+                Base recipe yield: {recipe.outputQuantity}{' '}
+                {recipe.unitOfMeasure}
               </p>
             </div>
             <div>
@@ -181,7 +182,11 @@ export function CostEstimateDialog({
             </div>
           </div>
 
-          <Button onClick={handleCalculate} disabled={loading} className='w-full'>
+          <Button
+            onClick={handleCalculate}
+            disabled={loading}
+            className='w-full'
+          >
             {loading ? (
               <>
                 <Loader2 className='h-4 w-4 mr-2 animate-spin' />
@@ -201,14 +206,18 @@ export function CostEstimateDialog({
               {/* Cost Summary */}
               <div className='grid grid-cols-2 gap-4'>
                 <div className='p-4 bg-blue-50 rounded-lg border border-blue-200'>
-                  <div className='text-sm text-blue-600 font-medium'>Material Cost</div>
+                  <div className='text-sm text-blue-600 font-medium'>
+                    Material Cost
+                  </div>
                   <div className='text-2xl font-bold text-blue-900 mt-1'>
                     {formatCurrency(estimate.estimatedMaterialCost)}
                   </div>
                 </div>
 
                 <div className='p-4 bg-green-50 rounded-lg border border-green-200'>
-                  <div className='text-sm text-green-600 font-medium'>Unit Cost</div>
+                  <div className='text-sm text-green-600 font-medium'>
+                    Unit Cost
+                  </div>
                   <div className='text-2xl font-bold text-green-900 mt-1'>
                     {formatCurrency(estimate.estimatedUnitCost)}
                   </div>
@@ -217,15 +226,19 @@ export function CostEstimateDialog({
                   </div>
                 </div>
 
-                <div className='p-4 bg-gray-50 rounded-lg border border-gray-200'>
-                  <div className='text-sm text-gray-600 font-medium'>Labor Cost</div>
+                <div className='p-4  rounded-lg border border-gray-200'>
+                  <div className='text-sm text-gray-600 font-medium'>
+                    Labor Cost
+                  </div>
                   <div className='text-xl font-bold text-gray-900 mt-1'>
                     {formatCurrency(estimate.estimatedLaborCost)}
                   </div>
                 </div>
 
-                <div className='p-4 bg-gray-50 rounded-lg border border-gray-200'>
-                  <div className='text-sm text-gray-600 font-medium'>Overhead Cost</div>
+                <div className='p-4  rounded-lg border border-gray-200'>
+                  <div className='text-sm text-gray-600 font-medium'>
+                    Overhead Cost
+                  </div>
                   <div className='text-xl font-bold text-gray-900 mt-1'>
                     {formatCurrency(estimate.estimatedOverheadCost)}
                   </div>
@@ -233,7 +246,9 @@ export function CostEstimateDialog({
               </div>
 
               <div className='p-6 bg-gradient-to-r from-purple-50 to-pink-50 rounded-lg border-2 border-purple-200'>
-                <div className='text-sm text-purple-600 font-medium'>Total Estimated Cost</div>
+                <div className='text-sm text-purple-600 font-medium'>
+                  Total Estimated Cost
+                </div>
                 <div className='text-3xl font-bold text-purple-900 mt-2'>
                   {formatCurrency(estimate.estimatedTotalCost)}
                 </div>
@@ -244,7 +259,9 @@ export function CostEstimateDialog({
 
               {/* Material Breakdown */}
               <div>
-                <h3 className='text-lg font-medium mb-3'>Material Cost Breakdown</h3>
+                <h3 className='text-lg font-medium mb-3'>
+                  Material Cost Breakdown
+                </h3>
                 <div className='rounded-md border'>
                   <Table>
                     <TableHeader>
@@ -272,7 +289,7 @@ export function CostEstimateDialog({
                           </TableCell>
                         </TableRow>
                       ))}
-                      <TableRow className='bg-gray-50 font-medium'>
+                      <TableRow className=' font-medium'>
                         <TableCell colSpan={3}>Total Material Cost</TableCell>
                         <TableCell className='text-right'>
                           {formatCurrency(estimate.estimatedMaterialCost)}
@@ -289,15 +306,26 @@ export function CostEstimateDialog({
                 <div className='space-y-2'>
                   {estimate.estimatedMaterialCost > 0 && (
                     <div className='flex items-center gap-3'>
-                      <div className='w-24 text-sm text-gray-600'>Materials</div>
+                      <div className='w-24 text-sm text-gray-600'>
+                        Materials
+                      </div>
                       <div className='flex-1 bg-gray-200 rounded-full h-6 overflow-hidden'>
                         <div
                           className='bg-blue-500 h-full flex items-center justify-end pr-2 text-white text-xs font-medium'
                           style={{
-                            width: `${(estimate.estimatedMaterialCost / estimate.estimatedTotalCost) * 100}%`,
+                            width: `${
+                              (estimate.estimatedMaterialCost /
+                                estimate.estimatedTotalCost) *
+                              100
+                            }%`,
                           }}
                         >
-                          {((estimate.estimatedMaterialCost / estimate.estimatedTotalCost) * 100).toFixed(1)}%
+                          {(
+                            (estimate.estimatedMaterialCost /
+                              estimate.estimatedTotalCost) *
+                            100
+                          ).toFixed(1)}
+                          %
                         </div>
                       </div>
                       <div className='w-24 text-sm text-right font-medium'>
@@ -312,10 +340,19 @@ export function CostEstimateDialog({
                         <div
                           className='bg-green-500 h-full flex items-center justify-end pr-2 text-white text-xs font-medium'
                           style={{
-                            width: `${(estimate.estimatedLaborCost / estimate.estimatedTotalCost) * 100}%`,
+                            width: `${
+                              (estimate.estimatedLaborCost /
+                                estimate.estimatedTotalCost) *
+                              100
+                            }%`,
                           }}
                         >
-                          {((estimate.estimatedLaborCost / estimate.estimatedTotalCost) * 100).toFixed(1)}%
+                          {(
+                            (estimate.estimatedLaborCost /
+                              estimate.estimatedTotalCost) *
+                            100
+                          ).toFixed(1)}
+                          %
                         </div>
                       </div>
                       <div className='w-24 text-sm text-right font-medium'>
@@ -330,10 +367,19 @@ export function CostEstimateDialog({
                         <div
                           className='bg-purple-500 h-full flex items-center justify-end pr-2 text-white text-xs font-medium'
                           style={{
-                            width: `${(estimate.estimatedOverheadCost / estimate.estimatedTotalCost) * 100}%`,
+                            width: `${
+                              (estimate.estimatedOverheadCost /
+                                estimate.estimatedTotalCost) *
+                              100
+                            }%`,
                           }}
                         >
-                          {((estimate.estimatedOverheadCost / estimate.estimatedTotalCost) * 100).toFixed(1)}%
+                          {(
+                            (estimate.estimatedOverheadCost /
+                              estimate.estimatedTotalCost) *
+                            100
+                          ).toFixed(1)}
+                          %
                         </div>
                       </div>
                       <div className='w-24 text-sm text-right font-medium'>

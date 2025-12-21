@@ -20,7 +20,8 @@ export interface ProductInventoryItem {
   locationName: string;
   alertThreshold: string;
   unitOfMeasure: string | null;
-  currentStock: number;
+  currentQuantity?: string;
+  taxRate?: string;
   belowThreshold: boolean;
   createdAt: Date;
   updatedAt: Date;

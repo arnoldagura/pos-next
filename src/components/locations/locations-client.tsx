@@ -114,9 +114,7 @@ export function LocationsClient() {
       <div className='flex justify-between items-center'>
         <div>
           <h2 className='text-2xl font-bold'>Locations</h2>
-          <p className='text-gray-600'>
-            Manage warehouse and store locations
-          </p>
+          <p className='text-gray-600'>Manage warehouse and store locations</p>
         </div>
         <Button
           onClick={() => {
@@ -165,7 +163,7 @@ export function LocationsClient() {
           )}
         </div>
       ) : (
-        <div className='rounded-md border bg-white'>
+        <div className='rounded-md border '>
           <Table>
             <TableHeader>
               <TableRow>
@@ -212,7 +210,9 @@ export function LocationsClient() {
                     </div>
                   </TableCell>
                   <TableCell>
-                    <Badge variant={location.isActive ? 'default' : 'secondary'}>
+                    <Badge
+                      variant={location.isActive ? 'default' : 'secondary'}
+                    >
                       {location.isActive ? 'Active' : 'Inactive'}
                     </Badge>
                   </TableCell>

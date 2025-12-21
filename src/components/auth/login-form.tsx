@@ -33,14 +33,20 @@ export function LoginForm() {
   };
 
   return (
-    <div className='w-full max-w-md space-y-6 bg-white p-6 sm:p-8 rounded-lg shadow-md'>
+    <div className='w-full max-w-md space-y-6  p-6 sm:p-8 rounded-lg shadow-md'>
       <div className='text-center'>
         <h1 className='text-2xl sm:text-3xl font-bold'>Welcome back</h1>
-        <p className='text-gray-600 mt-2 text-sm sm:text-base'>Sign in to your account</p>
+        <p className='text-gray-600 mt-2 text-sm sm:text-base'>
+          Sign in to your account
+        </p>
       </div>
 
       {error && (
-        <div className='p-3 bg-red-50 border border-red-200 rounded-md' role='alert' aria-live='polite'>
+        <div
+          className='p-3 bg-red-50 border border-red-200 rounded-md'
+          role='alert'
+          aria-live='polite'
+        >
           <p className='text-sm text-red-600'>{error}</p>
         </div>
       )}
@@ -86,7 +92,9 @@ export function LoginForm() {
                   className='w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500'
                   autoComplete='current-password'
                   aria-invalid={errors.password ? 'true' : 'false'}
-                  aria-describedby={errors.password ? 'password-error' : undefined}
+                  aria-describedby={
+                    errors.password ? 'password-error' : undefined
+                  }
                 />
               </FormFieldWrapper>
 
@@ -109,7 +117,9 @@ export function LoginForm() {
                 type='submit'
                 disabled={isSubmitting}
                 className='w-full px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors'
-                aria-label={isSubmitting ? 'Signing in' : 'Sign in to your account'}
+                aria-label={
+                  isSubmitting ? 'Signing in' : 'Sign in to your account'
+                }
               >
                 {isSubmitting ? 'Signing in...' : 'Sign in'}
               </button>

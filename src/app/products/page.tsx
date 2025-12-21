@@ -14,9 +14,9 @@ export default async function ProductsPage() {
 
   if (!canViewInventory) {
     return (
-      <div className='min-h-screen bg-gray-50'>
+      <div className='min-h-screen '>
         <div className='max-w-7xl mx-auto px-4 py-8'>
-          <div className='bg-white rounded-lg shadow p-6'>
+          <div className=' rounded-lg shadow p-6'>
             <h1 className='text-2xl font-bold text-red-600'>Access Denied</h1>
             <p className='mt-2 text-gray-600'>
               You do not have permission to view products.
@@ -28,9 +28,9 @@ export default async function ProductsPage() {
   }
 
   return (
-    <div className='min-h-screen bg-gray-50'>
+    <div className='min-h-screen '>
       <div className='max-w-7xl mx-auto px-4 py-8'>
-        <div className='bg-white rounded-lg shadow'>
+        <div className=' rounded-lg shadow'>
           <div className='p-6 border-b'>
             <h1 className='text-3xl font-bold'>Product Management</h1>
             <p className='text-gray-600 mt-1'>Manage your product inventory</p>

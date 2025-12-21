@@ -1,5 +1,10 @@
 import { db } from '@/db/db';
-import { order, orderItem, productInventory, orderStatusEnum } from '@/drizzle/schema';
+import {
+  order,
+  orderItem,
+  productInventory,
+  orderStatusEnum,
+} from '@/drizzle/schema';
 import { productInventoryMovement } from '@/drizzle/schema/product-inventory-movements';
 import { randomUUID } from 'crypto';
 import { eq, and, sql } from 'drizzle-orm';
@@ -130,6 +135,16 @@ export async function POST(req: NextRequest) {
           referenceId: orderId,
           createdBy: null,
         });
+        const currentQuantity =
+          parseFloat(inventoryRecord.currentQuantity) - item.quantity;
+        await tx
+          .update(productInventory)
+          .set({
+            currentQuantity: currentQuantity.toString(),
+            updatedAt: new Date(),
+          })
+          .where(eq(productInventory.id, inventoryRecord.id))
+          .returning();
       }
 
       return { order: newOrder, items: orderItems };

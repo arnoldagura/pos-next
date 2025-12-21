@@ -5,7 +5,6 @@ import { RouteContext, createDefaultRouteContext } from '@/lib/types';
 import { protectRoute } from '@/middleware/rbac';
 import { eq, and, isNull } from 'drizzle-orm';
 import { NextRequest, NextResponse } from 'next/server';
-import { getBulkStockLevels } from '@/lib/services/inventory-calculation';
 
 async function getProductByBarcodeHandler(
   req: NextRequest,
@@ -38,6 +37,7 @@ async function getProductByBarcodeHandler(
         description: product.description,
         unitPrice: productInventory.unitPrice,
         cost: productInventory.cost,
+        currentQuantity: productInventory.currentQuantity,
         image: product.image,
         unitOfMeasure: productInventory.unitOfMeasure,
         taxRate: productInventory.taxRate,
@@ -63,9 +63,8 @@ async function getProductByBarcodeHandler(
     }
 
     // Get current stock level
-    const stockLevels = await getBulkStockLevels([foundInventory.inventoryId]);
-    const currentStock =
-      stockLevels[foundInventory.inventoryId]?.currentStock || 0;
+    // const stockLevels = await getBulkStockLevels([foundInventory.inventoryId]);
+    const currentStock = parseFloat(foundInventory.currentQuantity) || 0;
 
     return NextResponse.json({
       ...foundInventory,

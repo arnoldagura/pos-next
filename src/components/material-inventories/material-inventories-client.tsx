@@ -297,7 +297,10 @@ export default function MaterialInventoriesClient() {
                     Low Stock
                   </Badge>
                 ) : (
-                  <Badge variant='outline' className='bg-green-50'>
+                  <Badge
+                    variant='outline'
+                    className='bg-green-50 dark:bg-green-500'
+                  >
                     In Stock
                   </Badge>
                 )}

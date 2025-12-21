@@ -47,23 +47,27 @@ export function InventoryTable({
 }: InventoryTableProps) {
   const router = useRouter();
   const getStockStatus = (item: ProductInventoryItem) => {
+    const currentQuantity = parseFloat(item.currentQuantity ?? '0');
     if (item.belowThreshold) {
-      return { label: 'Low Stock', variant: 'destructive' as const };
+      return { label: 'Low Stock', variant: 'warning' as const };
     }
-    if (item.currentStock === 0) {
+    if (currentQuantity === 0) {
       return { label: 'Out of Stock', variant: 'secondary' as const };
     }
     return { label: 'In Stock', variant: 'default' as const };
   };
 
   const getStockIndicator = (item: ProductInventoryItem) => {
-    if (item.currentStock === 0) return 'bg-red-500';
+    const currentQuantity = parseFloat(item.currentQuantity ?? '0');
+    if (currentQuantity === 0) return 'bg-red-500';
     if (item.belowThreshold) return 'bg-yellow-500';
     return 'bg-green-500';
   };
 
   const calculateValue = (item: ProductInventoryItem) => {
-    return item.currentStock * 10;
+    const currentQuantity = parseFloat(item.currentQuantity ?? '0');
+    const unitPrice = parseFloat(item.unitPrice ?? '0');
+    return currentQuantity * unitPrice;
   };
 
   const exportToExcel = () => {
@@ -71,7 +75,7 @@ export function InventoryTable({
       'Product Name': `${item.productName} ${item.variantName}`,
       SKU: item.sku || 'N/A',
       Location: item.locationName,
-      'Current Stock': item.currentStock,
+      'Current Quantity': item.currentQuantity,
       'Alert Threshold': item.alertThreshold,
       Unit: item.unitOfMeasure || 'pcs',
       Status: getStockStatus(item).label,
@@ -136,7 +140,7 @@ export function InventoryTable({
                 .map((item) => {
                   const status = getStockStatus(item);
                   const statusClass =
-                    item.currentStock === 0
+                    parseFloat(item.currentQuantity ?? '0') === 0
                       ? 'out-of-stock'
                       : item.belowThreshold
                       ? 'low-stock'
@@ -146,7 +150,9 @@ export function InventoryTable({
                     <td>${item.productName} ${item.variantName}</td>
                     <td>${item.sku || 'N/A'}</td>
                     <td>${item.locationName}</td>
-                    <td>${item.currentStock} ${item.unitOfMeasure || 'pcs'}</td>
+                    <td>${item.currentQuantity} ${
+                    item.unitOfMeasure || 'pcs'
+                  }</td>
                     <td>${item.alertThreshold}</td>
                     <td class="${statusClass}">${status.label}</td>
                     <td>$${item.unitPrice}</td>
@@ -212,7 +218,7 @@ export function InventoryTable({
               <TableHead>Location</TableHead>
               <TableHead className='text-right'>Stock</TableHead>
               <TableHead className='text-right'>Alert Level</TableHead>
-              <TableHead>Status</TableHead>
+              <TableHead className='text-center'>Status</TableHead>
               <TableHead className='text-right'>Unit Price</TableHead>
               <TableHead className='w-[70px]'></TableHead>
             </TableRow>
@@ -238,12 +244,12 @@ export function InventoryTable({
                   </TableCell>
                   <TableCell>{item.locationName}</TableCell>
                   <TableCell className='text-right'>
-                    {item.currentStock} {item.unitOfMeasure || 'pcs'}
+                    {item.currentQuantity} {item.unitOfMeasure || 'pcs'}
                   </TableCell>
                   <TableCell className='text-right'>
                     {item.alertThreshold}
                   </TableCell>
-                  <TableCell>
+                  <TableCell className='text-center'>
                     <Badge variant={status.variant}>{status.label}</Badge>
                   </TableCell>
                   <TableCell className='text-right'>

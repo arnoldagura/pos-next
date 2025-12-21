@@ -165,7 +165,7 @@ export function ExpiryAlertsDialog({
           ) : (
             <div className='rounded-md border overflow-x-auto max-h-[500px] overflow-y-auto'>
               <Table>
-                <TableHeader className='sticky top-0 bg-white z-10'>
+                <TableHeader className='sticky top-0  z-10'>
                   <TableRow>
                     <TableHead>Urgency</TableHead>
                     <TableHead>Material</TableHead>

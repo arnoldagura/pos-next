@@ -2,7 +2,6 @@ import { db } from '@/db/db';
 import { productInventory } from '@/drizzle/schema';
 import { eq, and } from 'drizzle-orm';
 import { NextRequest, NextResponse } from 'next/server';
-import { getBulkStockLevels } from '@/lib/services/inventory-calculation';
 
 export async function POST(req: NextRequest) {
   try {
@@ -45,8 +44,8 @@ export async function POST(req: NextRequest) {
         continue;
       }
 
-      const stockLevels = await getBulkStockLevels([inventoryRecord.id]);
-      const currentStock = stockLevels[inventoryRecord.id]?.currentStock || 0;
+      // const stockLevels = await getBulkStockLevels([inventoryRecord.id]);
+      const currentStock = parseFloat(inventoryRecord.currentQuantity) || 0;
 
       if (currentStock < quantity) {
         insufficientStock.push({

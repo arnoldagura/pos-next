@@ -63,16 +63,18 @@ export function CartSidebar({ onClose, locationId }: CartSidebarProps) {
   if (!cart) {
     return (
       <div className='flex flex-col h-full'>
-        <div className='p-4 border-b flex items-center justify-between'>
-          <h2 className='text-lg font-semibold flex items-center gap-2'>
-            <ShoppingCart className='h-5 w-5' />
-            Cart
-          </h2>
-          {onClose && (
-            <Button variant='ghost' size='sm' onClick={onClose}>
-              <X className='h-4 w-4' />
-            </Button>
-          )}
+        <div className='p-4 border-b'>
+          <div className='flex items-center justify-between'>
+            <h2 className='text-lg font-semibold flex items-center gap-2'>
+              <ShoppingCart className='h-5 w-5' />
+              Cart
+            </h2>
+            {onClose && (
+              <Button variant='ghost' size='sm' onClick={onClose}>
+                <X className='h-4 w-4' />
+              </Button>
+            )}
+          </div>
         </div>
 
         <div className='flex-1 flex flex-col items-center justify-center p-8 text-center'>
@@ -169,10 +171,10 @@ export function CartSidebar({ onClose, locationId }: CartSidebarProps) {
           {cart.items.map((item) => (
             <div
               key={item.id}
-              className='bg-gray-50 rounded-lg p-3 border border-gray-200'
+              className=' rounded-lg p-3 border border-gray-200'
             >
               <div className='flex gap-3 mb-2'>
-                <div className='w-16 h-16 rounded-md overflow-hidden bg-white border flex-shrink-0'>
+                <div className='w-16 h-16 rounded-md overflow-hidden  border flex-shrink-0'>
                   {item.image ? (
                     <Image
                       src={item.image}
@@ -265,7 +267,7 @@ export function CartSidebar({ onClose, locationId }: CartSidebarProps) {
               </div>
 
               {editingDiscount?.itemId === item.id && (
-                <div className='bg-white p-2 rounded border mt-2'>
+                <div className=' p-2 rounded border mt-2'>
                   <div className='flex gap-2 mb-2'>
                     <Button
                       variant={
@@ -357,7 +359,7 @@ export function CartSidebar({ onClose, locationId }: CartSidebarProps) {
         </div>
       </ScrollArea>
 
-      <div className='border-t p-4 space-y-3 bg-gray-50'>
+      <div className='border-t p-4 space-y-3 '>
         <Button
           variant='outline'
           className='w-full'

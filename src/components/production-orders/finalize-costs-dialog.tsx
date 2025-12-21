@@ -101,7 +101,8 @@ export default function FinalizeCostsDialog({
   );
   const laborCost = parseFloat(form.watch('laborCost') || '0');
   const overheadCost = parseFloat(form.watch('overheadCost') || '0');
-  const totalCost = calculatedMaterialCost + laborCost + overheadCost;
+  const totalCost =
+    calculatedMaterialCost + laborCost + overheadCost || materialCost;
 
   // Fetch materials when dialog opens
   useEffect(() => {

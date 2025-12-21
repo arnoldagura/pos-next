@@ -387,7 +387,7 @@ export function CheckoutDialog({
               )}
             </div>
 
-            <div className='bg-gray-50 rounded-lg p-4 space-y-2'>
+            <div className=' rounded-lg p-4 space-y-2'>
               <div className='flex justify-between'>
                 <span className='text-gray-600'>Total Amount:</span>
                 <span className='font-bold'>${cart.total.toFixed(2)}</span>

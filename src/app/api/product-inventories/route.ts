@@ -12,7 +12,6 @@ import { randomUUID } from 'crypto';
 import { eq, and, count, desc, ilike, or, gte, lte, isNull } from 'drizzle-orm';
 import { NextRequest, NextResponse } from 'next/server';
 import { ZodError } from 'zod';
-import { getBulkStockLevels } from '@/lib/services/inventory-calculation';
 import { generateSku, generateSlug } from '@/lib/validations';
 import { InventoryMovementType } from './[id]/movements/route';
 
@@ -76,6 +75,7 @@ export async function getInventoryHandler(req: NextRequest) {
         barcode: productInventory.barcode,
         unitPrice: productInventory.unitPrice,
         cost: productInventory.cost,
+        currentQuantity: productInventory.currentQuantity,
         unitOfMeasure: productInventory.unitOfMeasure,
         taxRate: productInventory.taxRate,
         alertThreshold: productInventory.alertThreshold,
@@ -90,14 +90,13 @@ export async function getInventoryHandler(req: NextRequest) {
       .limit(limit)
       .offset(offset);
 
-    const inventoryIds = inventoryRecords.map((inv) => inv.id);
-    const stockLevels = await getBulkStockLevels(inventoryIds);
+    // const inventoryIds = inventoryRecords.map((inv) => inv.id);
+    // const stockLevels = await getBulkStockLevels(inventoryIds);
 
     const inventoryWithStock = inventoryRecords.map((inv) => ({
       ...inv,
-      currentStock: stockLevels[inv.id]?.currentStock || 0,
       belowThreshold:
-        (stockLevels[inv.id]?.currentStock || 0) <= Number(inv.alertThreshold),
+        (parseFloat(inv.currentQuantity) || 0) <= Number(inv.alertThreshold),
     }));
 
     return NextResponse.json({

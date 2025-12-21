@@ -12,8 +12,29 @@ export async function proxy(request: NextRequest) {
     request.nextUrl.pathname.startsWith('/register');
 
   const isProtectedRoute =
+    request.nextUrl.pathname.startsWith('/pos') ||
     request.nextUrl.pathname.startsWith('/dashboard') ||
-    request.nextUrl.pathname.startsWith('/profile');
+    request.nextUrl.pathname.startsWith('/profile') ||
+    request.nextUrl.pathname.startsWith('/categories') ||
+    request.nextUrl.pathname.startsWith('/products') ||
+    request.nextUrl.pathname.startsWith('/materials') ||
+    request.nextUrl.pathname.startsWith('/product-inventories') ||
+    request.nextUrl.pathname.startsWith('/material-inventories') ||
+    request.nextUrl.pathname.startsWith('/inventory') ||
+    request.nextUrl.pathname.startsWith('/recipes') ||
+    request.nextUrl.pathname.startsWith('/production-orders') ||
+    request.nextUrl.pathname.startsWith('/locations') ||
+    request.nextUrl.pathname.startsWith('/users') ||
+    request.nextUrl.pathname.startsWith('/settings');
+
+  // Redirect root path to POS
+  if (request.nextUrl.pathname === '/') {
+    if (session) {
+      return NextResponse.redirect(new URL('/pos', request.url));
+    } else {
+      return NextResponse.redirect(new URL('/login', request.url));
+    }
+  }
 
   if (isProtectedRoute && !session) {
     const loginUrl = new URL('/login', request.url);
@@ -22,7 +43,7 @@ export async function proxy(request: NextRequest) {
   }
 
   if (isAuthPage && session) {
-    return NextResponse.redirect(new URL('/dashboard', request.url));
+    return NextResponse.redirect(new URL('/pos', request.url));
   }
 
   return NextResponse.next();

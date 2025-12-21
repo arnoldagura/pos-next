@@ -23,11 +23,13 @@ export function POSClient() {
   const [locations, setLocations] = useState<Location[]>([]);
   const [selectedLocation, setSelectedLocation] = useState<string>('');
   const [showCart, setShowCart] = useState(false);
+  const [isClient, setIsClient] = useState(false);
 
   const cart = useCartStore((state) => state.getActiveCart());
-  const itemCount = cart?.items.length || 0;
+  const itemCount = isClient ? (cart?.items.length || 0) : 0;
 
   useEffect(() => {
+    setIsClient(true);
     fetchLocations();
   }, []);
 
@@ -47,9 +49,9 @@ export function POSClient() {
   };
 
   return (
-    <div className='flex h-screen overflow-hidden bg-gray-50'>
+    <div className='flex h-screen overflow-hidden '>
       <div className='flex-1 flex flex-col overflow-hidden'>
-        <div className='bg-white border-b px-6 py-4 flex items-center justify-between'>
+        <div className=' border-b px-6 py-4 flex items-center justify-between'>
           <div className='flex items-center gap-4'>
             <h1 className='text-2xl font-bold'>Point of Sale</h1>
 
@@ -89,7 +91,7 @@ export function POSClient() {
       </div>
 
       {/* Cart Sidebar - Desktop */}
-      <div className='hidden lg:block w-96 border-l bg-white'>
+      <div className='hidden lg:block w-96 border-l '>
         <CartSidebar locationId={selectedLocation} />
       </div>
 
@@ -100,7 +102,7 @@ export function POSClient() {
             className='fixed inset-0 bg-black/50 z-40 lg:hidden'
             onClick={() => setShowCart(false)}
           />
-          <div className='fixed right-0 top-0 bottom-0 w-96 max-w-full bg-white z-50 lg:hidden shadow-xl'>
+          <div className='fixed right-0 top-0 bottom-0 w-96 max-w-full  z-50 lg:hidden shadow-xl'>
             <CartSidebar
               onClose={() => setShowCart(false)}
               locationId={selectedLocation}

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useCartStore } from '@/stores';
 import {
   Sheet,
@@ -44,12 +44,14 @@ export function PendingOrdersPanel({
   open,
   onOpenChange,
 }: PendingOrdersPanelProps) {
-  const allCarts = useCartStore((state) => state.getAllCarts());
+  const carts = useCartStore((state) => state.carts);
   const activeCartId = useCartStore((state) => state.activeCartId);
   const switchCart = useCartStore((state) => state.switchCart);
   const deleteCart = useCartStore((state) => state.deleteCart);
 
   const [cartToDelete, setCartToDelete] = useState<string | null>(null);
+
+  const allCarts = useMemo(() => Array.from(carts.values()), [carts]);
 
   const pendingCarts = allCarts.filter(
     (cart) => cart.items.length > 0 && cart.id !== activeCartId

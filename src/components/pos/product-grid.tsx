@@ -19,6 +19,7 @@ import { useCartStore } from '@/stores';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 import { Checkbox } from '../ui/checkbox';
+import { ProductInventoryItem } from '@/lib/types';
 
 type Product = {
   id: string;
@@ -44,18 +45,6 @@ type Category = {
   isActive: boolean;
 };
 
-type InventoryItem = {
-  id: string;
-  productId: string;
-  locationId: string;
-  currentStock: number;
-  belowThreshold: boolean;
-  unitPrice: string;
-  taxRate: string;
-  unitOfMeasure: string;
-  barcode: string | null;
-};
-
 interface ProductGridProps {
   locationId?: string;
 }
@@ -64,7 +53,7 @@ export function ProductGrid({ locationId }: ProductGridProps) {
   const [products, setProducts] = useState<Product[]>([]);
   const [allProducts, setAllProducts] = useState<Product[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
-  const [inventory, setInventory] = useState<Map<string, InventoryItem>>(
+  const [inventory, setInventory] = useState<Map<string, ProductInventoryItem>>(
     new Map()
   );
   const [loading, setLoading] = useState(true);
@@ -85,7 +74,9 @@ export function ProductGrid({ locationId }: ProductGridProps) {
       const data = await response.json();
       setCategories(data.categories || []);
     } catch (error) {
-      console.error('Failed to load categories:', error);
+      if (error) {
+        console.log('error', error);
+      }
       toast.error('Failed to load categories');
     }
   }, []);
@@ -94,7 +85,7 @@ export function ProductGrid({ locationId }: ProductGridProps) {
     try {
       setLoading(true);
       const params = new URLSearchParams({
-        status: 'true',
+        status: 'active',
         limit: '1000',
       });
 
@@ -104,6 +95,7 @@ export function ProductGrid({ locationId }: ProductGridProps) {
       if (!response.ok) throw new Error('Failed to fetch products');
 
       const data = await response.json();
+      console.log('data', data);
       setAllProducts(data.products || []);
     } catch (error) {
       console.error('Failed to load products:', error);
@@ -126,9 +118,9 @@ export function ProductGrid({ locationId }: ProductGridProps) {
       if (!response.ok) throw new Error('Failed to fetch inventory');
 
       const data = await response.json();
-      const inventoryMap = new Map<string, InventoryItem>();
+      const inventoryMap = new Map<string, ProductInventoryItem>();
 
-      (data.inventory || []).forEach((item: InventoryItem) => {
+      (data.inventory || []).forEach((item: ProductInventoryItem) => {
         inventoryMap.set(item.productId, item);
       });
 
@@ -217,7 +209,11 @@ export function ProductGrid({ locationId }: ProductGridProps) {
         return;
       }
 
-      if (locationId && stockItem && stockItem.currentStock <= 0) {
+      if (
+        locationId &&
+        stockItem &&
+        parseFloat(stockItem.currentQuantity ?? '0') <= 0
+      ) {
         toast.error('Product is out of stock');
         return;
       }
@@ -300,21 +296,28 @@ export function ProductGrid({ locationId }: ProductGridProps) {
     if (!locationId) return null;
 
     const stockItem = inventory.get(product.id);
+    console.log('stockItem', stockItem);
     if (!stockItem) return { status: 'unknown', stock: 0 };
 
-    if (stockItem.currentStock <= 0) {
+    if (parseFloat(stockItem.currentQuantity ?? '0') <= 0) {
       return { status: 'out', stock: 0 };
     } else if (stockItem.belowThreshold) {
-      return { status: 'low', stock: stockItem.currentStock };
+      return {
+        status: 'low',
+        stock: parseFloat(stockItem.currentQuantity ?? '0'),
+      };
     } else {
-      return { status: 'in-stock', stock: stockItem.currentStock };
+      return {
+        status: 'in-stock',
+        stock: parseFloat(stockItem.currentQuantity ?? '0'),
+      };
     }
   };
 
   return (
     <div className='flex flex-col h-full'>
       {/* Search Bar with Barcode Scanner and Filters */}
-      <div className='p-4 border-b bg-white space-y-3'>
+      <div className='p-4 border-b  space-y-3'>
         <div className='flex gap-2'>
           <div className='flex-1 relative'>
             <Search className='absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400' />
@@ -446,7 +449,7 @@ export function ProductGrid({ locationId }: ProductGridProps) {
       </div>
 
       {/* Products Grid */}
-      <div className='flex-1 overflow-y-auto p-4 bg-gray-50'>
+      <div className='flex-1 overflow-y-auto p-4 '>
         {loading ? (
           <div className='grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4'>
             {Array.from({ length: 12 }).map((_, i) => (
@@ -494,7 +497,7 @@ export function ProductGrid({ locationId }: ProductGridProps) {
 interface ProductCardProps {
   product: Product;
   stockStatus: { status: string; stock: number } | null;
-  inventoryItem?: InventoryItem;
+  inventoryItem?: ProductInventoryItem;
   onAddToCart: (product: Product) => void;
 }
 
@@ -519,7 +522,7 @@ function ProductCard({
       onClick={() => !isOutOfStock && onAddToCart(product)}
       disabled={isOutOfStock}
       className={cn(
-        'group relative flex flex-col bg-white rounded-lg border p-3 transition-all',
+        'group relative flex flex-col  rounded-lg border p-3 transition-all',
         'hover:shadow-lg hover:border-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-500',
         isOutOfStock
           ? 'opacity-60 cursor-not-allowed'
@@ -603,7 +606,7 @@ function ProductCard({
 
 function ProductCardSkeleton() {
   return (
-    <div className='flex flex-col bg-white rounded-lg border p-3'>
+    <div className='flex flex-col  rounded-lg border p-3'>
       <Skeleton className='aspect-square mb-2 rounded-md' />
       <Skeleton className='h-4 w-3/4 mb-2' />
       <Skeleton className='h-3 w-1/2 mb-2' />

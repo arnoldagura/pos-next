@@ -71,7 +71,7 @@ function SortableCategory({
   return (
     <div ref={setNodeRef} style={style}>
       <div
-        className='flex items-center justify-between p-3 hover:bg-gray-50 border-b'
+        className='flex items-center justify-between p-3 hover: border-b'
         style={{ paddingLeft }}
       >
         <div className='flex items-center gap-3 flex-1'>
@@ -353,7 +353,7 @@ export function CategoriesClient() {
           </Button>
         </div>
       ) : (
-        <div className='rounded-md border bg-white'>
+        <div className='rounded-md border '>
           <DndContext
             sensors={sensors}
             collisionDetection={closestCenter}

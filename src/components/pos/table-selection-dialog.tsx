@@ -44,9 +44,9 @@ const tableStatusConfig = {
   },
   maintenance: {
     label: 'Maintenance',
-    className: 'bg-gray-500 text-white cursor-not-allowed',
+    className: '0 text-white cursor-not-allowed',
     badgeVariant: 'outline' as const,
-    badgeClassName: 'bg-gray-500',
+    badgeClassName: '0',
   },
 };
 
@@ -69,7 +69,7 @@ export function TableSelectionDialog({
     }
   }, [open, locationId, fetchTables]);
 
-  const handleSelectTable = async (table: typeof tables[0]) => {
+  const handleSelectTable = async (table: (typeof tables)[0]) => {
     if (table.status === 'maintenance') {
       toast.error('Table is under maintenance');
       return;
@@ -110,7 +110,7 @@ export function TableSelectionDialog({
       />
 
       <Dialog open={open && !viewingOrder} onOpenChange={onOpenChange}>
-        <DialogContent className="sm:max-w-3xl">
+        <DialogContent className='sm:max-w-3xl'>
           <DialogHeader>
             <DialogTitle>Select Table</DialogTitle>
             <DialogDescription>
@@ -119,21 +119,21 @@ export function TableSelectionDialog({
             </DialogDescription>
           </DialogHeader>
 
-          <ScrollArea className="h-[400px] pr-4">
+          <ScrollArea className='h-[400px] pr-4'>
             {isLoading ? (
-              <div className="grid grid-cols-3 gap-4">
+              <div className='grid grid-cols-3 gap-4'>
                 {Array.from({ length: 9 }).map((_, i) => (
-                  <Skeleton key={i} className="h-24 w-full" />
+                  <Skeleton key={i} className='h-24 w-full' />
                 ))}
               </div>
             ) : tables.length === 0 ? (
-              <div className="flex flex-col items-center justify-center py-12 text-center">
-                <p className="text-muted-foreground">
+              <div className='flex flex-col items-center justify-center py-12 text-center'>
+                <p className='text-muted-foreground'>
                   No tables found for this location.
                 </p>
               </div>
             ) : (
-              <div className="grid grid-cols-3 gap-4">
+              <div className='grid grid-cols-3 gap-4'>
                 {tables.map((table) => {
                   const config = tableStatusConfig[table.status];
                   const isDisabled = table.status === 'maintenance';
@@ -150,7 +150,7 @@ export function TableSelectionDialog({
                         isDisabled && 'opacity-50'
                       )}
                     >
-                      <div className="absolute top-2 right-2">
+                      <div className='absolute top-2 right-2'>
                         <Badge
                           variant={config.badgeVariant}
                           className={cn('text-xs', config.badgeClassName)}
@@ -159,14 +159,14 @@ export function TableSelectionDialog({
                         </Badge>
                       </div>
 
-                      <div className="text-2xl font-bold mb-2">
+                      <div className='text-2xl font-bold mb-2'>
                         {table.number}
                       </div>
-                      <div className="text-sm font-medium mb-1">
+                      <div className='text-sm font-medium mb-1'>
                         {table.name}
                       </div>
-                      <div className="flex items-center text-xs opacity-90">
-                        <Users className="mr-1 h-3 w-3" />
+                      <div className='flex items-center text-xs opacity-90'>
+                        <Users className='mr-1 h-3 w-3' />
                         <span>{table.capacity} seats</span>
                       </div>
                     </button>
@@ -177,10 +177,10 @@ export function TableSelectionDialog({
           </ScrollArea>
 
           {selectedTable && (
-            <div className="border-t pt-4">
-              <p className="text-sm text-muted-foreground">
+            <div className='border-t pt-4'>
+              <p className='text-sm text-muted-foreground'>
                 Current selection:{' '}
-                <span className="font-medium text-foreground">
+                <span className='font-medium text-foreground'>
                   {selectedTable.name}
                 </span>
               </p>
