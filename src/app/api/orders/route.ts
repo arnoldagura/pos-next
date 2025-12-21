@@ -7,7 +7,7 @@ import {
 } from '@/drizzle/schema';
 import { productInventoryMovement } from '@/drizzle/schema/product-inventory-movements';
 import { randomUUID } from 'crypto';
-import { eq, and, sql } from 'drizzle-orm';
+import { eq, and, sql, gte, lte, desc } from 'drizzle-orm';
 import { NextRequest, NextResponse } from 'next/server';
 
 type OrderStatus = (typeof orderStatusEnum.enumValues)[number];
@@ -170,8 +170,11 @@ export async function GET(req: NextRequest) {
     const locationId = searchParams.get('locationId');
     const tableId = searchParams.get('tableId');
     const status = searchParams.get('status');
+    const paymentStatus = searchParams.get('paymentStatus');
+    const startDate = searchParams.get('startDate');
+    const endDate = searchParams.get('endDate');
     const page = parseInt(searchParams.get('page') || '1', 10);
-    const limit = parseInt(searchParams.get('limit') || '50', 10);
+    const limit = parseInt(searchParams.get('limit') || '100', 10);
     const offset = (page - 1) * limit;
 
     const conditions = [];
@@ -188,13 +191,29 @@ export async function GET(req: NextRequest) {
       conditions.push(eq(order.status, status as OrderStatus));
     }
 
+    if (paymentStatus) {
+      conditions.push(eq(order.paymentStatus, paymentStatus as any));
+    }
+
+    if (startDate) {
+      const start = new Date(startDate);
+      start.setHours(0, 0, 0, 0);
+      conditions.push(gte(order.createdAt, start));
+    }
+
+    if (endDate) {
+      const end = new Date(endDate);
+      end.setHours(23, 59, 59, 999);
+      conditions.push(lte(order.createdAt, end));
+    }
+
     const whereClause = conditions.length > 0 ? and(...conditions) : undefined;
 
     const orders = await db
       .select()
       .from(order)
       .where(whereClause)
-      .orderBy(sql`${order.createdAt} DESC`)
+      .orderBy(desc(order.createdAt))
       .limit(limit)
       .offset(offset);
 
