@@ -191,8 +191,8 @@ export async function GET(req: NextRequest) {
       conditions.push(eq(order.status, status as OrderStatus));
     }
 
-    if (paymentStatus) {
-      conditions.push(eq(order.paymentStatus, paymentStatus as any));
+    if (paymentStatus && (paymentStatus === 'pending' || paymentStatus === 'paid' || paymentStatus === 'partial' || paymentStatus === 'refunded')) {
+      conditions.push(eq(order.paymentStatus, paymentStatus));
     }
 
     if (startDate) {

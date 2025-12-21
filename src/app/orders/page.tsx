@@ -10,7 +10,7 @@ export default async function OrdersPage() {
     redirect('/login');
   }
 
-  const canViewOrders = await hasPermission(user.id, 'view', 'orders');
+  const canViewOrders = await hasPermission(user.id, 'read', 'orders');
 
   if (!canViewOrders) {
     return (

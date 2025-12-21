@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useMemo } from 'react';
 
 /**
  * Virtual scrolling hook for rendering large lists efficiently

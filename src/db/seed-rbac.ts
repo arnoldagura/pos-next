@@ -184,6 +184,36 @@ const defaultPermissions = [
     resource: 'settings',
     action: 'update',
   },
+
+  // Customer permissions
+  {
+    id: randomUUID(),
+    name: 'customers:create',
+    description: 'Create new customers',
+    resource: 'customers',
+    action: 'create',
+  },
+  {
+    id: randomUUID(),
+    name: 'customers:read',
+    description: 'View customers',
+    resource: 'customers',
+    action: 'read',
+  },
+  {
+    id: randomUUID(),
+    name: 'customers:update',
+    description: 'Update customer information',
+    resource: 'customers',
+    action: 'update',
+  },
+  {
+    id: randomUUID(),
+    name: 'customers:delete',
+    description: 'Delete customers',
+    resource: 'customers',
+    action: 'delete',
+  },
 ];
 
 // Role-Permission mappings
@@ -198,6 +228,10 @@ const rolePermissionMappings = {
     'orders:read',
     'orders:update',
     'orders:delete',
+    'customers:create',
+    'customers:read',
+    'customers:update',
+    'customers:delete',
     'users:create',
     'users:read',
     'users:update',
@@ -221,6 +255,10 @@ const rolePermissionMappings = {
     'orders:read',
     'orders:update',
     'orders:delete',
+    'customers:create',
+    'customers:read',
+    'customers:update',
+    'customers:delete',
     'users:read',
     'inventory:create',
     'inventory:read',
@@ -236,6 +274,8 @@ const rolePermissionMappings = {
     'orders:create',
     'orders:read',
     'orders:update',
+    'customers:read',
+    'customers:create',
   ],
   kitchen: [
     // Kitchen staff can view and update orders

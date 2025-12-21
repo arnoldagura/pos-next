@@ -10,7 +10,8 @@ export default async function CustomersPage() {
     redirect('/login');
   }
 
-  const canViewCustomers = await hasPermission(user.id, 'view', 'products');
+  // For now, use products permission until customer permissions are seeded
+  const canViewCustomers = await hasPermission(user.id, 'read', 'products');
 
   if (!canViewCustomers) {
     return (

@@ -1,7 +1,7 @@
 import { db } from '@/db/db';
 import { customer } from '@/drizzle/schema/customers';
 import { randomUUID } from 'crypto';
-import { eq, or, ilike, desc } from 'drizzle-orm';
+import { or, ilike, desc } from 'drizzle-orm';
 import { NextRequest, NextResponse } from 'next/server';
 
 export async function GET(req: NextRequest) {
@@ -21,7 +21,7 @@ export async function GET(req: NextRequest) {
           ilike(customer.email, `%${search}%`),
           ilike(customer.phone, `%${search}%`)
         )
-      ) as any;
+      );
     }
 
     const customers = await query
