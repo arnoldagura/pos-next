@@ -7,7 +7,6 @@ import {
   productionOrder,
   materialBatch,
 } from '@/drizzle/schema';
-import { productInventoryMovement } from '@/drizzle/schema/product-inventory-movements';
 import { eq, and, sql, gte, lte, desc } from 'drizzle-orm';
 import { NextRequest, NextResponse } from 'next/server';
 
@@ -143,7 +142,9 @@ export async function GET(req: NextRequest) {
         count: sql<number>`COUNT(*)`,
       })
       .from(productionOrder)
-      .where(locationId ? eq(productionOrder.locationId, locationId) : undefined)
+      .where(
+        locationId ? eq(productionOrder.locationId, locationId) : undefined
+      )
       .groupBy(productionOrder.status);
 
     // Inventory Value
