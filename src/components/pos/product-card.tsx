@@ -6,18 +6,12 @@ import { ShoppingCart } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
+import { ProductPosItem } from '@/lib/types';
 
 interface ProductCardProps {
-  product: {
-    id: string;
-    name: string;
-    sku: string | null;
-    sellingPrice: string;
-    image: string | null;
-    unitOfMeasure: string | null;
-  };
+  product: ProductPosItem;
   currentStock?: number;
-  onAddToCart: (product: any) => void;
+  onAddToCart: (product: ProductPosItem) => void;
 }
 
 /**
@@ -38,38 +32,38 @@ export const ProductCard = memo(function ProductCard({
       )}
       onClick={() => !isOutOfStock && onAddToCart(product)}
     >
-      <div className="aspect-square relative mb-3 bg-gray-100 rounded-md overflow-hidden">
+      <div className='aspect-square relative mb-3 bg-gray-100 rounded-md overflow-hidden'>
         {product.image ? (
           <Image
             src={product.image}
             alt={product.name}
             fill
-            className="object-cover"
-            sizes="(max-width: 768px) 50vw, 25vw"
+            className='object-cover'
+            sizes='(max-width: 768px) 50vw, 25vw'
           />
         ) : (
-          <div className="w-full h-full flex items-center justify-center text-gray-400">
-            <ShoppingCart className="h-12 w-12" />
+          <div className='w-full h-full flex items-center justify-center text-gray-400'>
+            <ShoppingCart className='h-12 w-12' />
           </div>
         )}
         {isOutOfStock && (
-          <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
-            <Badge variant="destructive">Out of Stock</Badge>
+          <div className='absolute inset-0 bg-black/50 flex items-center justify-center'>
+            <Badge variant='destructive'>Out of Stock</Badge>
           </div>
         )}
       </div>
 
-      <div className="space-y-2">
-        <h3 className="font-semibold text-sm line-clamp-2 group-hover:text-blue-600 transition-colors">
+      <div className='space-y-2'>
+        <h3 className='font-semibold text-sm line-clamp-2 group-hover:text-blue-600 transition-colors'>
           {product.name}
         </h3>
         {product.sku && (
-          <p className="text-xs text-muted-foreground">SKU: {product.sku}</p>
+          <p className='text-xs text-muted-foreground'>SKU: {product.sku}</p>
         )}
-        <div className="flex items-center justify-between">
-          <span className="text-lg font-bold">${product.sellingPrice}</span>
+        <div className='flex items-center justify-between'>
+          <span className='text-lg font-bold'>${product.sellingPrice}</span>
           {!isOutOfStock && (
-            <Badge variant="secondary" className="text-xs">
+            <Badge variant='secondary' className='text-xs'>
               {currentStock} {product.unitOfMeasure || 'units'}
             </Badge>
           )}
@@ -78,14 +72,14 @@ export const ProductCard = memo(function ProductCard({
 
       {!isOutOfStock && (
         <Button
-          size="sm"
-          className="w-full mt-3 opacity-0 group-hover:opacity-100 transition-opacity"
+          size='sm'
+          className='w-full mt-3 opacity-0 group-hover:opacity-100 transition-opacity'
           onClick={(e) => {
             e.stopPropagation();
             onAddToCart(product);
           }}
         >
-          <ShoppingCart className="h-4 w-4 mr-2" />
+          <ShoppingCart className='h-4 w-4 mr-2' />
           Add to Cart
         </Button>
       )}

@@ -26,6 +26,38 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Search, Filter, Receipt, RefreshCcw } from 'lucide-react';
 import { formatCurrency } from '@/lib/utils';
 import { ReceiptDialog } from '@/components/receipts/receipt-dialog';
+import { order, orderItem } from '@/drizzle/schema/orders';
+import type { InferSelectModel } from 'drizzle-orm';
+
+type Order = InferSelectModel<typeof order>;
+type OrderItem = InferSelectModel<typeof orderItem>;
+
+interface ReceiptData {
+  orderNumber: string;
+  orderDate: Date;
+  location?: {
+    name: string;
+    address?: string;
+    phone?: string;
+  };
+  items: {
+    productName: string;
+    productSku?: string | null;
+    quantity: number;
+    unitPrice: string;
+    discount: string;
+    total: string;
+  }[];
+  subtotal: string;
+  totalDiscount: string;
+  totalTax: string;
+  total: string;
+  paymentMethod: string;
+  amountPaid: string;
+  changeGiven: string;
+  customerName?: string | null;
+  tableNumber?: string | null;
+}
 
 const statusColors: Record<string, string> = {
   pending: 'bg-yellow-100 text-yellow-800',
@@ -47,7 +79,7 @@ export function OrdersClient() {
   const [paymentFilter, setPaymentFilter] = useState('all');
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
-  const [selectedOrder, setSelectedOrder] = useState<any>(null);
+  const [selectedOrder, setSelectedOrder] = useState<ReceiptData | null>(null);
   const [receiptDialogOpen, setReceiptDialogOpen] = useState(false);
 
   const { data, isLoading, refetch } = useQuery({
@@ -65,7 +97,7 @@ export function OrdersClient() {
     },
   });
 
-  const filteredOrders = data?.orders?.filter((order: any) => {
+  const filteredOrders = data?.orders?.filter((order: Order) => {
     if (!searchQuery) return true;
     const query = searchQuery.toLowerCase();
     return (
@@ -90,7 +122,7 @@ export function OrdersClient() {
           address: order.locationAddress,
           phone: order.locationPhone,
         } : undefined,
-        items: items.map((item: any) => ({
+        items: items.map((item: OrderItem) => ({
           productName: item.productName,
           productSku: item.productSku,
           quantity: item.quantity,
@@ -228,7 +260,7 @@ export function OrdersClient() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {filteredOrders.map((order: any) => (
+                  {filteredOrders.map((order: Order) => (
                     <TableRow key={order.id}>
                       <TableCell className="font-medium">
                         {order.orderNumber}
@@ -253,7 +285,7 @@ export function OrdersClient() {
                         </Badge>
                       </TableCell>
                       <TableCell className="capitalize">
-                        {order.paymentMethod.replace('_', ' ')}
+                        {order.paymentMethod?.replace('_', ' ') || '-'}
                       </TableCell>
                       <TableCell className="text-right font-medium">
                         {formatCurrency(parseFloat(order.total))}

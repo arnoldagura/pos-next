@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
+import type { DiscountType } from '@/lib/types';
 
 export interface CartItem {
   id: string;
@@ -8,7 +9,7 @@ export interface CartItem {
   price: number;
   quantity: number;
   discount: number;
-  discountType: 'percentage' | 'fixed';
+  discountType: DiscountType;
   taxRate: number;
   subtotal: number;
   total: number;
@@ -47,7 +48,7 @@ interface CartState {
   applyItemDiscount: (
     itemId: string,
     discount: number,
-    discountType: 'percentage' | 'fixed'
+    discountType: DiscountType
   ) => void;
 
   setTable: (tableId: string, tableName: string) => void;

@@ -7,8 +7,9 @@ import {
 } from '@/drizzle/schema';
 import { productInventoryMovement } from '@/drizzle/schema/product-inventory-movements';
 import { randomUUID } from 'crypto';
-import { eq, and, sql, gte, lte, desc } from 'drizzle-orm';
+import { eq, and, gte, lte, desc } from 'drizzle-orm';
 import { NextRequest, NextResponse } from 'next/server';
+import type { DiscountType } from '@/lib/types';
 
 type OrderStatus = (typeof orderStatusEnum.enumValues)[number];
 
@@ -19,7 +20,7 @@ interface OrderItemInput {
   quantity: number;
   unitPrice: number;
   discount?: number;
-  discountType?: 'percentage' | 'fixed';
+  discountType?: DiscountType;
   taxRate?: number;
   subtotal: number;
   total: number;
@@ -191,7 +192,13 @@ export async function GET(req: NextRequest) {
       conditions.push(eq(order.status, status as OrderStatus));
     }
 
-    if (paymentStatus && (paymentStatus === 'pending' || paymentStatus === 'paid' || paymentStatus === 'partial' || paymentStatus === 'refunded')) {
+    if (
+      paymentStatus &&
+      (paymentStatus === 'pending' ||
+        paymentStatus === 'paid' ||
+        paymentStatus === 'partial' ||
+        paymentStatus === 'refunded')
+    ) {
       conditions.push(eq(order.paymentStatus, paymentStatus));
     }
 

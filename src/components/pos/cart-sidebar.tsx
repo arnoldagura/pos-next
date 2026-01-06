@@ -25,6 +25,7 @@ import { CheckoutDialog } from './checkout-dialog';
 import { TableSelectionDialog } from './table-selection-dialog';
 import { PendingOrdersPanel } from './pending-orders-panel';
 import { Badge } from '@/components/ui/badge';
+import type { DiscountType } from '@/lib/types';
 
 interface CartSidebarProps {
   onClose?: () => void;
@@ -49,7 +50,7 @@ export function CartSidebar({ onClose, locationId }: CartSidebarProps) {
   const [editingDiscount, setEditingDiscount] = useState<{
     itemId: string;
     value: string;
-    type: 'percentage' | 'fixed';
+    type: DiscountType;
   } | null>(null);
 
   const [showCheckout, setShowCheckout] = useState(false);
@@ -103,7 +104,7 @@ export function CartSidebar({ onClose, locationId }: CartSidebarProps) {
   const handleApplyDiscount = (
     itemId: string,
     discount: number,
-    type: 'percentage' | 'fixed'
+    type: DiscountType
   ) => {
     applyItemDiscount(itemId, discount, type);
     setEditingDiscount(null);
@@ -138,7 +139,7 @@ export function CartSidebar({ onClose, locationId }: CartSidebarProps) {
         <div className='flex items-center justify-between mb-3'>
           <h2 className='text-lg font-semibold flex items-center gap-2'>
             <ShoppingCart className='h-5 w-5' />
-            Cart ({cart.items.length})
+            Cart{` (${cart.items.length})`}
           </h2>
           <div className='flex items-center gap-2'>
             <Button
@@ -181,7 +182,8 @@ export function CartSidebar({ onClose, locationId }: CartSidebarProps) {
                       alt={item.name}
                       width={64}
                       height={64}
-                      className='object-cover w-full h-full'
+                      className='object-cover'
+                      style={{ width: '100%', height: 'auto' }}
                     />
                   ) : (
                     <div className='w-full h-full flex items-center justify-center'>

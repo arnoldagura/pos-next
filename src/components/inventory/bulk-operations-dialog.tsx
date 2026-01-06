@@ -20,8 +20,15 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Loader2, Package, DollarSign, TrendingUp, Archive } from 'lucide-react';
+import {
+  Loader2,
+  Package,
+  DollarSign,
+  TrendingUp,
+  Archive,
+} from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
+import type { DiscountType } from '@/lib/types';
 
 type BulkOperationType =
   | 'adjust_price'
@@ -45,7 +52,8 @@ export function BulkOperationsDialog({
   const [operation, setOperation] = useState<BulkOperationType>('adjust_price');
   const [loading, setLoading] = useState(false);
   const [value, setValue] = useState('');
-  const [adjustmentType, setAdjustmentType] = useState<'percentage' | 'fixed'>('percentage');
+  const [adjustmentType, setAdjustmentType] =
+    useState<DiscountType>('percentage');
   const [remarks, setRemarks] = useState('');
 
   const handleSubmit = async () => {
@@ -81,7 +89,11 @@ export function BulkOperationsDialog({
       setRemarks('');
     } catch (error) {
       console.error('Bulk operation error:', error);
-      alert(error instanceof Error ? error.message : 'Failed to perform bulk operation');
+      alert(
+        error instanceof Error
+          ? error.message
+          : 'Failed to perform bulk operation'
+      );
     } finally {
       setLoading(false);
     }
@@ -89,7 +101,7 @@ export function BulkOperationsDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-md">
+      <DialogContent className='max-w-md'>
         <DialogHeader>
           <DialogTitle>Bulk Operations</DialogTitle>
           <DialogDescription>
@@ -97,35 +109,38 @@ export function BulkOperationsDialog({
           </DialogDescription>
         </DialogHeader>
 
-        <div className="space-y-4 py-4">
-          <div className="space-y-2">
+        <div className='space-y-4 py-4'>
+          <div className='space-y-2'>
             <Label>Operation Type</Label>
-            <Select value={operation} onValueChange={(v) => setOperation(v as BulkOperationType)}>
+            <Select
+              value={operation}
+              onValueChange={(v) => setOperation(v as BulkOperationType)}
+            >
               <SelectTrigger>
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="adjust_price">
-                  <div className="flex items-center gap-2">
-                    <DollarSign className="h-4 w-4" />
+                <SelectItem value='adjust_price'>
+                  <div className='flex items-center gap-2'>
+                    <DollarSign className='h-4 w-4' />
                     Adjust Price
                   </div>
                 </SelectItem>
-                <SelectItem value="adjust_stock">
-                  <div className="flex items-center gap-2">
-                    <Package className="h-4 w-4" />
+                <SelectItem value='adjust_stock'>
+                  <div className='flex items-center gap-2'>
+                    <Package className='h-4 w-4' />
                     Adjust Stock
                   </div>
                 </SelectItem>
-                <SelectItem value="update_threshold">
-                  <div className="flex items-center gap-2">
-                    <TrendingUp className="h-4 w-4" />
+                <SelectItem value='update_threshold'>
+                  <div className='flex items-center gap-2'>
+                    <TrendingUp className='h-4 w-4' />
                     Update Alert Threshold
                   </div>
                 </SelectItem>
-                <SelectItem value="change_status">
-                  <div className="flex items-center gap-2">
-                    <Archive className="h-4 w-4" />
+                <SelectItem value='change_status'>
+                  <div className='flex items-center gap-2'>
+                    <Archive className='h-4 w-4' />
                     Change Status
                   </div>
                 </SelectItem>
@@ -135,30 +150,39 @@ export function BulkOperationsDialog({
 
           {operation === 'adjust_price' && (
             <>
-              <div className="space-y-2">
+              <div className='space-y-2'>
                 <Label>Adjustment Type</Label>
-                <Select value={adjustmentType} onValueChange={(v) => setAdjustmentType(v as any)}>
+                <Select
+                  value={adjustmentType}
+                  onValueChange={(v) => setAdjustmentType(v as DiscountType)}
+                >
                   <SelectTrigger>
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="percentage">Percentage (%)</SelectItem>
-                    <SelectItem value="fixed">Fixed Amount</SelectItem>
+                    <SelectItem value='percentage'>Percentage (%)</SelectItem>
+                    <SelectItem value='fixed'>Fixed Amount</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
-              <div className="space-y-2">
+              <div className='space-y-2'>
                 <Label>
-                  {adjustmentType === 'percentage' ? 'Percentage Change' : 'Amount'}
+                  {adjustmentType === 'percentage'
+                    ? 'Percentage Change'
+                    : 'Amount'}
                 </Label>
                 <Input
-                  type="number"
-                  placeholder={adjustmentType === 'percentage' ? 'e.g., 10 for +10%' : 'e.g., 5.00'}
+                  type='number'
+                  placeholder={
+                    adjustmentType === 'percentage'
+                      ? 'e.g., 10 for +10%'
+                      : 'e.g., 5.00'
+                  }
                   value={value}
                   onChange={(e) => setValue(e.target.value)}
                   step={adjustmentType === 'percentage' ? '1' : '0.01'}
                 />
-                <p className="text-xs text-muted-foreground">
+                <p className='text-xs text-muted-foreground'>
                   {adjustmentType === 'percentage'
                     ? 'Use positive for increase, negative for decrease'
                     : 'Use positive to increase, negative to decrease'}
@@ -168,56 +192,60 @@ export function BulkOperationsDialog({
           )}
 
           {operation === 'adjust_stock' && (
-            <div className="space-y-2">
+            <div className='space-y-2'>
               <Label>Stock Adjustment</Label>
               <Input
-                type="number"
-                placeholder="e.g., 10 to add, -5 to remove"
+                type='number'
+                placeholder='e.g., 10 to add, -5 to remove'
                 value={value}
                 onChange={(e) => setValue(e.target.value)}
               />
-              <p className="text-xs text-muted-foreground">
+              <p className='text-xs text-muted-foreground'>
                 Positive to add stock, negative to remove
               </p>
             </div>
           )}
 
           {operation === 'update_threshold' && (
-            <div className="space-y-2">
+            <div className='space-y-2'>
               <Label>New Alert Threshold</Label>
               <Input
-                type="number"
-                placeholder="e.g., 10"
+                type='number'
+                placeholder='e.g., 10'
                 value={value}
                 onChange={(e) => setValue(e.target.value)}
-                min="0"
+                min='0'
               />
             </div>
           )}
 
           {operation === 'change_status' && (
-            <div className="space-y-2">
+            <div className='space-y-2'>
               <Label>New Status</Label>
               <Select value={value} onValueChange={setValue}>
                 <SelectTrigger>
-                  <SelectValue placeholder="Select status" />
+                  <SelectValue placeholder='Select status' />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="active">
-                    <Badge className="bg-green-100 text-green-800">Active</Badge>
+                  <SelectItem value='active'>
+                    <Badge className='bg-green-100 text-green-800'>
+                      Active
+                    </Badge>
                   </SelectItem>
-                  <SelectItem value="inactive">
-                    <Badge className="bg-gray-100 text-gray-800">Inactive</Badge>
+                  <SelectItem value='inactive'>
+                    <Badge className='bg-gray-100 text-gray-800'>
+                      Inactive
+                    </Badge>
                   </SelectItem>
                 </SelectContent>
               </Select>
             </div>
           )}
 
-          <div className="space-y-2">
+          <div className='space-y-2'>
             <Label>Remarks (Optional)</Label>
             <Textarea
-              placeholder="Add notes about this bulk operation..."
+              placeholder='Add notes about this bulk operation...'
               value={remarks}
               onChange={(e) => setRemarks(e.target.value)}
               rows={3}
@@ -226,13 +254,17 @@ export function BulkOperationsDialog({
         </div>
 
         <DialogFooter>
-          <Button variant="outline" onClick={() => onOpenChange(false)} disabled={loading}>
+          <Button
+            variant='outline'
+            onClick={() => onOpenChange(false)}
+            disabled={loading}
+          >
             Cancel
           </Button>
           <Button onClick={handleSubmit} disabled={loading}>
             {loading ? (
               <>
-                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                <Loader2 className='h-4 w-4 mr-2 animate-spin' />
                 Processing...
               </>
             ) : (

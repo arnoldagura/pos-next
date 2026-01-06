@@ -21,7 +21,7 @@ import {
   ShoppingCart,
   UserCircle,
 } from 'lucide-react';
-import { Suspense, useState } from 'react';
+import { Suspense } from 'react';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -94,9 +94,8 @@ const navGroups: NavGroup[] = [
 
 export function Sidebar() {
   const { data: session } = useSession();
-  const { mobileOpen, setMobileOpen } = useSidebar();
+  const { mobileOpen, setMobileOpen, collapsed, setCollapsed } = useSidebar();
   const pathname = usePathname();
-  const [collapsed, setCollapsed] = useState(false);
 
   if (!session) {
     return null;

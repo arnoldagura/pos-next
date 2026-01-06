@@ -5,7 +5,7 @@
 /**
  * Convert data to CSV format
  */
-export function exportToCSV<T extends Record<string, any>>(
+export function exportToCSV<T extends Record<string, string | number | null>>(
   data: T[],
   filename: string = 'export.csv'
 ): void {
@@ -39,7 +39,7 @@ export function exportToCSV<T extends Record<string, any>>(
 /**
  * Export data to Excel format using simple HTML table method
  */
-export function exportToExcel<T extends Record<string, any>>(
+export function exportToExcel<T extends Record<string, string | number | null>>(
   data: T[],
   filename: string = 'export.xlsx',
   sheetName: string = 'Sheet1'

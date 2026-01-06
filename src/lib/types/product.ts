@@ -26,7 +26,22 @@ export interface ProductInventoryItem {
   createdAt: Date;
   updatedAt: Date;
 }
-
+export interface ProductPosItem {
+  id: string;
+  name: string;
+  slug: string;
+  sku: string | null;
+  description: string | null;
+  sellingPrice: string;
+  cost: string | null;
+  categoryId: string | null;
+  image: string | null;
+  status: boolean;
+  unitOfMeasure: string | null;
+  taxRate: string;
+  createdAt: string;
+  updatedAt: string;
+}
 export interface ProductInventoryResponse {
   inventory: ProductInventoryItem[];
   pagination: {

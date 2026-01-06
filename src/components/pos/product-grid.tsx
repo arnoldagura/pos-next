@@ -19,24 +19,7 @@ import { useCartStore } from '@/stores';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 import { Checkbox } from '../ui/checkbox';
-import { ProductInventoryItem } from '@/lib/types';
-
-type Product = {
-  id: string;
-  name: string;
-  slug: string;
-  sku: string | null;
-  description: string | null;
-  sellingPrice: string;
-  cost: string | null;
-  categoryId: string | null;
-  image: string | null;
-  status: boolean;
-  unitOfMeasure: string | null;
-  taxRate: string;
-  createdAt: string;
-  updatedAt: string;
-};
+import { ProductInventoryItem, ProductPosItem } from '@/lib/types';
 
 type Category = {
   id: string;
@@ -50,8 +33,8 @@ interface ProductGridProps {
 }
 
 export function ProductGrid({ locationId }: ProductGridProps) {
-  const [products, setProducts] = useState<Product[]>([]);
-  const [allProducts, setAllProducts] = useState<Product[]>([]);
+  const [products, setProducts] = useState<ProductPosItem[]>([]);
+  const [allProducts, setAllProducts] = useState<ProductPosItem[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [inventory, setInventory] = useState<Map<string, ProductInventoryItem>>(
     new Map()
@@ -201,7 +184,7 @@ export function ProductGrid({ locationId }: ProductGridProps) {
   };
 
   const handleAddToCart = useCallback(
-    (product: Product) => {
+    (product: ProductPosItem) => {
       const stockItem = inventory.get(product.id);
 
       if (locationId && !stockItem) {
@@ -218,7 +201,6 @@ export function ProductGrid({ locationId }: ProductGridProps) {
         return;
       }
 
-      // Use inventory pricing if available, otherwise fall back to product pricing
       const price = stockItem?.unitPrice
         ? parseFloat(stockItem.unitPrice)
         : parseFloat(product.sellingPrice);
@@ -246,7 +228,6 @@ export function ProductGrid({ locationId }: ProductGridProps) {
   const handleBarcodeSubmit = useCallback(
     async (barcode: string) => {
       try {
-        // Search by barcode in product inventory
         const params = new URLSearchParams({ code: barcode });
         if (locationId) params.append('locationId', locationId);
 
@@ -262,7 +243,6 @@ export function ProductGrid({ locationId }: ProductGridProps) {
 
         const inventoryItem = await response.json();
 
-        // Find the product to add to cart
         const product = allProducts.find(
           (p) => p.id === inventoryItem.productId
         );
@@ -273,7 +253,6 @@ export function ProductGrid({ locationId }: ProductGridProps) {
           return;
         }
 
-        // Check stock if location is selected
         if (locationId && inventoryItem.currentStock <= 0) {
           toast.error('Product is out of stock');
           setBarcodeInput('');
@@ -292,7 +271,7 @@ export function ProductGrid({ locationId }: ProductGridProps) {
     [allProducts, handleAddToCart, locationId]
   );
 
-  const getStockStatus = (product: Product) => {
+  const getStockStatus = (product: ProductPosItem) => {
     if (!locationId) return null;
 
     const stockItem = inventory.get(product.id);
@@ -316,7 +295,6 @@ export function ProductGrid({ locationId }: ProductGridProps) {
 
   return (
     <div className='flex flex-col h-full'>
-      {/* Search Bar with Barcode Scanner and Filters */}
       <div className='p-4 border-b  space-y-3'>
         <div className='flex gap-2'>
           <div className='flex-1 relative'>
@@ -399,7 +377,6 @@ export function ProductGrid({ locationId }: ProductGridProps) {
           </Popover>
         </div>
 
-        {/* Active Filters and Keyboard shortcuts */}
         <div className='flex items-center justify-between'>
           <div className='flex gap-4 text-xs text-gray-500'>
             <span>
@@ -422,7 +399,6 @@ export function ProductGrid({ locationId }: ProductGridProps) {
             </span>
           </div>
 
-          {/* Active Category Filters */}
           {selectedCategories.size > 0 && (
             <div className='flex gap-2 flex-wrap items-center'>
               {Array.from(selectedCategories).map((categoryId) => {
@@ -448,7 +424,6 @@ export function ProductGrid({ locationId }: ProductGridProps) {
         </div>
       </div>
 
-      {/* Products Grid */}
       <div className='flex-1 overflow-y-auto p-4 '>
         {loading ? (
           <div className='grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4'>
@@ -495,10 +470,10 @@ export function ProductGrid({ locationId }: ProductGridProps) {
 }
 
 interface ProductCardProps {
-  product: Product;
+  product: ProductPosItem;
   stockStatus: { status: string; stock: number } | null;
   inventoryItem?: ProductInventoryItem;
-  onAddToCart: (product: Product) => void;
+  onAddToCart: (product: ProductPosItem) => void;
 }
 
 function ProductCard({
@@ -510,7 +485,6 @@ function ProductCard({
   const isOutOfStock = stockStatus?.status === 'out';
   const isLowStock = stockStatus?.status === 'low';
 
-  // Use inventory pricing if available, otherwise fall back to product pricing
   const displayPrice = inventoryItem?.unitPrice
     ? parseFloat(inventoryItem.unitPrice)
     : parseFloat(product.sellingPrice);
@@ -529,7 +503,6 @@ function ProductCard({
           : 'cursor-pointer active:scale-95'
       )}
     >
-      {/* Image */}
       <div className='relative aspect-square mb-2 rounded-md overflow-hidden bg-gray-100'>
         {product.image ? (
           <Image
@@ -545,7 +518,6 @@ function ProductCard({
           </div>
         )}
 
-        {/* Stock Status Badge */}
         {stockStatus && (
           <div className='absolute top-2 right-2'>
             {isOutOfStock && (
@@ -566,7 +538,6 @@ function ProductCard({
         )}
       </div>
 
-      {/* Product Info */}
       <div className='flex-1 flex flex-col text-left'>
         <h3 className='font-medium text-sm line-clamp-2 mb-1'>
           {product.name}
@@ -589,7 +560,6 @@ function ProductCard({
         </div>
       </div>
 
-      {/* Add to Cart Overlay on Hover */}
       {!isOutOfStock && (
         <div className='absolute inset-0 bg-blue-600/0 group-hover:bg-blue-600/10 transition-colors rounded-lg pointer-events-none flex items-center justify-center'>
           <div className='opacity-0 group-hover:opacity-100 transition-opacity'>

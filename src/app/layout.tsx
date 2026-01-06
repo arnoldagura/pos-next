@@ -6,6 +6,7 @@ import { ThemeProvider } from '@/contexts/theme-context';
 import { SidebarProvider } from '@/contexts/sidebar-context';
 import { Sidebar } from '@/components/layout/sidebar';
 import { MobileHeader } from '@/components/layout/mobile-header';
+import { MainContent } from '@/components/layout/main-content';
 import { Toaster } from '@/components/ui/sonner';
 
 const geistSans = Geist({
@@ -38,9 +39,7 @@ export default function RootLayout({
             <QueryProvider>
               <MobileHeader />
               <Sidebar />
-              <main className='ml-0 pt-16 lg:ml-64 lg:pt-0 min-h-screen transition-all duration-300'>
-                <div className='container mx-auto p-6'>{children}</div>
-              </main>
+              <MainContent>{children}</MainContent>
               <Toaster />
             </QueryProvider>
           </SidebarProvider>

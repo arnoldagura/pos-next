@@ -1,3 +1,4 @@
+export * from './common';
 export * from './route';
 export * from './location';
 export * from './material-inventory';
