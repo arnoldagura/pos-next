@@ -1,6 +1,12 @@
 import { db } from '@/db/db';
 import { eq, and } from 'drizzle-orm';
-import { userRole, rolePermission, role, permission } from '@/drizzle/schema';
+import {
+  userRole,
+  rolePermission,
+  role,
+  permission,
+  userOrganization,
+} from '@/drizzle/schema';
 
 /**
  * Check if a user has a specific role
@@ -10,7 +16,7 @@ import { userRole, rolePermission, role, permission } from '@/drizzle/schema';
  */
 export async function hasRole(
   userId: string,
-  roleName: string,
+  roleName: string
 ): Promise<boolean> {
   const result = await db
     .select()
@@ -30,7 +36,7 @@ export async function hasRole(
  */
 export async function hasAnyRole(
   userId: string,
-  roleNames: string[],
+  roleNames: string[]
 ): Promise<boolean> {
   const roles = await getUserRoles(userId);
   return roles.some((r) => roleNames.includes(r.name));
@@ -85,14 +91,16 @@ export async function getUserPermissions(userId: string) {
  */
 export async function hasPermission(
   userId: string,
-  permissionName: string,
+  permissionName: string
 ): Promise<boolean> {
   const result = await db
     .select()
     .from(userRole)
     .innerJoin(rolePermission, eq(userRole.roleId, rolePermission.roleId))
     .innerJoin(permission, eq(rolePermission.permissionId, permission.id))
-    .where(and(eq(userRole.userId, userId), eq(permission.name, permissionName)))
+    .where(
+      and(eq(userRole.userId, userId), eq(permission.name, permissionName))
+    )
     .limit(1);
 
   return result.length > 0;
@@ -108,7 +116,7 @@ export async function hasPermission(
 export async function can(
   userId: string,
   resource: string,
-  action: string,
+  action: string
 ): Promise<boolean> {
   const result = await db
     .select()
@@ -119,8 +127,8 @@ export async function can(
       and(
         eq(userRole.userId, userId),
         eq(permission.resource, resource),
-        eq(permission.action, action),
-      ),
+        eq(permission.action, action)
+      )
     )
     .limit(1);
 
@@ -167,14 +175,15 @@ export async function removePermission(roleId: string, permissionId: string) {
     .where(
       and(
         eq(rolePermission.roleId, roleId),
-        eq(rolePermission.permissionId, permissionId),
-      ),
+        eq(rolePermission.permissionId, permissionId)
+      )
     );
 }
 
 // Role constants for easy reference
 export const ROLES = {
-  ADMIN: 'admin',
+  SUPER_ADMIN: 'super_admin', // Global super admin
+  ADMIN: 'admin', // Tenant admin
   MANAGER: 'manager',
   CASHIER: 'cashier',
   KITCHEN: 'kitchen',
@@ -198,4 +207,221 @@ export const RESOURCES = {
   INVENTORY: 'inventory',
   REPORTS: 'reports',
   SETTINGS: 'settings',
+  TENANTS: 'tenants',
 } as const;
+
+// ============================================================================
+// TENANT-SCOPED RBAC FUNCTIONS
+// ============================================================================
+
+/**
+ * Check if a user has a specific role within an organization
+ * @param userId - The user's ID
+ * @param roleName - The role name to check
+ * @param organizationId - The organization ID
+ * @returns true if user has the role in the organization, false otherwise
+ */
+export async function hasRoleInTenant(
+  userId: string,
+  roleName: string,
+  organizationId: string
+): Promise<boolean> {
+  // Check for super admin first (global role)
+  if (roleName === ROLES.SUPER_ADMIN) {
+    const result = await db
+      .select()
+      .from(userRole)
+      .innerJoin(role, eq(userRole.roleId, role.id))
+      .where(
+        and(
+          eq(userRole.userId, userId),
+          eq(role.name, ROLES.SUPER_ADMIN),
+          eq(role.isGlobal, true)
+        )
+      )
+      .limit(1);
+    return result.length > 0;
+  }
+
+  // Check org-specific role
+  const result = await db
+    .select()
+    .from(userOrganization)
+    .innerJoin(role, eq(userOrganization.roleId, role.id))
+    .where(
+      and(
+        eq(userOrganization.userId, userId),
+        eq(userOrganization.organizationId, organizationId),
+        eq(role.name, roleName)
+      )
+    )
+    .limit(1);
+
+  return result.length > 0;
+}
+
+/**
+ * Check if a user has any of the specified roles within an organization
+ * @param userId - The user's ID
+ * @param roleNames - Array of role names to check
+ * @param organizationId - The organization ID
+ * @returns true if user has any of the roles in the organization, false otherwise
+ */
+export async function hasAnyRoleInTenant(
+  userId: string,
+  roleNames: string[],
+  organizationId: string
+): Promise<boolean> {
+  const roles = await getUserRolesInTenant(userId, organizationId);
+  return roles.some((r) => roleNames.includes(r.name));
+}
+
+/**
+ * Get all roles assigned to a user within an organization
+ * @param userId - The user's ID
+ * @param organizationId - The organization ID
+ * @returns Array of role objects
+ */
+export async function getUserRolesInTenant(
+  userId: string,
+  organizationId: string
+) {
+  const result = await db
+    .select({
+      id: role.id,
+      name: role.name,
+      description: role.description,
+    })
+    .from(userOrganization)
+    .innerJoin(role, eq(userOrganization.roleId, role.id))
+    .where(
+      and(
+        eq(userOrganization.userId, userId),
+        eq(userOrganization.organizationId, organizationId)
+      )
+    );
+
+  return result;
+}
+
+/**
+ * Get all permissions for a user within an organization (through their roles)
+ * @param userId - The user's ID
+ * @param organizationId - The organization ID
+ * @returns Array of permission objects
+ */
+export async function getUserPermissionsInTenant(
+  userId: string,
+  organizationId: string
+) {
+  const result = await db
+    .select({
+      id: permission.id,
+      name: permission.name,
+      resource: permission.resource,
+      action: permission.action,
+      description: permission.description,
+    })
+    .from(userOrganization)
+    .innerJoin(
+      rolePermission,
+      eq(userOrganization.roleId, rolePermission.roleId)
+    )
+    .innerJoin(permission, eq(rolePermission.permissionId, permission.id))
+    .where(
+      and(
+        eq(userOrganization.userId, userId),
+        eq(userOrganization.organizationId, organizationId)
+      )
+    );
+
+  return result;
+}
+
+/**
+ * Check if a user can perform an action on a resource within an organization
+ * @param userId - The user's ID
+ * @param resource - The resource name (e.g., 'products', 'orders')
+ * @param action - The action (e.g., 'create', 'read', 'update', 'delete')
+ * @param organizationId - The organization ID
+ * @returns true if user has the permission in the organization, false otherwise
+ */
+export async function canInTenant(
+  userId: string,
+  resource: string,
+  action: string,
+  organizationId: string
+): Promise<boolean> {
+  // Check super admin first (global permissions)
+  const isSuperAdmin = await hasRole(userId, ROLES.SUPER_ADMIN);
+  if (isSuperAdmin) {
+    return true;
+  }
+
+  // Check org-specific permissions
+  const result = await db
+    .select()
+    .from(userOrganization)
+    .innerJoin(
+      rolePermission,
+      eq(userOrganization.roleId, rolePermission.roleId)
+    )
+    .innerJoin(permission, eq(rolePermission.permissionId, permission.id))
+    .where(
+      and(
+        eq(userOrganization.userId, userId),
+        eq(userOrganization.organizationId, organizationId),
+        eq(permission.resource, resource),
+        eq(permission.action, action)
+      )
+    )
+    .limit(1);
+
+  return result.length > 0;
+}
+
+/**
+ * Assign a role to a user within an organization
+ * @param userId - The user's ID
+ * @param roleId - The role's ID
+ * @param organizationId - The organization ID
+ */
+export async function assignRoleInTenant(
+  userId: string,
+  roleId: string,
+  organizationId: string
+) {
+  await db.insert(userOrganization).values({
+    userId,
+    roleId,
+    organizationId,
+  });
+}
+
+/**
+ * Remove a role from a user within an organization
+ * @param userId - The user's ID
+ * @param organizationId - The organization ID
+ */
+export async function removeRoleFromTenant(
+  userId: string,
+  organizationId: string
+) {
+  await db
+    .delete(userOrganization)
+    .where(
+      and(
+        eq(userOrganization.userId, userId),
+        eq(userOrganization.organizationId, organizationId)
+      )
+    );
+}
+
+/**
+ * Check if user is super admin (global role)
+ * @param userId - The user's ID
+ * @returns true if user is super admin, false otherwise
+ */
+export async function isSuperAdmin(userId: string): Promise<boolean> {
+  return hasRole(userId, ROLES.SUPER_ADMIN);
+}

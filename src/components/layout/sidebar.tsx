@@ -20,13 +20,15 @@ import {
   Store,
   ShoppingCart,
   UserCircle,
+  Building2,
 } from 'lucide-react';
 import { Suspense } from 'react';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Skeleton } from '@/components/ui/skeleton';
-import { useSession } from '@/lib/auth-client';
+import { useExtendedSession } from '@/hooks/use-extended-session';
+import { TenantSelector } from './tenant-selector';
 
 interface NavItem {
   title: string;
@@ -37,6 +39,7 @@ interface NavItem {
 interface NavGroup {
   title?: string;
   items: NavItem[];
+  superAdminOnly?: boolean;
 }
 
 const navGroups: NavGroup[] = [
@@ -90,14 +93,21 @@ const navGroups: NavGroup[] = [
       { title: 'Users', href: '/users', icon: Users },
     ],
   },
+  {
+    title: 'Admin',
+    superAdminOnly: true,
+    items: [
+      { title: 'Organizations', href: '/admin/organizations', icon: Building2 },
+    ],
+  },
 ];
 
 export function Sidebar() {
-  const { data: session } = useSession();
+  const { data: session, isPending } = useExtendedSession();
   const { mobileOpen, setMobileOpen, collapsed, setCollapsed } = useSidebar();
   const pathname = usePathname();
 
-  if (!session) {
+  if (isPending || !session) {
     return null;
   }
 
@@ -144,43 +154,61 @@ export function Sidebar() {
             </Button>
           </div>
 
+          {/* Tenant Selector for Super Admin */}
+          {session?.user?.isSuperAdmin && session?.user?.organizations && session.user.organizations.length > 0 && (
+            <div className='p-3 border-b border-sidebar-border'>
+              <TenantSelector
+                organizations={session.user.organizations}
+                currentOrganizationId={session.user.currentOrganizationId}
+                collapsed={collapsed}
+              />
+            </div>
+          )}
+
           {/* Navigation */}
           <ScrollArea className='flex-1'>
             <nav className='p-2 space-y-4'>
-              {navGroups.map((group, groupIndex) => (
-                <div key={groupIndex} className='space-y-1'>
-                  {group.title && !collapsed && (
-                    <h3 className='px-3 py-2 text-xs font-semibold text-sidebar-foreground/60 uppercase tracking-wider'>
-                      {group.title}
-                    </h3>
-                  )}
-                  <div className='space-y-1'>
-                    {group.items.map((item) => {
-                      const Icon = item.icon;
-                      const isActive = pathname === item.href;
+              {navGroups.map((group, groupIndex) => {
+                // Hide super admin only sections if user is not a super admin
+                if (group.superAdminOnly && !session?.user?.isSuperAdmin) {
+                  return null;
+                }
 
-                      return (
-                        <Link
-                          key={item.href}
-                          href={item.href}
-                          onClick={() => setMobileOpen(false)}
-                          className={cn(
-                            'flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors',
-                            isActive
-                              ? 'bg-sidebar-accent text-sidebar-accent-foreground'
-                              : 'text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground',
-                            collapsed && 'justify-center px-2'
-                          )}
-                          title={collapsed ? item.title : undefined}
-                        >
-                          <Icon className='h-5 w-5 shrink-0' />
-                          {!collapsed && <span>{item.title}</span>}
-                        </Link>
-                      );
-                    })}
+                return (
+                  <div key={groupIndex} className='space-y-1'>
+                    {group.title && !collapsed && (
+                      <h3 className='px-3 py-2 text-xs font-semibold text-sidebar-foreground/60 uppercase tracking-wider'>
+                        {group.title}
+                      </h3>
+                    )}
+                    <div className='space-y-1'>
+                      {group.items.map((item) => {
+                        const Icon = item.icon;
+                        const isActive = pathname === item.href;
+
+                        return (
+                          <Link
+                            key={item.href}
+                            href={item.href}
+                            onClick={() => setMobileOpen(false)}
+                            className={cn(
+                              'flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors',
+                              isActive
+                                ? 'bg-sidebar-accent text-sidebar-accent-foreground'
+                                : 'text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground',
+                              collapsed && 'justify-center px-2'
+                            )}
+                            title={collapsed ? item.title : undefined}
+                          >
+                            <Icon className='h-5 w-5 shrink-0' />
+                            {!collapsed && <span>{item.title}</span>}
+                          </Link>
+                        );
+                      })}
+                    </div>
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </nav>
 
             <Separator className='my-2' />

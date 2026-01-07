@@ -1,3 +1,0 @@
-ALTER TABLE "production_material" ADD COLUMN "material_id" text NOT NULL;--> statement-breakpoint
-ALTER TABLE "production_material" ADD CONSTRAINT "production_material_material_id_material_id_fk" FOREIGN KEY ("material_id") REFERENCES "public"."material"("id") ON DELETE restrict ON UPDATE no action;--> statement-breakpoint
-CREATE INDEX "production_material_material_idx" ON "production_material" USING btree ("material_id");

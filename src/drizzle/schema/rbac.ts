@@ -5,34 +5,46 @@ import {
   timestamp,
   primaryKey,
   index,
+  boolean,
 } from 'drizzle-orm/pg-core';
 import { user } from './auth';
+import { organization } from './organizations';
 
 // Roles table
 export const role = pgTable('role', {
   id: text('id').primaryKey(),
-  name: text('name').notNull().unique(),
+  name: text('name').notNull(),
   description: text('description'),
+  organizationId: text('organization_id').references(() => organization.id, { onDelete: 'cascade' }),
+  isGlobal: boolean('is_global').default(false).notNull(), // For super_admin role
   createdAt: timestamp('created_at').defaultNow().notNull(),
   updatedAt: timestamp('updated_at')
     .defaultNow()
     .$onUpdate(() => new Date())
     .notNull(),
-});
+}, (table) => [
+  index('role_org_idx').on(table.organizationId),
+  index('role_name_org_idx').on(table.name, table.organizationId),
+]);
 
 // Permissions table
 export const permission = pgTable('permission', {
   id: text('id').primaryKey(),
-  name: text('name').notNull().unique(),
+  name: text('name').notNull(),
   description: text('description'),
   resource: text('resource').notNull(), // e.g., 'products', 'orders', 'users'
   action: text('action').notNull(), // e.g., 'create', 'read', 'update', 'delete'
+  organizationId: text('organization_id').references(() => organization.id, { onDelete: 'cascade' }),
+  isGlobal: boolean('is_global').default(false).notNull(), // For system-wide permissions
   createdAt: timestamp('created_at').defaultNow().notNull(),
   updatedAt: timestamp('updated_at')
     .defaultNow()
     .$onUpdate(() => new Date())
     .notNull(),
-});
+}, (table) => [
+  index('permission_org_idx').on(table.organizationId),
+  index('permission_name_org_idx').on(table.name, table.organizationId),
+]);
 
 // User-Roles relationship (many-to-many)
 export const userRole = pgTable(
@@ -75,13 +87,21 @@ export const rolePermission = pgTable(
 );
 
 // Relations
-export const roleRelations = relations(role, ({ many }) => ({
+export const roleRelations = relations(role, ({ many, one }) => ({
   userRoles: many(userRole),
   rolePermissions: many(rolePermission),
+  organization: one(organization, {
+    fields: [role.organizationId],
+    references: [organization.id],
+  }),
 }));
 
-export const permissionRelations = relations(permission, ({ many }) => ({
+export const permissionRelations = relations(permission, ({ many, one }) => ({
   rolePermissions: many(rolePermission),
+  organization: one(organization, {
+    fields: [permission.organizationId],
+    references: [organization.id],
+  }),
 }));
 
 export const userRoleRelations = relations(userRole, ({ one }) => ({

@@ -1,1 +1,0 @@
-ALTER TABLE "product_inventory" ADD COLUMN "variant_name" text;

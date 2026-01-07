@@ -1,3 +1,5 @@
+CREATE TYPE "public"."organization_status" AS ENUM('active', 'suspended', 'trial', 'cancelled');--> statement-breakpoint
+CREATE TYPE "public"."subscription_tier" AS ENUM('starter', 'professional', 'enterprise');--> statement-breakpoint
 CREATE TYPE "public"."table_status" AS ENUM('available', 'occupied', 'reserved', 'maintenance');--> statement-breakpoint
 CREATE TYPE "public"."material_type" AS ENUM('raw_materials', 'goods_for_resale', 'operation_supplies', 'wip_products');--> statement-breakpoint
 CREATE TYPE "public"."movement_type" AS ENUM('purchase', 'sale', 'adjustment', 'waste', 'transfer_in', 'transfer_out', 'production_output', 'receive_from_material');--> statement-breakpoint
@@ -33,6 +35,66 @@ CREATE TABLE "product_category" (
 	"created_at" timestamp DEFAULT now() NOT NULL,
 	"updated_at" timestamp DEFAULT now() NOT NULL,
 	CONSTRAINT "product_category_slug_unique" UNIQUE("slug")
+);
+--> statement-breakpoint
+CREATE TABLE "customer" (
+	"id" text PRIMARY KEY NOT NULL,
+	"name" varchar(255) NOT NULL,
+	"email" varchar(255),
+	"phone" varchar(50),
+	"address" text,
+	"city" varchar(100),
+	"state" varchar(100),
+	"zip_code" varchar(20),
+	"country" varchar(100),
+	"notes" text,
+	"loyalty_points" text DEFAULT '0',
+	"is_active" boolean DEFAULT true NOT NULL,
+	"created_at" timestamp DEFAULT now() NOT NULL,
+	"updated_at" timestamp DEFAULT now() NOT NULL,
+	"created_by" text,
+	"updated_by" text
+);
+--> statement-breakpoint
+CREATE TABLE "organization" (
+	"id" text PRIMARY KEY NOT NULL,
+	"name" text NOT NULL,
+	"slug" text NOT NULL,
+	"subdomain" text,
+	"domain" text,
+	"status" "organization_status" DEFAULT 'trial' NOT NULL,
+	"subscription_tier" "subscription_tier" DEFAULT 'starter' NOT NULL,
+	"max_users" integer DEFAULT 5 NOT NULL,
+	"max_locations" integer DEFAULT 1 NOT NULL,
+	"settings" jsonb,
+	"billing_email" text,
+	"contact_name" text,
+	"contact_phone" text,
+	"address" text,
+	"city" text,
+	"country" text,
+	"tax_id" text,
+	"trial_ends_at" timestamp,
+	"subscription_starts_at" timestamp,
+	"subscription_ends_at" timestamp,
+	"deleted_at" timestamp,
+	"created_at" timestamp DEFAULT now() NOT NULL,
+	"updated_at" timestamp DEFAULT now() NOT NULL,
+	CONSTRAINT "organization_slug_unique" UNIQUE("slug"),
+	CONSTRAINT "organization_subdomain_unique" UNIQUE("subdomain"),
+	CONSTRAINT "organization_domain_unique" UNIQUE("domain")
+);
+--> statement-breakpoint
+CREATE TABLE "user_organization" (
+	"user_id" text NOT NULL,
+	"organization_id" text NOT NULL,
+	"role_id" text NOT NULL,
+	"is_default" boolean DEFAULT false NOT NULL,
+	"invited_by" text,
+	"invited_at" timestamp,
+	"joined_at" timestamp DEFAULT now() NOT NULL,
+	"last_accessed_at" timestamp,
+	CONSTRAINT "user_organization_user_id_organization_id_pk" PRIMARY KEY("user_id","organization_id")
 );
 --> statement-breakpoint
 CREATE TABLE "location" (
@@ -76,13 +138,9 @@ CREATE TABLE "product" (
 	"id" text PRIMARY KEY NOT NULL,
 	"name" text NOT NULL,
 	"description" text,
-	"selling_price" numeric(10, 2) NOT NULL,
-	"cost_price" numeric(10, 2),
 	"category_id" text,
 	"image" text,
 	"status" boolean DEFAULT true NOT NULL,
-	"unit_of_measure" text,
-	"tax_rate" numeric(5, 2) DEFAULT '0',
 	"created_by" text,
 	"updated_by" text,
 	"deleted_at" timestamp,
@@ -109,11 +167,13 @@ CREATE TABLE "product_inventory" (
 	"id" text PRIMARY KEY NOT NULL,
 	"product_id" text NOT NULL,
 	"location_id" text NOT NULL,
+	"variant_name" text,
 	"slug" text NOT NULL,
 	"sku" text,
 	"barcode" text,
 	"unit_price" numeric(10, 2) NOT NULL,
-	"cost_price" numeric(10, 2),
+	"cost" numeric(10, 2),
+	"current_quantity" numeric(10, 2) NOT NULL,
 	"unit_of_measure" text NOT NULL,
 	"tax_rate" numeric(5, 2) DEFAULT '0' NOT NULL,
 	"alert_threshold" numeric(10, 2) DEFAULT '0' NOT NULL,
@@ -122,7 +182,7 @@ CREATE TABLE "product_inventory" (
 	CONSTRAINT "product_inventory_slug_unique" UNIQUE("slug"),
 	CONSTRAINT "product_inventory_sku_unique" UNIQUE("sku"),
 	CONSTRAINT "product_inventory_barcode_unique" UNIQUE("barcode"),
-	CONSTRAINT "product_inventory_product_location_unique" UNIQUE("product_id","location_id")
+	CONSTRAINT "product_inventory_product_location_variant_unique" UNIQUE("product_id","location_id","variant_name")
 );
 --> statement-breakpoint
 CREATE TABLE "product_inventory_movement" (
@@ -146,19 +206,21 @@ CREATE TABLE "material_batch" (
 	"expiry_date" timestamp,
 	"quantity" numeric(10, 2) NOT NULL,
 	"cost" numeric(10, 2) NOT NULL,
+	"remarks" text,
 	"created_at" timestamp DEFAULT now() NOT NULL,
 	"updated_at" timestamp DEFAULT now() NOT NULL
 );
 --> statement-breakpoint
 CREATE TABLE "material_inventory" (
 	"id" text PRIMARY KEY NOT NULL,
-	"variant_name" text NOT NULL,
+	"variant_name" text,
 	"material_id" text NOT NULL,
 	"location_id" text NOT NULL,
 	"sku" text,
 	"default_supplier_id" text,
 	"unit_of_measure" text NOT NULL,
 	"cost" numeric(10, 2),
+	"current_quantity" numeric(10, 2) NOT NULL,
 	"alert_threshold" numeric(10, 2) DEFAULT '0' NOT NULL,
 	"created_at" timestamp DEFAULT now() NOT NULL,
 	"updated_at" timestamp DEFAULT now() NOT NULL,
@@ -254,6 +316,7 @@ CREATE TABLE "production_material" (
 	"id" text PRIMARY KEY NOT NULL,
 	"production_order_id" text NOT NULL,
 	"material_id" text NOT NULL,
+	"material_inventory_id" text NOT NULL,
 	"planned_quantity" numeric(10, 2) NOT NULL,
 	"actual_quantity" numeric(10, 2),
 	"unit_of_measure" text NOT NULL,
@@ -271,8 +334,8 @@ CREATE TABLE "production_order" (
 	"actual_quantity" numeric(10, 2),
 	"status" "production_order_status" DEFAULT 'draft' NOT NULL,
 	"output_type" "output_type" NOT NULL,
-	"output_product_id" text,
-	"output_material_id" text,
+	"output_product_inventory_id" text,
+	"output_material_inventory_id" text,
 	"scheduled_date" date,
 	"started_at" timestamp,
 	"completed_at" timestamp,
@@ -300,8 +363,18 @@ CREATE TABLE "production_quality_check" (
 	"created_at" timestamp DEFAULT now() NOT NULL
 );
 --> statement-breakpoint
+ALTER TABLE "permission" DROP CONSTRAINT "permission_name_unique";--> statement-breakpoint
+ALTER TABLE "role" DROP CONSTRAINT "role_name_unique";--> statement-breakpoint
+ALTER TABLE "permission" ADD COLUMN "organization_id" text;--> statement-breakpoint
+ALTER TABLE "permission" ADD COLUMN "is_global" boolean DEFAULT false NOT NULL;--> statement-breakpoint
+ALTER TABLE "role" ADD COLUMN "organization_id" text;--> statement-breakpoint
+ALTER TABLE "role" ADD COLUMN "is_global" boolean DEFAULT false NOT NULL;--> statement-breakpoint
 ALTER TABLE "material_category" ADD CONSTRAINT "material_category_parent_id_material_category_id_fk" FOREIGN KEY ("parent_id") REFERENCES "public"."material_category"("id") ON DELETE set null ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "product_category" ADD CONSTRAINT "product_category_parent_id_product_category_id_fk" FOREIGN KEY ("parent_id") REFERENCES "public"."product_category"("id") ON DELETE set null ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "user_organization" ADD CONSTRAINT "user_organization_user_id_user_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."user"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "user_organization" ADD CONSTRAINT "user_organization_organization_id_organization_id_fk" FOREIGN KEY ("organization_id") REFERENCES "public"."organization"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "user_organization" ADD CONSTRAINT "user_organization_role_id_role_id_fk" FOREIGN KEY ("role_id") REFERENCES "public"."role"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "user_organization" ADD CONSTRAINT "user_organization_invited_by_user_id_fk" FOREIGN KEY ("invited_by") REFERENCES "public"."user"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "restaurant_table" ADD CONSTRAINT "restaurant_table_location_id_location_id_fk" FOREIGN KEY ("location_id") REFERENCES "public"."location"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "product" ADD CONSTRAINT "product_category_id_product_category_id_fk" FOREIGN KEY ("category_id") REFERENCES "public"."product_category"("id") ON DELETE set null ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "material" ADD CONSTRAINT "material_category_id_material_category_id_fk" FOREIGN KEY ("category_id") REFERENCES "public"."material_category"("id") ON DELETE set null ON UPDATE no action;--> statement-breakpoint
@@ -325,11 +398,18 @@ ALTER TABLE "production_recipe_ingredient" ADD CONSTRAINT "production_recipe_ing
 ALTER TABLE "production_recipe_ingredient" ADD CONSTRAINT "production_recipe_ingredient_material_id_material_id_fk" FOREIGN KEY ("material_id") REFERENCES "public"."material"("id") ON DELETE restrict ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "production_material" ADD CONSTRAINT "production_material_production_order_id_production_order_id_fk" FOREIGN KEY ("production_order_id") REFERENCES "public"."production_order"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "production_material" ADD CONSTRAINT "production_material_material_id_material_id_fk" FOREIGN KEY ("material_id") REFERENCES "public"."material"("id") ON DELETE restrict ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "production_material" ADD CONSTRAINT "production_material_material_inventory_id_material_inventory_id_fk" FOREIGN KEY ("material_inventory_id") REFERENCES "public"."material_inventory"("id") ON DELETE restrict ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "production_order" ADD CONSTRAINT "production_order_recipe_id_production_recipe_id_fk" FOREIGN KEY ("recipe_id") REFERENCES "public"."production_recipe"("id") ON DELETE restrict ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "production_order" ADD CONSTRAINT "production_order_location_id_location_id_fk" FOREIGN KEY ("location_id") REFERENCES "public"."location"("id") ON DELETE restrict ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "production_order" ADD CONSTRAINT "production_order_output_product_id_product_id_fk" FOREIGN KEY ("output_product_id") REFERENCES "public"."product"("id") ON DELETE set null ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "production_order" ADD CONSTRAINT "production_order_output_material_id_material_id_fk" FOREIGN KEY ("output_material_id") REFERENCES "public"."material"("id") ON DELETE set null ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "production_order" ADD CONSTRAINT "production_order_output_product_inventory_id_product_inventory_id_fk" FOREIGN KEY ("output_product_inventory_id") REFERENCES "public"."product_inventory"("id") ON DELETE set null ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "production_order" ADD CONSTRAINT "production_order_output_material_inventory_id_material_inventory_id_fk" FOREIGN KEY ("output_material_inventory_id") REFERENCES "public"."material_inventory"("id") ON DELETE set null ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "production_quality_check" ADD CONSTRAINT "production_quality_check_production_order_id_production_order_id_fk" FOREIGN KEY ("production_order_id") REFERENCES "public"."production_order"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
+CREATE INDEX "organization_slug_idx" ON "organization" USING btree ("slug");--> statement-breakpoint
+CREATE INDEX "organization_status_idx" ON "organization" USING btree ("status");--> statement-breakpoint
+CREATE INDEX "organization_subdomain_idx" ON "organization" USING btree ("subdomain");--> statement-breakpoint
+CREATE INDEX "user_organization_user_idx" ON "user_organization" USING btree ("user_id");--> statement-breakpoint
+CREATE INDEX "user_organization_org_idx" ON "user_organization" USING btree ("organization_id");--> statement-breakpoint
+CREATE INDEX "user_organization_role_idx" ON "user_organization" USING btree ("role_id");--> statement-breakpoint
 CREATE INDEX "product_name_idx" ON "product" USING btree ("name");--> statement-breakpoint
 CREATE INDEX "product_category_idx" ON "product" USING btree ("category_id");--> statement-breakpoint
 CREATE INDEX "product_status_idx" ON "product" USING btree ("status");--> statement-breakpoint
@@ -375,11 +455,18 @@ CREATE INDEX "production_recipe_ingredient_recipe_idx" ON "production_recipe_ing
 CREATE INDEX "production_recipe_ingredient_material_idx" ON "production_recipe_ingredient" USING btree ("material_id");--> statement-breakpoint
 CREATE INDEX "production_material_production_order_idx" ON "production_material" USING btree ("production_order_id");--> statement-breakpoint
 CREATE INDEX "production_material_material_idx" ON "production_material" USING btree ("material_id");--> statement-breakpoint
+CREATE INDEX "production_material_material_inventory_idx" ON "production_material" USING btree ("material_inventory_id");--> statement-breakpoint
 CREATE INDEX "production_order_recipe_idx" ON "production_order" USING btree ("recipe_id");--> statement-breakpoint
 CREATE INDEX "production_order_location_idx" ON "production_order" USING btree ("location_id");--> statement-breakpoint
-CREATE INDEX "production_order_output_product_idx" ON "production_order" USING btree ("output_product_id");--> statement-breakpoint
-CREATE INDEX "production_order_output_material_idx" ON "production_order" USING btree ("output_material_id");--> statement-breakpoint
+CREATE INDEX "production_order_output_product_inventory_idx" ON "production_order" USING btree ("output_product_inventory_id");--> statement-breakpoint
+CREATE INDEX "production_order_output_material_inventory_idx" ON "production_order" USING btree ("output_material_inventory_id");--> statement-breakpoint
 CREATE INDEX "production_order_status_idx" ON "production_order" USING btree ("status");--> statement-breakpoint
 CREATE INDEX "production_order_scheduled_date_idx" ON "production_order" USING btree ("scheduled_date");--> statement-breakpoint
 CREATE INDEX "production_quality_check_production_order_idx" ON "production_quality_check" USING btree ("production_order_id");--> statement-breakpoint
-CREATE INDEX "production_quality_check_checked_at_idx" ON "production_quality_check" USING btree ("checked_at");
+CREATE INDEX "production_quality_check_checked_at_idx" ON "production_quality_check" USING btree ("checked_at");--> statement-breakpoint
+ALTER TABLE "permission" ADD CONSTRAINT "permission_organization_id_organization_id_fk" FOREIGN KEY ("organization_id") REFERENCES "public"."organization"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "role" ADD CONSTRAINT "role_organization_id_organization_id_fk" FOREIGN KEY ("organization_id") REFERENCES "public"."organization"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
+CREATE INDEX "permission_org_idx" ON "permission" USING btree ("organization_id");--> statement-breakpoint
+CREATE INDEX "permission_name_org_idx" ON "permission" USING btree ("name","organization_id");--> statement-breakpoint
+CREATE INDEX "role_org_idx" ON "role" USING btree ("organization_id");--> statement-breakpoint
+CREATE INDEX "role_name_org_idx" ON "role" USING btree ("name","organization_id");

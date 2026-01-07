@@ -1,6 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
-import { hasAnyRole, can } from '@/lib/rbac';
+import {
+  hasAnyRole,
+  can,
+  hasAnyRoleInTenant,
+  canInTenant,
+  ROLES,
+  hasRole,
+} from '@/lib/rbac';
+import { getTenantId } from '@/lib/tenant-context';
 
 /**
  * Middleware to protect routes by requiring specific roles
@@ -54,9 +62,9 @@ export function requirePermission(resource: string, action: string) {
 }
 
 /**
- * Higher-order function to protect API route handlers
+ * Higher-order function to protect API route handlers with tenant awareness
  * @param handler - The API route handler
- * @param options - Protection options (roles or permission)
+ * @param options - Protection options (roles, permission, requireSuperAdmin, or custom check)
  * @returns Protected handler
  */
 export function protectRoute<T>(
@@ -64,7 +72,13 @@ export function protectRoute<T>(
   options:
     | { roles: string[] }
     | { resource: string; action: string }
-    | { check: (userId: string) => Promise<boolean> },
+    | { requireSuperAdmin: boolean }
+    | {
+        check: (
+          userId: string,
+          organizationId: string | null
+        ) => Promise<boolean>;
+      }
 ) {
   return async (req: NextRequest, context?: T) => {
     const session = await auth.api.getSession({
@@ -75,19 +89,63 @@ export function protectRoute<T>(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
+    // Get tenant ID using centralized tenant context logic
+    // This handles super admin sidebar selection, cookies, and headers
+    const tenantId: string | null = await getTenantId();
+
+    // Check for super admin requirement
+    if ('requireSuperAdmin' in options && options.requireSuperAdmin) {
+      const isSuperAdmin = await hasRole(session.user.id, ROLES.SUPER_ADMIN);
+      if (!isSuperAdmin) {
+        return NextResponse.json(
+          { error: 'Super admin access required' },
+          { status: 403 }
+        );
+      }
+      // Inject tenant ID into headers if provided (for super admin operations)
+      if (tenantId) {
+        req.headers.set('x-tenant-id', tenantId);
+      }
+      return handler(req, context);
+    }
+
+    // Require tenant context for non-super-admin routes
+    if (!tenantId) {
+      return NextResponse.json(
+        {
+          error:
+            'No tenant context available. Please contact your administrator.',
+        },
+        { status: 400 }
+      );
+    }
+
     let hasAccess = false;
 
+    // Check permissions based on options
     if ('roles' in options) {
-      hasAccess = await hasAnyRole(session.user.id, options.roles);
+      hasAccess = await hasAnyRoleInTenant(
+        session.user.id,
+        options.roles,
+        tenantId
+      );
     } else if ('resource' in options && 'action' in options) {
-      hasAccess = await can(session.user.id, options.resource, options.action);
+      hasAccess = await canInTenant(
+        session.user.id,
+        options.resource,
+        options.action,
+        tenantId
+      );
     } else if ('check' in options) {
-      hasAccess = await options.check(session.user.id);
+      hasAccess = await options.check(session.user.id, tenantId);
     }
 
     if (!hasAccess) {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
     }
+
+    // Inject tenant ID into request headers for use in handler
+    req.headers.set('x-tenant-id', tenantId);
 
     return handler(req, context);
   };

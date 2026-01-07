@@ -1,1 +1,0 @@
-ALTER TABLE "material_batch" ADD COLUMN "remarks" text;
