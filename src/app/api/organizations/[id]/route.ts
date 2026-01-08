@@ -134,6 +134,8 @@ async function updateOrganizationHandler(
       .update(organization)
       .set({
         ...validatedData,
+        subdomain: validatedData.subdomain || null,
+        domain: validatedData.domain || null,
         updatedAt: new Date(),
       })
       .where(eq(organization.id, params.id))

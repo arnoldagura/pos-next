@@ -230,7 +230,11 @@ export default function OrganizationsPage() {
                         <div className='font-medium'>{org.name}</div>
                         {org.subdomain && (
                           <div className='text-xs text-muted-foreground'>
-                            {org.subdomain}.yourdomain.com
+                            {org.subdomain}.
+                            {process.env.NODE_ENV === 'development'
+                              ? 'localhost:3000'
+                              : process.env.NEXT_PUBLIC_APP_DOMAIN ||
+                                'yourdomain.com'}
                           </div>
                         )}
                       </div>

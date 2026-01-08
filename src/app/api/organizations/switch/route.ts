@@ -1,19 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getSession } from '@/lib/session';
-import { db } from '@/db/db';
-import { userOrganization, organization } from '@/drizzle/schema';
-import { eq, and } from 'drizzle-orm';
-import { hasRole } from '@/lib/rbac';
-import { cookies } from 'next/headers';
+import { setCurrentTenant } from '@/lib/tenant-context';
+import { isTenantError } from '@/lib/errors/tenant-errors';
 
+/**
+ * POST /api/organizations/switch
+ * Switch the current organization/tenant
+ * Includes rate limiting and audit logging
+ */
 export async function POST(req: NextRequest) {
   try {
-    const session = await getSession();
-
-    if (!session?.user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
-
     const body = await req.json();
     const { organizationId } = body;
 
@@ -24,54 +19,12 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Check if user is super admin
-    const isSuperAdmin = await hasRole(session.user.id, 'super_admin');
+    // Extract IP and User-Agent for audit logging
+    const ipAddress = req.headers.get('x-forwarded-for') || req.headers.get('x-real-ip');
+    const userAgent = req.headers.get('user-agent');
 
-    if (isSuperAdmin) {
-      // Super admin can switch to any organization
-      // Verify the organization exists
-      const [org] = await db
-        .select()
-        .from(organization)
-        .where(eq(organization.id, organizationId))
-        .limit(1);
-
-      if (!org) {
-        return NextResponse.json(
-          { error: 'Organization not found' },
-          { status: 404 }
-        );
-      }
-    } else {
-      // Regular users can only switch to organizations they belong to
-      const [userOrg] = await db
-        .select()
-        .from(userOrganization)
-        .where(
-          and(
-            eq(userOrganization.userId, session.user.id),
-            eq(userOrganization.organizationId, organizationId)
-          )
-        )
-        .limit(1);
-
-      if (!userOrg) {
-        return NextResponse.json(
-          { error: 'You do not have access to this organization' },
-          { status: 403 }
-        );
-      }
-    }
-
-    // Set the organization cookie
-    const cookieStore = await cookies();
-    cookieStore.set('currentOrganizationId', organizationId, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
-      maxAge: 60 * 60 * 24 * 30, // 30 days
-      path: '/',
-    });
+    // Use centralized setCurrentTenant with rate limiting and audit logging
+    await setCurrentTenant(organizationId, ipAddress, userAgent);
 
     return NextResponse.json({
       success: true,
@@ -79,6 +32,16 @@ export async function POST(req: NextRequest) {
     });
   } catch (error) {
     console.error('Error switching organization:', error);
+
+    // Handle custom tenant errors with proper status codes
+    if (isTenantError(error)) {
+      return NextResponse.json(
+        { error: error.message, code: error.code },
+        { status: error.statusCode }
+      );
+    }
+
+    // Generic error fallback
     return NextResponse.json(
       { error: 'Failed to switch organization' },
       { status: 500 }

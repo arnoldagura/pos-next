@@ -2,6 +2,8 @@ export * from './auth';
 export * from './rbac';
 export * from './organizations';
 export * from './user-organizations';
+export * from './user-invitation';
+export * from './audit-log';
 export * from './locations';
 export * from './customers';
 export * from './categories';

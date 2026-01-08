@@ -129,10 +129,16 @@ async function getOrganizationsHandler(req: NextRequest) {
  */
 async function createOrganizationHandler(req: NextRequest) {
   try {
+    const { getSession } = await import('@/lib/session');
+    const session = await getSession();
+
+    if (!session?.user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
     const body = await req.json();
     const validatedData = createOrganizationSchema.parse(body);
 
-    // Check if slug is already taken
     const existingOrg = await db.query.organization.findFirst({
       where: eq(organization.slug, validatedData.slug),
     });
@@ -144,7 +150,6 @@ async function createOrganizationHandler(req: NextRequest) {
       );
     }
 
-    // Check subdomain if provided
     if (validatedData.subdomain) {
       const existingSubdomain = await db.query.organization.findFirst({
         where: eq(organization.subdomain, validatedData.subdomain),
@@ -158,7 +163,6 @@ async function createOrganizationHandler(req: NextRequest) {
       }
     }
 
-    // Check domain if provided
     if (validatedData.domain) {
       const existingDomain = await db.query.organization.findFirst({
         where: eq(organization.domain, validatedData.domain),
@@ -172,19 +176,17 @@ async function createOrganizationHandler(req: NextRequest) {
       }
     }
 
-    // Calculate trial end date (14 days from now)
     const trialEndsAt = new Date();
     trialEndsAt.setDate(trialEndsAt.getDate() + 14);
 
-    // Create organization
     const [newOrg] = await db
       .insert(organization)
       .values({
         id: randomUUID(),
         name: validatedData.name,
         slug: validatedData.slug,
-        subdomain: validatedData.subdomain,
-        domain: validatedData.domain,
+        subdomain: validatedData.subdomain || null,
+        domain: validatedData.domain || null,
         status: 'trial',
         subscriptionTier: validatedData.subscriptionTier || 'starter',
         maxUsers: validatedData.maxUsers || 5,
@@ -201,10 +203,71 @@ async function createOrganizationHandler(req: NextRequest) {
       })
       .returning();
 
+    let invitation = null;
+    if (validatedData.adminEmail) {
+      try {
+        const { role: roleSchema } = await import('@/drizzle/schema');
+        let [adminRole] = await db
+          .select()
+          .from(roleSchema)
+          .where(
+            and(
+              eq(roleSchema.organizationId, newOrg.id),
+              eq(roleSchema.name, 'admin')
+            )
+          )
+          .limit(1);
+
+        if (!adminRole) {
+          [adminRole] = await db
+            .insert(roleSchema)
+            .values({
+              id: randomUUID(),
+              name: 'admin',
+              description: 'Organization administrator with full access',
+              organizationId: newOrg.id,
+              isGlobal: false,
+            })
+            .returning();
+        }
+
+        const { createUserInvitation, getInvitationUrl } = await import(
+          '@/lib/invitations'
+        );
+        const { sendInvitationEmail } = await import('@/lib/email');
+
+        invitation = await createUserInvitation({
+          email: validatedData.adminEmail,
+          name: validatedData.adminName || undefined,
+          organizationId: newOrg.id,
+          roleId: adminRole.id,
+          invitedBy: session.user.id,
+          expiresInDays: 7,
+        });
+
+        const invitationUrl = getInvitationUrl(invitation.token);
+        await sendInvitationEmail({
+          to: validatedData.adminEmail,
+          name: validatedData.adminName || undefined,
+          organizationName: newOrg.name,
+          invitationUrl,
+          expiresInDays: 7,
+        });
+      } catch (inviteError) {
+        console.error('Failed to create admin invitation:', inviteError);
+      }
+    }
+
     return NextResponse.json(
       {
         message: 'Organization created successfully',
         organization: newOrg,
+        invitation: invitation
+          ? {
+              email: invitation.email,
+              expiresAt: invitation.expiresAt,
+            }
+          : null,
       },
       { status: 201 }
     );
@@ -228,7 +291,6 @@ async function createOrganizationHandler(req: NextRequest) {
   }
 }
 
-// Protect routes with super admin permission
 export const GET = protectRoute(getOrganizationsHandler, {
   requireSuperAdmin: true,
 });

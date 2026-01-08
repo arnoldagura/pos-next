@@ -1,7 +1,6 @@
 'use client';
 
 import { useSession, signOut } from '@/lib/auth-client';
-import { useRouter } from 'next/navigation';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -18,12 +17,22 @@ import Link from 'next/link';
 
 export function UserMenu() {
   const { data: session, isPending } = useSession();
-  const router = useRouter();
 
   const handleSignOut = async () => {
-    await signOut();
-    router.push('/login');
-    router.refresh();
+    try {
+      await signOut({
+        fetchOptions: {
+          onSuccess: () => {
+            // Redirect after successful sign out
+            window.location.href = '/login';
+          },
+        },
+      });
+    } catch (error) {
+      console.error('Sign out error:', error);
+      // Force redirect even if there's an error
+      window.location.href = '/login';
+    }
   };
 
   if (isPending) {

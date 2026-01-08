@@ -5,27 +5,71 @@ import { useRouter } from 'next/navigation';
 import { signIn } from '@/lib/auth-client';
 import { FormWrapper, FormFieldWrapper } from '../forms/form-wrapper';
 import { loginUserSchema, type LoginUserInput } from '@/lib/validations';
+import { PasswordInput } from '@/components/ui/password-input';
 
-export function LoginForm() {
+interface LoginFormProps {
+  organizationName?: string | null;
+  organizationId?: string | null;
+}
+
+export function LoginForm({
+  organizationName,
+  organizationId,
+}: LoginFormProps = {}) {
   const router = useRouter();
   const [error, setError] = useState<string | null>(null);
 
   const handleSubmit = async (data: LoginUserInput) => {
     try {
       setError(null);
-      const result = await signIn.email({
-        email: data.email,
-        password: data.password,
-      });
 
-      if (result.error) {
-        setError(result.error.message || 'Login failed');
-        return;
+      // If organizationId is provided, validate access BEFORE signing in
+      if (organizationId) {
+        const validationResponse = await fetch('/api/auth/login-with-org', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            email: data.email,
+            organizationId,
+          }),
+        });
+
+        const validationResult = await validationResponse.json();
+
+        if (!validationResponse.ok) {
+          setError(validationResult.error || 'Access denied');
+          return;
+        }
+
+        // Validation passed, now proceed with better-auth sign-in
+        const result = await signIn.email({
+          email: data.email,
+          password: data.password,
+        });
+
+        if (result.error) {
+          setError(result.error.message || 'Invalid email or password');
+          return;
+        }
+
+        // Sign in successful, redirect to dashboard
+        router.push('/dashboard');
+        router.refresh();
+      } else {
+        // Standard login (no organization validation)
+        const result = await signIn.email({
+          email: data.email,
+          password: data.password,
+        });
+
+        if (result.error) {
+          setError(result.error.message || 'Login failed');
+          return;
+        }
+
+        router.push('/dashboard');
+        router.refresh();
       }
-
-      // Redirect to dashboard on success
-      router.push('/dashboard');
-      router.refresh();
     } catch (err) {
       setError('An unexpected error occurred');
       console.error('Login error:', err);
@@ -33,21 +77,53 @@ export function LoginForm() {
   };
 
   return (
-    <div className='w-full max-w-md space-y-6  p-6 sm:p-8 rounded-lg shadow-md'>
-      <div className='text-center'>
-        <h1 className='text-2xl sm:text-3xl font-bold'>Welcome back</h1>
-        <p className='text-gray-600 mt-2 text-sm sm:text-base'>
-          Sign in to your account
+    <div className='w-full space-y-6 bg-white p-6 sm:p-8 rounded-xl shadow-lg border border-gray-200'>
+      <div className='text-center space-y-2'>
+        <div className='inline-flex items-center justify-center w-16 h-16 bg-blue-100 rounded-full mb-2'>
+          <svg
+            className='w-8 h-8 text-blue-600'
+            fill='none'
+            stroke='currentColor'
+            viewBox='0 0 24 24'
+          >
+            <path
+              strokeLinecap='round'
+              strokeLinejoin='round'
+              strokeWidth={2}
+              d='M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z'
+            />
+          </svg>
+        </div>
+        <h1 className='text-2xl sm:text-3xl font-bold text-gray-900'>
+          Welcome back
+        </h1>
+        <p className='text-gray-600 text-sm sm:text-base'>
+          {organizationName
+            ? `Sign in to ${organizationName}`
+            : 'Sign in to your account to continue'}
         </p>
       </div>
 
       {error && (
         <div
-          className='p-3 bg-red-50 border border-red-200 rounded-md'
+          className='p-4 bg-red-50 border-l-4 border-red-500 rounded-r-lg'
           role='alert'
           aria-live='polite'
         >
-          <p className='text-sm text-red-600'>{error}</p>
+          <div className='flex items-start'>
+            <svg
+              className='shrink-0 w-5 h-5 text-red-500 mt-0.5'
+              fill='currentColor'
+              viewBox='0 0 20 20'
+            >
+              <path
+                fillRule='evenodd'
+                d='M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z'
+                clipRule='evenodd'
+              />
+            </svg>
+            <p className='ml-3 text-sm font-medium text-red-800'>{error}</p>
+          </div>
         </div>
       )}
 
@@ -69,15 +145,32 @@ export function LoginForm() {
                 error={errors.email?.message}
                 required
               >
-                <input
-                  {...register('email')}
-                  type='email'
-                  placeholder='you@example.com'
-                  className='w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500'
-                  autoComplete='email'
-                  aria-invalid={errors.email ? 'true' : 'false'}
-                  aria-describedby={errors.email ? 'email-error' : undefined}
-                />
+                <div className='relative'>
+                  <div className='absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none'>
+                    <svg
+                      className='h-5 w-5 text-gray-400'
+                      fill='none'
+                      stroke='currentColor'
+                      viewBox='0 0 24 24'
+                    >
+                      <path
+                        strokeLinecap='round'
+                        strokeLinejoin='round'
+                        strokeWidth={2}
+                        d='M16 12a4 4 0 10-8 0 4 4 0 008 0zm0 0v1.5a2.5 2.5 0 005 0V12a9 9 0 10-9 9m4.5-1.206a8.959 8.959 0 01-4.5 1.207'
+                      />
+                    </svg>
+                  </div>
+                  <input
+                    {...register('email')}
+                    type='email'
+                    placeholder='you@example.com'
+                    className='w-full pl-10 pr-3 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors'
+                    autoComplete='email'
+                    aria-invalid={errors.email ? 'true' : 'false'}
+                    aria-describedby={errors.email ? 'email-error' : undefined}
+                  />
+                </div>
               </FormFieldWrapper>
 
               <FormFieldWrapper
@@ -85,11 +178,9 @@ export function LoginForm() {
                 error={errors.password?.message}
                 required
               >
-                <input
+                <PasswordInput
                   {...register('password')}
-                  type='password'
                   placeholder='••••••••'
-                  className='w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500'
                   autoComplete='current-password'
                   aria-invalid={errors.password ? 'true' : 'false'}
                   aria-describedby={
@@ -116,24 +207,60 @@ export function LoginForm() {
               <button
                 type='submit'
                 disabled={isSubmitting}
-                className='w-full px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors'
+                className='w-full px-4 py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:bg-gray-400 disabled:cursor-not-allowed transition-all duration-200 transform hover:scale-[1.02] active:scale-[0.98] shadow-md'
                 aria-label={
                   isSubmitting ? 'Signing in' : 'Sign in to your account'
                 }
               >
-                {isSubmitting ? 'Signing in...' : 'Sign in'}
+                {isSubmitting ? (
+                  <span className='flex items-center justify-center'>
+                    <svg
+                      className='animate-spin -ml-1 mr-3 h-5 w-5 text-white'
+                      fill='none'
+                      viewBox='0 0 24 24'
+                    >
+                      <circle
+                        className='opacity-25'
+                        cx='12'
+                        cy='12'
+                        r='10'
+                        stroke='currentColor'
+                        strokeWidth='4'
+                      />
+                      <path
+                        className='opacity-75'
+                        fill='currentColor'
+                        d='M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z'
+                      />
+                    </svg>
+                    Signing in...
+                  </span>
+                ) : (
+                  'Sign in'
+                )}
               </button>
             </>
           );
         }}
       </FormWrapper>
 
-      <p className='text-center text-sm text-gray-600'>
-        Don&apos;t have an account?{' '}
-        <a href='/register' className='text-blue-600 hover:underline'>
-          Sign up
+      <div className='relative'>
+        <div className='absolute inset-0 flex items-center'>
+          <div className='w-full border-t border-gray-300' />
+        </div>
+        <div className='relative flex justify-center text-sm'>
+          <span className='px-2 bg-white text-gray-500'>New here?</span>
+        </div>
+      </div>
+
+      <div className='text-center'>
+        <a
+          href='/register'
+          className='inline-flex items-center justify-center w-full px-4 py-2.5 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors'
+        >
+          Create new account
         </a>
-      </p>
+      </div>
     </div>
   );
 }

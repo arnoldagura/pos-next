@@ -1,14 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { auth } from '@/lib/auth';
-import {
-  hasAnyRole,
-  can,
-  hasAnyRoleInTenant,
-  canInTenant,
-  ROLES,
-  hasRole,
-} from '@/lib/rbac';
+import { hasAnyRole, can, hasAnyRoleInTenant, canInTenant } from '@/lib/rbac';
 import { getTenantId } from '@/lib/tenant-context';
+import { getSession } from '@/lib/session';
+import { tenantAsyncContext } from '@/lib/tenant-async-context';
 
 /**
  * Middleware to protect routes by requiring specific roles
@@ -16,10 +10,8 @@ import { getTenantId } from '@/lib/tenant-context';
  * @returns Middleware function
  */
 export function requireRole(...requiredRoles: string[]) {
-  return async (req: NextRequest) => {
-    const session = await auth.api.getSession({
-      headers: req.headers,
-    });
+  return async () => {
+    const session = await getSession();
 
     if (!session?.user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
@@ -42,10 +34,8 @@ export function requireRole(...requiredRoles: string[]) {
  * @returns Middleware function
  */
 export function requirePermission(resource: string, action: string) {
-  return async (req: NextRequest) => {
-    const session = await auth.api.getSession({
-      headers: req.headers,
-    });
+  return async () => {
+    const session = await getSession();
 
     if (!session?.user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
@@ -81,9 +71,8 @@ export function protectRoute<T>(
       }
 ) {
   return async (req: NextRequest, context?: T) => {
-    const session = await auth.api.getSession({
-      headers: req.headers,
-    });
+    // Use extended session with pre-computed isSuperAdmin
+    const session = await getSession();
 
     if (!session?.user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
@@ -95,17 +84,30 @@ export function protectRoute<T>(
 
     // Check for super admin requirement
     if ('requireSuperAdmin' in options && options.requireSuperAdmin) {
-      const isSuperAdmin = await hasRole(session.user.id, ROLES.SUPER_ADMIN);
-      if (!isSuperAdmin) {
+      // Use pre-computed isSuperAdmin from session (no extra DB query)
+      if (!session.user.isSuperAdmin) {
         return NextResponse.json(
           { error: 'Super admin access required' },
           { status: 403 }
         );
       }
-      // Inject tenant ID into headers if provided (for super admin operations)
+
+      // Use AsyncLocalStorage for tenant context (safer than header mutation)
       if (tenantId) {
-        req.headers.set('x-tenant-id', tenantId);
+        return tenantAsyncContext.run(
+          {
+            tenantId,
+            userId: session.user.id,
+            isSuperAdmin: true,
+          },
+          () => {
+            // Also set header for backward compatibility
+            req.headers.set('x-tenant-id', tenantId);
+            return handler(req, context);
+          }
+        );
       }
+
       return handler(req, context);
     }
 
@@ -144,9 +146,18 @@ export function protectRoute<T>(
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
     }
 
-    // Inject tenant ID into request headers for use in handler
-    req.headers.set('x-tenant-id', tenantId);
-
-    return handler(req, context);
+    // Use AsyncLocalStorage for tenant context (safer than header mutation)
+    // Also set header for backward compatibility
+    return tenantAsyncContext.run(
+      {
+        tenantId,
+        userId: session.user.id,
+        isSuperAdmin: session.user.isSuperAdmin,
+      },
+      () => {
+        req.headers.set('x-tenant-id', tenantId);
+        return handler(req, context);
+      }
+    );
   };
 }

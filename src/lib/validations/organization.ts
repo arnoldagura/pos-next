@@ -135,6 +135,9 @@ export const createOrganizationSchema = z.object({
   country: z.string().max(100).optional().or(z.literal('')),
   taxId: z.string().max(50).optional().or(z.literal('')),
   // settings: organizationSettingsSchema.optional(),
+  // Admin invitation fields (optional)
+  adminEmail: optionalEmailSchema,
+  adminName: z.string().max(100).optional().or(z.literal('')),
 });
 
 // Update organization schema (all fields optional except id)
