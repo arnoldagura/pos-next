@@ -25,7 +25,8 @@ export async function createMaterialMovementHandler(req: NextRequest) {
     }
 
     // Use provided unitPrice or fallback to current inventory cost
-    const finalUnitPrice = validatedData.unitPrice ?? Number(inventory.cost || 0);
+    const finalUnitPrice =
+      validatedData.unitPrice ?? Number(inventory.cost || 0);
     const unitPrice = finalUnitPrice.toFixed(2);
 
     const quantity = validatedData.quantity.toString();

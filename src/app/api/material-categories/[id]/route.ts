@@ -18,7 +18,9 @@ async function getMaterialCategoryHandler(
     const [foundCategory] = await db
       .select()
       .from(materialCategory)
-      .where(and(eq(materialCategory.id, id), isNull(materialCategory.deletedAt)))
+      .where(
+        and(eq(materialCategory.id, id), isNull(materialCategory.deletedAt))
+      )
       .limit(1);
 
     if (!foundCategory) {
@@ -31,7 +33,12 @@ async function getMaterialCategoryHandler(
     const children = await db
       .select()
       .from(materialCategory)
-      .where(and(eq(materialCategory.parentId, id), isNull(materialCategory.deletedAt)))
+      .where(
+        and(
+          eq(materialCategory.parentId, id),
+          isNull(materialCategory.deletedAt)
+        )
+      )
       .orderBy(materialCategory.displayOrder, materialCategory.name);
 
     return NextResponse.json({
@@ -59,7 +66,9 @@ async function updateMaterialCategoryHandler(
     const [existing] = await db
       .select()
       .from(materialCategory)
-      .where(and(eq(materialCategory.id, id), isNull(materialCategory.deletedAt)))
+      .where(
+        and(eq(materialCategory.id, id), isNull(materialCategory.deletedAt))
+      )
       .limit(1);
 
     if (!existing) {
@@ -153,7 +162,9 @@ async function deleteMaterialCategoryHandler(
     const [existing] = await db
       .select()
       .from(materialCategory)
-      .where(and(eq(materialCategory.id, id), isNull(materialCategory.deletedAt)))
+      .where(
+        and(eq(materialCategory.id, id), isNull(materialCategory.deletedAt))
+      )
       .limit(1);
 
     if (!existing) {
@@ -166,7 +177,12 @@ async function deleteMaterialCategoryHandler(
     const children = await db
       .select()
       .from(materialCategory)
-      .where(and(eq(materialCategory.parentId, id), isNull(materialCategory.deletedAt)))
+      .where(
+        and(
+          eq(materialCategory.parentId, id),
+          isNull(materialCategory.deletedAt)
+        )
+      )
       .limit(1);
 
     if (children.length > 0) {

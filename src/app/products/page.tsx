@@ -1,7 +1,21 @@
 import { getCurrentUser } from '@/lib/session';
 import { redirect } from 'next/navigation';
-import { ProductsClient } from '@/components/products/products-client';
 import { hasPermission } from '@/lib/rbac';
+import { Suspense } from 'react';
+import dynamic from 'next/dynamic';
+
+const ProductsClient = dynamic(() => import('@/components/products/products-client').then(mod => ({ default: mod.ProductsClient })), {
+  loading: () => <ProductsLoadingSkeleton />
+});
+
+function ProductsLoadingSkeleton() {
+  return (
+    <div className='p-6 space-y-4 animate-pulse'>
+      <div className='h-10 bg-gray-200 rounded w-full'></div>
+      <div className='h-64 bg-gray-200 rounded w-full'></div>
+    </div>
+  );
+}
 
 export default async function ProductsPage() {
   const user = await getCurrentUser();
@@ -35,7 +49,9 @@ export default async function ProductsPage() {
             <h1 className='text-3xl font-bold'>Product Management</h1>
             <p className='text-gray-600 mt-1'>Manage your product inventory</p>
           </div>
-          <ProductsClient />
+          <Suspense fallback={<ProductsLoadingSkeleton />}>
+            <ProductsClient />
+          </Suspense>
         </div>
       </div>
     </div>

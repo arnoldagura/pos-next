@@ -34,9 +34,9 @@ import {
 import { Checkbox } from '@/components/ui/checkbox';
 import { toast } from 'sonner';
 import { generateSlug } from '@/lib/validations/category';
-import { Category, CategoryFormValues } from '@/lib/types';
+import { MaterialCategory, MaterialCategoryFormValues } from '@/lib/types';
 
-export const categoryFormSchema = z.object({
+export const materialCategoryFormSchema = z.object({
   name: z.string().min(1, 'Name is required').max(100, 'Name is too long'),
   slug: z
     .string()
@@ -53,25 +53,25 @@ export const categoryFormSchema = z.object({
   isActive: z.boolean(),
 });
 
-type CategoryFormDialogProps = {
-  category?: Category;
+type MaterialCategoryFormDialogProps = {
+  category?: MaterialCategory;
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onSuccess: () => void;
 };
 
-export function CategoryFormDialog({
+export function MaterialCategoryFormDialog({
   category,
   open,
   onOpenChange,
   onSuccess,
-}: CategoryFormDialogProps) {
+}: MaterialCategoryFormDialogProps) {
   const [loading, setLoading] = useState(false);
-  const [categories, setCategories] = useState<Category[]>([]);
+  const [categories, setCategories] = useState<MaterialCategory[]>([]);
   const [isDirty, setIsDirty] = useState(false);
 
-  const form = useForm<CategoryFormValues>({
-    resolver: zodResolver(categoryFormSchema),
+  const form = useForm<MaterialCategoryFormValues>({
+    resolver: zodResolver(materialCategoryFormSchema),
     defaultValues: {
       name: category?.name || '',
       slug: category?.slug || '',
@@ -85,12 +85,12 @@ export function CategoryFormDialog({
   useEffect(() => {
     const fetchCategories = async () => {
       try {
-        const response = await fetch('/api/categories?isActive=true');
+        const response = await fetch('/api/material-categories?isActive=true');
         if (!response.ok) throw new Error('Failed to fetch categories');
         const data = await response.json();
 
         const filteredCategories = category
-          ? data.categories.filter((cat: Category) => cat.id !== category.id)
+          ? data.categories.filter((cat: MaterialCategory) => cat.id !== category.id)
           : data.categories;
         setCategories(filteredCategories || []);
       } catch (error) {
@@ -143,7 +143,7 @@ export function CategoryFormDialog({
     setIsDirty(true);
   };
 
-  const onSubmit = async (data: CategoryFormValues) => {
+  const onSubmit = async (data: MaterialCategoryFormValues) => {
     try {
       setLoading(true);
 
@@ -154,8 +154,8 @@ export function CategoryFormDialog({
       };
 
       const url = category
-        ? `/api/categories/${category.id}`
-        : '/api/categories';
+        ? `/api/material-categories/${category.id}`
+        : '/api/material-categories';
       const method = category ? 'PATCH' : 'POST';
 
       const response = await fetch(url, {
@@ -171,8 +171,8 @@ export function CategoryFormDialog({
 
       toast.success(
         category
-          ? 'Category updated successfully'
-          : 'Category created successfully'
+          ? 'Material category updated successfully'
+          : 'Material category created successfully'
       );
       setIsDirty(false);
       onOpenChange(false);
@@ -202,12 +202,12 @@ export function CategoryFormDialog({
       <DialogContent className='max-w-lg'>
         <DialogHeader>
           <DialogTitle>
-            {category ? 'Edit Category' : 'Create Category'}
+            {category ? 'Edit Material Category' : 'Create Material Category'}
           </DialogTitle>
           <DialogDescription>
             {category
-              ? 'Update category information'
-              : 'Add a new category for organizing products'}
+              ? 'Update material category information'
+              : 'Add a new category for organizing materials'}
           </DialogDescription>
         </DialogHeader>
 
@@ -219,7 +219,7 @@ export function CategoryFormDialog({
               <FormItem>
                 <FormLabel>Category Name *</FormLabel>
                 <FormControl>
-                  <Input placeholder='e.g., Beverages' {...field} />
+                  <Input placeholder='e.g., Raw Materials' {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -234,7 +234,7 @@ export function CategoryFormDialog({
                 <FormLabel>Slug</FormLabel>
                 <div className='flex gap-2'>
                   <FormControl>
-                    <Input placeholder='e.g., beverages' {...field} />
+                    <Input placeholder='e.g., raw-materials' {...field} />
                   </FormControl>
                   <Button
                     type='button'
@@ -339,7 +339,7 @@ export function CategoryFormDialog({
                 <div className='space-y-1 leading-none'>
                   <FormLabel>Active</FormLabel>
                   <FormDescription>
-                    Show this category in product selection
+                    Show this category in material selection
                   </FormDescription>
                 </div>
               </FormItem>

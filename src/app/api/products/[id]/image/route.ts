@@ -24,10 +24,7 @@ async function uploadProductImageHandler(
       .limit(1);
 
     if (!existingProduct) {
-      return NextResponse.json(
-        { error: 'Product not found' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'Product not found' }, { status: 404 });
     }
 
     const formData = await req.formData();
@@ -105,10 +102,7 @@ async function deleteProductImageHandler(
       .returning({ id: product.id });
 
     if (!updatedProduct) {
-      return NextResponse.json(
-        { error: 'Product not found' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'Product not found' }, { status: 404 });
     }
 
     return NextResponse.json({ success: true });

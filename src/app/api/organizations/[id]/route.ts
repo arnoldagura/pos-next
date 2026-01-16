@@ -15,10 +15,7 @@ async function getOrganizationHandler(
 ) {
   try {
     if (!context?.params) {
-      return NextResponse.json(
-        { error: 'Invalid request' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Invalid request' }, { status: 400 });
     }
 
     const params = await context.params;
@@ -62,10 +59,7 @@ async function updateOrganizationHandler(
 ) {
   try {
     if (!context?.params) {
-      return NextResponse.json(
-        { error: 'Invalid request' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Invalid request' }, { status: 400 });
     }
 
     const params = await context.params;
@@ -150,7 +144,10 @@ async function updateOrganizationHandler(
 
     if (error instanceof Error && error.name === 'ZodError') {
       return NextResponse.json(
-        { error: 'Invalid input data', details: (error as unknown as { errors: unknown }).errors },
+        {
+          error: 'Invalid input data',
+          details: (error as unknown as { errors: unknown }).errors,
+        },
         { status: 400 }
       );
     }
@@ -172,10 +169,7 @@ async function deleteOrganizationHandler(
 ) {
   try {
     if (!context?.params) {
-      return NextResponse.json(
-        { error: 'Invalid request' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Invalid request' }, { status: 400 });
     }
 
     const params = await context.params;

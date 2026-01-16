@@ -25,10 +25,7 @@ async function updateTableStatusHandler(
       .limit(1);
 
     if (!existingTable) {
-      return NextResponse.json(
-        { error: 'Table not found' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'Table not found' }, { status: 404 });
     }
 
     // Update only the status

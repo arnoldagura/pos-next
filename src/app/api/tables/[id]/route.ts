@@ -22,10 +22,7 @@ async function getTableHandler(
       .limit(1);
 
     if (!foundTable) {
-      return NextResponse.json(
-        { error: 'Table not found' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'Table not found' }, { status: 404 });
     }
 
     return NextResponse.json(foundTable);
@@ -57,10 +54,7 @@ async function updateTableHandler(
       .returning();
 
     if (!updatedTable) {
-      return NextResponse.json(
-        { error: 'Table not found' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'Table not found' }, { status: 404 });
     }
 
     return NextResponse.json(updatedTable);
@@ -94,10 +88,7 @@ async function deleteTableHandler(
       .returning({ id: restaurantTable.id });
 
     if (!deletedTable) {
-      return NextResponse.json(
-        { error: 'Table not found' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'Table not found' }, { status: 404 });
     }
 
     return NextResponse.json({ success: true });

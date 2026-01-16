@@ -1,19 +1,29 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/db/db';
-import { user, userRole, role as roleTable } from '@/drizzle/schema';
-import { eq } from 'drizzle-orm';
+import { user, role as roleTable, userOrganization } from '@/drizzle/schema';
+import { eq, and } from 'drizzle-orm';
 import { protectRoute } from '@/middleware/rbac';
 import { RESOURCES, ACTIONS } from '@/lib/rbac';
 import { RouteContext, createDefaultRouteContext } from '@/lib/types/route';
+import { getTenantId } from '@/lib/tenant-context';
 
 async function getUserHandler(
   req: NextRequest,
   context: RouteContext<{ id: string }> = createDefaultRouteContext({ id: '' })
 ) {
   try {
+    const tenantId = await getTenantId();
+
+    if (!tenantId) {
+      return NextResponse.json(
+        { error: 'No tenant context available' },
+        { status: 400 }
+      );
+    }
+
     const { id } = await context.params;
 
-    const [foundUser] = await db
+    const [userInOrg] = await db
       .select({
         id: user.id,
         name: user.name,
@@ -24,25 +34,33 @@ async function getUserHandler(
         updatedAt: user.updatedAt,
       })
       .from(user)
-      .where(eq(user.id, id))
+      .innerJoin(userOrganization, eq(user.id, userOrganization.userId))
+      .where(
+        and(eq(user.id, id), eq(userOrganization.organizationId, tenantId))
+      )
       .limit(1);
 
-    if (!foundUser) {
+    if (!userInOrg) {
       return NextResponse.json({ error: 'User not found' }, { status: 404 });
     }
 
     const roles = await db
       .select({
-        roleId: userRole.roleId,
+        roleId: userOrganization.roleId,
         roleName: roleTable.name,
         roleDescription: roleTable.description,
       })
-      .from(userRole)
-      .innerJoin(roleTable, eq(userRole.roleId, roleTable.id))
-      .where(eq(userRole.userId, id));
+      .from(userOrganization)
+      .innerJoin(roleTable, eq(userOrganization.roleId, roleTable.id))
+      .where(
+        and(
+          eq(userOrganization.userId, id),
+          eq(userOrganization.organizationId, tenantId)
+        )
+      );
 
     return NextResponse.json({
-      ...foundUser,
+      ...userInOrg,
       roles: roles.map((r) => ({
         id: r.roleId,
         name: r.roleName,
@@ -63,9 +81,33 @@ async function updateUserHandler(
   context: RouteContext<{ id: string }> = createDefaultRouteContext({ id: '' })
 ) {
   try {
-    const { id } = await context.params;
-    const body = await req.json();
+    const tenantId = await getTenantId();
 
+    if (!tenantId) {
+      return NextResponse.json(
+        { error: 'No tenant context available' },
+        { status: 400 }
+      );
+    }
+
+    const { id } = await context.params;
+
+    const [userInOrg] = await db
+      .select({ userId: userOrganization.userId })
+      .from(userOrganization)
+      .where(
+        and(
+          eq(userOrganization.userId, id),
+          eq(userOrganization.organizationId, tenantId)
+        )
+      )
+      .limit(1);
+
+    if (!userInOrg) {
+      return NextResponse.json({ error: 'User not found' }, { status: 404 });
+    }
+
+    const body = await req.json();
     const { name, email, emailVerified } = body;
 
     const [updatedUser] = await db
@@ -106,16 +148,41 @@ async function deleteUserHandler(
   context: RouteContext<{ id: string }> = createDefaultRouteContext({ id: '' })
 ) {
   try {
+    const tenantId = await getTenantId();
+
+    if (!tenantId) {
+      return NextResponse.json(
+        { error: 'No tenant context available' },
+        { status: 400 }
+      );
+    }
+
     const { id } = await context.params;
 
-    const [deletedUser] = await db
-      .delete(user)
-      .where(eq(user.id, id))
-      .returning({ id: user.id });
+    // Verify user belongs to this organization
+    const [userInOrg] = await db
+      .select({ userId: userOrganization.userId })
+      .from(userOrganization)
+      .where(
+        and(
+          eq(userOrganization.userId, id),
+          eq(userOrganization.organizationId, tenantId)
+        )
+      )
+      .limit(1);
 
-    if (!deletedUser) {
+    if (!userInOrg) {
       return NextResponse.json({ error: 'User not found' }, { status: 404 });
     }
+
+    await db
+      .delete(userOrganization)
+      .where(
+        and(
+          eq(userOrganization.userId, id),
+          eq(userOrganization.organizationId, tenantId)
+        )
+      );
 
     return NextResponse.json({ success: true });
   } catch (error) {

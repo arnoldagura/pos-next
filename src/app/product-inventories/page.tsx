@@ -19,10 +19,14 @@ import CreateInventoryDialog from '@/components/product-inventories/create-inven
 import {
   useProductInventory,
   useLowStockItems,
+  useCreateInventory,
+  useUpdateInventorySettings,
 } from '@/hooks/use-product-inventory';
 import { ProductInventoryItem } from '@/lib/types';
+import { useQueryClient } from '@tanstack/react-query';
 
 export default function InventoryPage() {
+  const queryClient = useQueryClient();
   const [selectedLocation, setSelectedLocation] = useState<string>('');
   const [searchQuery, setSearchQuery] = useState('');
   const [page] = useState(1);
@@ -205,8 +209,8 @@ export default function InventoryPage() {
           onSuccess={() => {
             setIsEditSettingsOpen(false);
             setSelectedInventoryForEdit({} as ProductInventoryItem);
-            // Refetch inventory data
-            window.location.reload();
+            // Refetch inventory data using React Query
+            queryClient.invalidateQueries({ queryKey: ['inventory'] });
           }}
         />
       )}
@@ -217,8 +221,8 @@ export default function InventoryPage() {
         onOpenChange={setIsCreateDialogOpen}
         onSuccess={() => {
           setIsCreateDialogOpen(false);
-          // Refetch inventory data
-          window.location.reload();
+          // Refetch inventory data using React Query
+          queryClient.invalidateQueries({ queryKey: ['inventory'] });
         }}
       />
     </div>

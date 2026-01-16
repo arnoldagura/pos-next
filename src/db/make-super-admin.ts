@@ -1,6 +1,6 @@
 import { db } from './db';
 import { user, role, userRole } from '@/drizzle/schema';
-import { eq } from 'drizzle-orm';
+import { eq, and } from 'drizzle-orm';
 
 /**
  * Utility script to assign super_admin role to an existing user
@@ -72,8 +72,7 @@ async function makeSuperAdmin() {
     const [existingAssignment] = await db
       .select()
       .from(userRole)
-      .where(eq(userRole.userId, foundUser.id))
-      .where(eq(userRole.roleId, superAdminRole.id))
+      .where(and(eq(userRole.userId, foundUser.id), eq(userRole.roleId, superAdminRole.id)))
       .limit(1);
 
     if (existingAssignment) {

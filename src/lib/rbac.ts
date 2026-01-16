@@ -62,12 +62,14 @@ export async function getUserRoles(userId: string) {
 }
 
 /**
- * Get all permissions for a user (through their roles)
+ * Get all permissions for a user (through their roles) - supports both legacy and multi-tenant
+ * @deprecated Use getUserPermissionsInTenant() for tenant-specific permissions
  * @param userId - The user's ID
- * @returns Array of permission objects
+ * @returns Array of permission objects (deduplicated)
  */
 export async function getUserPermissions(userId: string) {
-  const result = await db
+  // Get permissions from legacy userRole table
+  const legacyPermissions = await db
     .select({
       id: permission.id,
       name: permission.name,
@@ -80,11 +82,35 @@ export async function getUserPermissions(userId: string) {
     .innerJoin(permission, eq(rolePermission.permissionId, permission.id))
     .where(eq(userRole.userId, userId));
 
-  return result;
+  // Get permissions from multi-tenant userOrganization table
+  const tenantPermissions = await db
+    .select({
+      id: permission.id,
+      name: permission.name,
+      resource: permission.resource,
+      action: permission.action,
+      description: permission.description,
+    })
+    .from(userOrganization)
+    .innerJoin(
+      rolePermission,
+      eq(userOrganization.roleId, rolePermission.roleId)
+    )
+    .innerJoin(permission, eq(rolePermission.permissionId, permission.id))
+    .where(eq(userOrganization.userId, userId));
+
+  // Deduplicate permissions by ID
+  const permissionMap = new Map();
+  [...legacyPermissions, ...tenantPermissions].forEach((perm) => {
+    permissionMap.set(perm.id, perm);
+  });
+
+  return Array.from(permissionMap.values());
 }
 
 /**
- * Check if a user has a specific permission
+ * Check if a user has a specific permission (legacy - non-tenant-aware)
+ * @deprecated Use canInTenant() for multi-tenant permission checks
  * @param userId - The user's ID
  * @param permissionName - The permission name to check (e.g., 'products:create')
  * @returns true if user has the permission, false otherwise
@@ -93,7 +119,14 @@ export async function hasPermission(
   userId: string,
   permissionName: string
 ): Promise<boolean> {
-  const result = await db
+  // Check super admin first (global permissions)
+  const isSuperAdmin = await hasRole(userId, ROLES.SUPER_ADMIN);
+  if (isSuperAdmin) {
+    return true;
+  }
+
+  // Check legacy userRole table
+  const legacyResult = await db
     .select()
     .from(userRole)
     .innerJoin(rolePermission, eq(userRole.roleId, rolePermission.roleId))
@@ -103,11 +136,30 @@ export async function hasPermission(
     )
     .limit(1);
 
-  return result.length > 0;
+  if (legacyResult.length > 0) {
+    return true;
+  }
+
+  // Check multi-tenant userOrganization table (any organization)
+  const tenantResult = await db
+    .select()
+    .from(userOrganization)
+    .innerJoin(
+      rolePermission,
+      eq(userOrganization.roleId, rolePermission.roleId)
+    )
+    .innerJoin(permission, eq(rolePermission.permissionId, permission.id))
+    .where(
+      and(eq(userOrganization.userId, userId), eq(permission.name, permissionName))
+    )
+    .limit(1);
+
+  return tenantResult.length > 0;
 }
 
 /**
- * Check if a user can perform an action on a resource
+ * Check if a user can perform an action on a resource (legacy - non-tenant-aware)
+ * @deprecated Use canInTenant() for multi-tenant permission checks
  * @param userId - The user's ID
  * @param resource - The resource name (e.g., 'products', 'orders')
  * @param action - The action (e.g., 'create', 'read', 'update', 'delete')
@@ -118,7 +170,14 @@ export async function can(
   resource: string,
   action: string
 ): Promise<boolean> {
-  const result = await db
+  // Check super admin first (global permissions)
+  const isSuperAdmin = await hasRole(userId, ROLES.SUPER_ADMIN);
+  if (isSuperAdmin) {
+    return true;
+  }
+
+  // Check legacy userRole table
+  const legacyResult = await db
     .select()
     .from(userRole)
     .innerJoin(rolePermission, eq(userRole.roleId, rolePermission.roleId))
@@ -132,7 +191,29 @@ export async function can(
     )
     .limit(1);
 
-  return result.length > 0;
+  if (legacyResult.length > 0) {
+    return true;
+  }
+
+  // Check multi-tenant userOrganization table (any organization)
+  const tenantResult = await db
+    .select()
+    .from(userOrganization)
+    .innerJoin(
+      rolePermission,
+      eq(userOrganization.roleId, rolePermission.roleId)
+    )
+    .innerJoin(permission, eq(rolePermission.permissionId, permission.id))
+    .where(
+      and(
+        eq(userOrganization.userId, userId),
+        eq(permission.resource, resource),
+        eq(permission.action, action)
+      )
+    )
+    .limit(1);
+
+  return tenantResult.length > 0;
 }
 
 /**

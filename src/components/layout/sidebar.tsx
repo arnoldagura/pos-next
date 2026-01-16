@@ -21,6 +21,7 @@ import {
   ShoppingCart,
   UserCircle,
   Building2,
+  Shield,
 } from 'lucide-react';
 import { Suspense } from 'react';
 import { Button } from '@/components/ui/button';
@@ -61,6 +62,7 @@ const navGroups: NavGroup[] = [
     items: [
       { title: 'Categories', href: '/categories', icon: Layers },
       { title: 'Products', href: '/products', icon: Package },
+      { title: 'Material Categories', href: '/material-categories', icon: Layers },
       { title: 'Materials', href: '/materials', icon: Package },
     ],
   },
@@ -91,6 +93,7 @@ const navGroups: NavGroup[] = [
     items: [
       { title: 'Locations', href: '/locations', icon: MapPin },
       { title: 'Users', href: '/users', icon: Users },
+      { title: 'Roles & Permissions', href: '/roles', icon: Shield },
     ],
   },
   {

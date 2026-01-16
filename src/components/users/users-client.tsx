@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Search, Pencil, Trash2, Shield } from 'lucide-react';
+import { Search, Pencil, Trash2, Shield, Plus } from 'lucide-react';
 import {
   Table,
   TableBody,
@@ -16,6 +16,7 @@ import { Badge } from '@/components/ui/badge';
 import { UserFormDialog } from './user-form-dialog';
 import { DeleteUserDialog } from './delete-user-dialog';
 import { RoleAssignmentDialog } from './role-assignment-dialog';
+import { CreateUserDialog } from './create-user-dialog';
 import { toast } from 'sonner';
 
 type User = {
@@ -43,6 +44,7 @@ export function UsersClient({ currentUserId }: UsersClientProps) {
   const [showEditDialog, setShowEditDialog] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [showRoleDialog, setShowRoleDialog] = useState(false);
+  const [showCreateDialog, setShowCreateDialog] = useState(false);
 
   const fetchUsers = async () => {
     try {
@@ -105,6 +107,11 @@ export function UsersClient({ currentUserId }: UsersClientProps) {
     setSelectedUser(null);
   };
 
+  const handleUserCreated = () => {
+    fetchUsers();
+    setShowCreateDialog(false);
+  };
+
   return (
     <div className='p-6 space-y-4'>
       <div className='flex items-center gap-4'>
@@ -120,6 +127,10 @@ export function UsersClient({ currentUserId }: UsersClientProps) {
             className='pl-9'
           />
         </div>
+        <Button onClick={() => setShowCreateDialog(true)}>
+          <Plus className='h-4 w-4 mr-2' />
+          Create User
+        </Button>
       </div>
 
       {loading ? (
@@ -241,6 +252,12 @@ export function UsersClient({ currentUserId }: UsersClientProps) {
           )}
         </>
       )}
+
+      <CreateUserDialog
+        open={showCreateDialog}
+        onOpenChange={setShowCreateDialog}
+        onSuccess={handleUserCreated}
+      />
 
       {selectedUser && (
         <>

@@ -1,9 +1,15 @@
 import { getCurrentUser } from '@/lib/session';
 import { redirect } from 'next/navigation';
-import { DashboardClient } from '@/components/dashboard/dashboard-client';
 import { getTenantId } from '@/lib/tenant-context';
 import { TenantAccessDeniedError } from '@/lib/errors/tenant-errors';
 import Link from 'next/link';
+import { Suspense } from 'react';
+import dynamic from 'next/dynamic';
+import DashboardSkeleton from './loading';
+
+const DashboardClient = dynamic(() => import('@/components/dashboard/dashboard-client').then(mod => ({ default: mod.DashboardClient })), {
+  loading: () => <DashboardSkeleton />
+});
 
 export default async function DashboardPage() {
   const user = await getCurrentUser();
@@ -97,7 +103,9 @@ export default async function DashboardPage() {
   return (
     <div className='min-h-screen p-4 md:p-8'>
       <div className='max-w-7xl mx-auto'>
-        <DashboardClient />
+        <Suspense fallback={<DashboardSkeleton />}>
+          <DashboardClient />
+        </Suspense>
       </div>
     </div>
   );

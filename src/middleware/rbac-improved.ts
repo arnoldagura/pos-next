@@ -400,3 +400,93 @@ export function protectRoute<T>(
     );
   };
 }
+
+/**
+ * Legacy middleware functions (kept for backward compatibility)
+ */
+export function requireRole(...requiredRoles: string[]) {
+  return async () => {
+    const session = await getSession();
+
+    if (!session?.user) {
+      return createErrorResponse(
+        'Unauthorized',
+        ERROR_CODES.AUTH_REQUIRED,
+        'Authentication is required',
+        401
+      );
+    }
+
+    const tenantId = await getTenantId();
+    if (!tenantId) {
+      return createErrorResponse(
+        'Bad Request',
+        ERROR_CODES.NO_TENANT_CONTEXT,
+        'No tenant context available',
+        400
+      );
+    }
+
+    const hasAccess = await hasAnyRoleInTenant(
+      session.user.id,
+      requiredRoles,
+      tenantId
+    );
+
+    if (!hasAccess) {
+      return createErrorResponse(
+        'Forbidden',
+        ERROR_CODES.INSUFFICIENT_PERMISSIONS,
+        'You do not have the required role',
+        403,
+        { required_roles: requiredRoles }
+      );
+    }
+
+    return NextResponse.next();
+  };
+}
+
+export function requirePermission(resource: string, action: string) {
+  return async () => {
+    const session = await getSession();
+
+    if (!session?.user) {
+      return createErrorResponse(
+        'Unauthorized',
+        ERROR_CODES.AUTH_REQUIRED,
+        'Authentication is required',
+        401
+      );
+    }
+
+    const tenantId = await getTenantId();
+    if (!tenantId) {
+      return createErrorResponse(
+        'Bad Request',
+        ERROR_CODES.NO_TENANT_CONTEXT,
+        'No tenant context available',
+        400
+      );
+    }
+
+    const hasAccess = await canInTenant(
+      session.user.id,
+      resource,
+      action,
+      tenantId
+    );
+
+    if (!hasAccess) {
+      return createErrorResponse(
+        'Forbidden',
+        ERROR_CODES.INSUFFICIENT_PERMISSIONS,
+        'You do not have permission to perform this action',
+        403,
+        { required: `${resource}:${action}` }
+      );
+    }
+
+    return NextResponse.next();
+  };
+}

@@ -40,7 +40,10 @@ async function getMaterialHandler(
       .limit(1);
 
     if (!foundMaterial) {
-      return NextResponse.json({ error: 'Material not found' }, { status: 404 });
+      return NextResponse.json(
+        { error: 'Material not found' },
+        { status: 404 }
+      );
     }
 
     return NextResponse.json(foundMaterial);
@@ -69,7 +72,10 @@ async function updateMaterialHandler(
       .returning();
 
     if (!updatedMaterial) {
-      return NextResponse.json({ error: 'Material not found' }, { status: 404 });
+      return NextResponse.json(
+        { error: 'Material not found' },
+        { status: 404 }
+      );
     }
 
     return NextResponse.json(updatedMaterial);
@@ -106,7 +112,10 @@ async function deleteMaterialHandler(
       .returning({ id: material.id });
 
     if (!deletedMaterial) {
-      return NextResponse.json({ error: 'Material not found' }, { status: 404 });
+      return NextResponse.json(
+        { error: 'Material not found' },
+        { status: 404 }
+      );
     }
 
     return NextResponse.json({ success: true });

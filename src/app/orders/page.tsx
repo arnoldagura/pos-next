@@ -1,7 +1,21 @@
 import { getCurrentUser } from '@/lib/session';
 import { redirect } from 'next/navigation';
-import { OrdersClient } from '@/components/orders/orders-client';
 import { hasPermission } from '@/lib/rbac';
+import { Suspense } from 'react';
+import dynamic from 'next/dynamic';
+
+const OrdersClient = dynamic(() => import('@/components/orders/orders-client').then(mod => ({ default: mod.OrdersClient })), {
+  loading: () => <OrdersLoadingSkeleton />
+});
+
+function OrdersLoadingSkeleton() {
+  return (
+    <div className='p-6 space-y-4 animate-pulse'>
+      <div className='h-10 bg-gray-200 rounded w-1/3'></div>
+      <div className='h-64 bg-gray-200 rounded w-full'></div>
+    </div>
+  );
+}
 
 export default async function OrdersPage() {
   const user = await getCurrentUser();
@@ -10,7 +24,7 @@ export default async function OrdersPage() {
     redirect('/login');
   }
 
-  const canViewOrders = await hasPermission(user.id, 'read', 'orders');
+  const canViewOrders = await hasPermission(user.id, 'orders:read');
 
   if (!canViewOrders) {
     return (
@@ -36,7 +50,9 @@ export default async function OrdersPage() {
             View and manage all orders with advanced search and filtering
           </p>
         </div>
-        <OrdersClient />
+        <Suspense fallback={<OrdersLoadingSkeleton />}>
+          <OrdersClient />
+        </Suspense>
       </div>
     </div>
   );

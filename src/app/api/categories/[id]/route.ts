@@ -31,7 +31,9 @@ async function getCategoryHandler(
     const children = await db
       .select()
       .from(productCategory)
-      .where(and(eq(productCategory.parentId, id), isNull(productCategory.deletedAt)))
+      .where(
+        and(eq(productCategory.parentId, id), isNull(productCategory.deletedAt))
+      )
       .orderBy(productCategory.displayOrder, productCategory.name);
 
     return NextResponse.json({
@@ -166,7 +168,9 @@ async function deleteCategoryHandler(
     const children = await db
       .select()
       .from(productCategory)
-      .where(and(eq(productCategory.parentId, id), isNull(productCategory.deletedAt)))
+      .where(
+        and(eq(productCategory.parentId, id), isNull(productCategory.deletedAt))
+      )
       .limit(1);
 
     if (children.length > 0) {

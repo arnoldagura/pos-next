@@ -12,22 +12,24 @@ export async function GET(req: NextRequest) {
     const limit = parseInt(searchParams.get('limit') || '50', 10);
     const offset = (page - 1) * limit;
 
-    let query = db.select().from(customer);
+    const query = db.select().from(customer);
 
-    if (search) {
-      query = query.where(
-        or(
-          ilike(customer.name, `%${search}%`),
-          ilike(customer.email, `%${search}%`),
-          ilike(customer.phone, `%${search}%`)
-        )
-      );
-    }
-
-    const customers = await query
-      .orderBy(desc(customer.createdAt))
-      .limit(limit)
-      .offset(offset);
+    const customers = search
+      ? await query
+          .where(
+            or(
+              ilike(customer.name, `%${search}%`),
+              ilike(customer.email, `%${search}%`),
+              ilike(customer.phone, `%${search}%`)
+            )
+          )
+          .orderBy(desc(customer.createdAt))
+          .limit(limit)
+          .offset(offset)
+      : await query
+          .orderBy(desc(customer.createdAt))
+          .limit(limit)
+          .offset(offset);
 
     return NextResponse.json({ customers });
   } catch (error) {

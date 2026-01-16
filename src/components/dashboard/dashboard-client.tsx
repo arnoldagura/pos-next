@@ -1,6 +1,5 @@
 'use client';
 
-import { useEffect, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { StatsCard } from './stats-card';
 import { RecentOrdersTable } from './recent-orders-table';
@@ -20,6 +19,7 @@ import {
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { formatCurrency } from '@/lib/utils';
+import { useQuery } from '@tanstack/react-query';
 
 interface DashboardStats {
   sales: {
@@ -73,44 +73,33 @@ interface DashboardStats {
 }
 
 export function DashboardClient() {
-  const [stats, setStats] = useState<DashboardStats | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  const fetchStats = async () => {
-    try {
-      setLoading(true);
-      setError(null);
+  const { data: stats, isLoading: loading, error, refetch } = useQuery<DashboardStats>({
+    queryKey: ['dashboard-stats'],
+    queryFn: async () => {
       const response = await fetch('/api/dashboard/stats');
       if (!response.ok) {
         throw new Error('Failed to fetch dashboard statistics');
       }
-      const data = await response.json();
-      setStats(data);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'An error occurred');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchStats();
-  }, []);
+      return response.json();
+    },
+    staleTime: 5 * 60 * 1000, // Consider data fresh for 5 minutes
+    refetchOnWindowFocus: false,
+  });
 
   if (loading) {
     return <DashboardSkeleton />;
   }
 
   if (error) {
+    const errorMessage = error instanceof Error ? error.message : 'An error occurred';
     return (
       <div className="flex flex-col items-center justify-center min-h-[400px] gap-4">
         <div className="text-destructive text-center">
           <AlertTriangle className="h-12 w-12 mx-auto mb-2" />
           <p className="font-semibold">Failed to load dashboard</p>
-          <p className="text-sm text-muted-foreground">{error}</p>
+          <p className="text-sm text-muted-foreground">{errorMessage}</p>
         </div>
-        <Button onClick={fetchStats}>Try Again</Button>
+        <Button onClick={() => refetch()}>Try Again</Button>
       </div>
     );
   }
@@ -123,7 +112,7 @@ export function DashboardClient() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h1 className="text-3xl font-bold">Dashboard</h1>
-        <Button onClick={fetchStats} variant="outline" size="sm">
+        <Button onClick={() => refetch()} variant="outline" size="sm">
           <RefreshCcw className="h-4 w-4 mr-2" />
           Refresh
         </Button>
