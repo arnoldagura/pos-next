@@ -1,12 +1,14 @@
 import { db } from '@/drizzle/db';
 import { product } from '@/drizzle/schema/products';
 import { ACTIONS, RESOURCES } from '@/lib/rbac';
+import { requireTenantId } from '@/lib/tenant-context';
 import { protectRoute } from '@/middleware/rbac';
 import { and, eq, ilike, isNull } from 'drizzle-orm';
 import { NextRequest, NextResponse } from 'next/server';
 
 export async function searchProductsHandler(req: NextRequest) {
   try {
+    const tenantId = await requireTenantId();
     const { searchParams } = new URL(req.url);
     const query = searchParams.get('q');
     const limit = parseInt(searchParams.get('limit') || '10', 10);
@@ -30,6 +32,7 @@ export async function searchProductsHandler(req: NextRequest) {
       .from(product)
       .where(
         and(
+          eq(product.organizationId, tenantId),
           ilike(product.name, `%${query}%`),
           eq(product.status, true),
           isNull(product.deletedAt)

@@ -8,6 +8,7 @@ import {
   pgEnum,
 } from 'drizzle-orm/pg-core';
 import { materialCategory } from './categories';
+import { organization } from './organizations';
 
 export const materialTypeEnum = pgEnum('material_type', [
   'raw_materials',
@@ -20,6 +21,9 @@ export const material = pgTable(
   'material',
   {
     id: text('id').primaryKey(),
+    organizationId: text('organization_id')
+      .notNull()
+      .references(() => organization.id, { onDelete: 'cascade' }),
     name: text('name').notNull(),
     description: text('description'),
     type: materialTypeEnum('type').notNull(),
@@ -38,6 +42,7 @@ export const material = pgTable(
       .notNull(),
   },
   (table) => ({
+    orgIdx: index('material_org_idx').on(table.organizationId),
     nameIdx: index('material_name_idx').on(table.name),
     typeIdx: index('material_type_idx').on(table.type),
     categoryIdx: index('material_category_idx').on(table.categoryId),
@@ -46,6 +51,10 @@ export const material = pgTable(
 );
 
 export const materialRelations = relations(material, ({ one }) => ({
+  organization: one(organization, {
+    fields: [material.organizationId],
+    references: [organization.id],
+  }),
   category: one(materialCategory, {
     fields: [material.categoryId],
     references: [materialCategory.id],

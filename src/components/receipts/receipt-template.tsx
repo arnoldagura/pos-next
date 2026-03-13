@@ -24,7 +24,7 @@ interface ReceiptData {
   totalDiscount: string;
   totalTax: string;
   total: string;
-  paymentMethod: string;
+  paymentMethod: string | null;
   amountPaid: string;
   changeGiven: string;
   customerName?: string | null;

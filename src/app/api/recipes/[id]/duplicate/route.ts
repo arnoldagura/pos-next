@@ -1,6 +1,7 @@
 import { db } from '@/db/db';
 import { productionRecipe, productionRecipeIngredient } from '@/drizzle/schema';
-import { eq } from 'drizzle-orm';
+import { requireTenantId } from '@/lib/tenant-context';
+import { eq, and } from 'drizzle-orm';
 import { NextRequest, NextResponse } from 'next/server';
 
 // POST /api/recipes/[id]/duplicate - Duplicate a recipe
@@ -9,9 +10,10 @@ export async function POST(
   context: { params: Promise<{ id: string }> }
 ) {
   try {
+    const tenantId = await requireTenantId();
     const { id } = await context.params;
     const originalRecipe = await db.query.productionRecipe.findFirst({
-      where: eq(productionRecipe.id, id),
+      where: and(eq(productionRecipe.organizationId, tenantId), eq(productionRecipe.id, id)),
       with: {
         ingredients: true,
       },
@@ -28,6 +30,7 @@ export async function POST(
     await db.transaction(async (tx) => {
       await tx.insert(productionRecipe).values({
         id: newRecipeId,
+        organizationId: tenantId,
         name: `${originalRecipe.name} (Copy)`,
         description: originalRecipe.description,
         outputType: originalRecipe.outputType,

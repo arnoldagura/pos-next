@@ -4,18 +4,20 @@ import { productCategory } from '@/drizzle/schema';
 import { eq, isNull, and } from 'drizzle-orm';
 import { protectRoute } from '@/middleware/rbac';
 import { RESOURCES, ACTIONS } from '@/lib/rbac';
+import { requireTenantId } from '@/lib/tenant-context';
 import { createProductCategorySchema, generateSlug } from '@/lib/validations';
 import { randomUUID } from 'crypto';
 import { ZodError } from 'zod';
 
 async function getCategoriesHandler(req: NextRequest) {
   try {
+    const tenantId = await requireTenantId();
     const { searchParams } = new URL(req.url);
     const parentId = searchParams.get('parentId');
     const isActiveParam = searchParams.get('isActive');
     const includeDeleted = searchParams.get('includeDeleted') === 'true';
 
-    const conditions = [];
+    const conditions = [eq(productCategory.organizationId, tenantId)];
 
     if (parentId === 'null' || parentId === '') {
       conditions.push(isNull(productCategory.parentId));
@@ -50,6 +52,7 @@ async function getCategoriesHandler(req: NextRequest) {
 
 async function createCategoryHandler(req: NextRequest) {
   try {
+    const tenantId = await requireTenantId();
     const body = await req.json();
     const validatedData = createProductCategorySchema.parse(body);
 
@@ -58,7 +61,7 @@ async function createCategoryHandler(req: NextRequest) {
     const existing = await db
       .select()
       .from(productCategory)
-      .where(eq(productCategory.slug, slug))
+      .where(and(eq(productCategory.organizationId, tenantId), eq(productCategory.slug, slug)))
       .limit(1);
 
     if (existing.length > 0) {
@@ -72,7 +75,7 @@ async function createCategoryHandler(req: NextRequest) {
       const parent = await db
         .select()
         .from(productCategory)
-        .where(eq(productCategory.id, validatedData.parentId))
+        .where(and(eq(productCategory.organizationId, tenantId), eq(productCategory.id, validatedData.parentId)))
         .limit(1);
 
       if (parent.length === 0) {
@@ -87,6 +90,7 @@ async function createCategoryHandler(req: NextRequest) {
       .insert(productCategory)
       .values({
         id: randomUUID(),
+        organizationId: tenantId,
         ...validatedData,
         slug,
         parentId: validatedData.parentId || null,

@@ -13,6 +13,7 @@ import { eq, and, count, desc, ilike, or, gte, lte, isNull } from 'drizzle-orm';
 import { NextRequest, NextResponse } from 'next/server';
 import { ZodError } from 'zod';
 import { generateSku, generateSlug } from '@/lib/validations';
+import { requireTenantId } from '@/lib/tenant-context';
 import { InventoryMovementType } from './[id]/movements/route';
 
 export async function getInventoryHandler(req: NextRequest) {
@@ -27,7 +28,8 @@ export async function getInventoryHandler(req: NextRequest) {
     const limit = parseInt(searchParams.get('limit') || '50', 10);
     const offset = (page - 1) * limit;
 
-    const conditions = [];
+    const tenantId = await requireTenantId();
+    const conditions = [eq(productInventory.organizationId, tenantId)];
 
     if (locationId) {
       conditions.push(eq(productInventory.locationId, locationId));
@@ -38,13 +40,12 @@ export async function getInventoryHandler(req: NextRequest) {
     }
 
     if (search) {
-      conditions.push(
-        or(
-          ilike(productInventory.sku, `%${search}%`),
-          ilike(productInventory.barcode, `%${search}%`),
-          ilike(productInventory.variantName, `%${search}%`)
-        )
+      const searchCondition = or(
+        ilike(productInventory.sku, `%${search}%`),
+        ilike(productInventory.barcode, `%${search}%`),
+        ilike(productInventory.variantName, `%${search}%`)
       );
+      if (searchCondition) conditions.push(searchCondition);
     }
 
     if (minPrice) {
@@ -120,6 +121,7 @@ export async function getInventoryHandler(req: NextRequest) {
 
 export async function createInventoryHandler(req: NextRequest) {
   try {
+    const tenantId = await requireTenantId();
     const body = await req.json();
     const validatedData = createProductInventorySchema.parse(body);
 
@@ -128,6 +130,7 @@ export async function createInventoryHandler(req: NextRequest) {
       .from(productInventory)
       .where(
         and(
+          eq(productInventory.organizationId, tenantId),
           eq(productInventory.productId, validatedData.productId),
           eq(productInventory.locationId, validatedData.locationId),
           validatedData.variantName
@@ -161,7 +164,7 @@ export async function createInventoryHandler(req: NextRequest) {
     const existingSku = await db
       .select()
       .from(productInventory)
-      .where(eq(productInventory.sku, sku))
+      .where(and(eq(productInventory.organizationId, tenantId), eq(productInventory.sku, sku)))
       .limit(1);
 
     if (existingSku.length > 0) {
@@ -175,7 +178,7 @@ export async function createInventoryHandler(req: NextRequest) {
       const existingBarcode = await db
         .select()
         .from(productInventory)
-        .where(eq(productInventory.barcode, validatedData.barcode))
+        .where(and(eq(productInventory.organizationId, tenantId), eq(productInventory.barcode, validatedData.barcode)))
         .limit(1);
 
       if (existingBarcode.length > 0) {
@@ -203,6 +206,7 @@ export async function createInventoryHandler(req: NextRequest) {
       .insert(productInventory)
       .values({
         id: randomUUID(),
+        organizationId: tenantId,
         productId: validatedData.productId,
         locationId: validatedData.locationId,
         variantName: validatedData.variantName || null,

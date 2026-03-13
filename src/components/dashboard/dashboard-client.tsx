@@ -42,7 +42,7 @@ interface DashboardStats {
     orderNumber: string;
     total: string;
     status: string;
-    paymentMethod: string;
+    paymentMethod: string | null;
     paymentStatus: string;
     createdAt: Date;
     completedAt: Date | null;
@@ -66,7 +66,7 @@ interface DashboardStats {
     quantity: string;
   }>;
   paymentMethods: Array<{
-    paymentMethod: string;
+    paymentMethod: string| null;
     total: string;
     count: number;
   }>;
@@ -207,7 +207,7 @@ export function DashboardClient() {
                 >
                   <div>
                     <p className="text-sm font-medium capitalize">
-                      {method.paymentMethod.replace('_', ' ')}
+                      {method.paymentMethod ? method.paymentMethod.replace('_', ' ') : 'not specified'}
                     </p>
                     <p className="text-xs text-muted-foreground">
                       {method.count} transactions

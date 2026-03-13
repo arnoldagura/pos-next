@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { ProductGrid } from './product-grid';
 import { CartSidebar } from './cart-sidebar';
+import { ShortcutHelpDialog } from './shortcut-help-dialog';
 import { Button } from '@/components/ui/button';
 import {
   Select,
@@ -11,7 +12,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { MapPin, ShoppingCart } from 'lucide-react';
+import { MapPin, ShoppingCart, Keyboard } from 'lucide-react';
 import { useCartStore } from '@/stores';
 
 type Location = {
@@ -23,6 +24,7 @@ export function POSClient() {
   const [locations, setLocations] = useState<Location[]>([]);
   const [selectedLocation, setSelectedLocation] = useState<string>('');
   const [showCart, setShowCart] = useState(false);
+  const [showHelp, setShowHelp] = useState(false);
   const [isClient, setIsClient] = useState(false);
 
   const cart = useCartStore((state) => state.getActiveCart());
@@ -31,6 +33,24 @@ export function POSClient() {
   useEffect(() => {
     setIsClient(true);
     fetchLocations();
+  }, []);
+
+  // Listen for help shortcut (? key) at this level too
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      const target = e.target as HTMLElement;
+      const isInput =
+        target.tagName === 'INPUT' ||
+        target.tagName === 'TEXTAREA' ||
+        target.isContentEditable;
+
+      if (e.key === '?' && !isInput) {
+        e.preventDefault();
+        setShowHelp(true);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
   }, []);
 
   const fetchLocations = async () => {
@@ -75,15 +95,27 @@ export function POSClient() {
             </div>
           </div>
 
-          <Button
-            variant='outline'
-            size='sm'
-            className='lg:hidden'
-            onClick={() => setShowCart(!showCart)}
-          >
-            <ShoppingCart className='h-4 w-4 mr-2' />
-            Cart ({itemCount})
-          </Button>
+          <div className='flex items-center gap-2'>
+            <Button
+              variant='ghost'
+              size='sm'
+              onClick={() => setShowHelp(true)}
+              className='hidden lg:flex text-muted-foreground'
+              title='Keyboard shortcuts (?)'
+            >
+              <Keyboard className='h-4 w-4' />
+            </Button>
+
+            <Button
+              variant='outline'
+              size='sm'
+              className='lg:hidden'
+              onClick={() => setShowCart(!showCart)}
+            >
+              <ShoppingCart className='h-4 w-4 mr-2' />
+              Cart ({itemCount})
+            </Button>
+          </div>
         </div>
 
         {/* Product Grid */}
@@ -110,6 +142,9 @@ export function POSClient() {
           </div>
         </>
       )}
+
+      {/* Keyboard Shortcuts Help */}
+      <ShortcutHelpDialog open={showHelp} onOpenChange={setShowHelp} />
     </div>
   );
 }

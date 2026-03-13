@@ -10,6 +10,7 @@ import { randomUUID } from 'crypto';
 import { eq, and, gte, lte, desc } from 'drizzle-orm';
 import { NextRequest, NextResponse } from 'next/server';
 import type { DiscountType } from '@/lib/types';
+import { requireTenantId } from '@/lib/tenant-context';
 
 type OrderStatus = (typeof orderStatusEnum.enumValues)[number];
 
@@ -38,6 +39,7 @@ function generateOrderNumber(): string {
 
 export async function POST(req: NextRequest) {
   try {
+    const tenantId = await requireTenantId();
     const body = await req.json();
     const {
       locationId,
@@ -70,6 +72,7 @@ export async function POST(req: NextRequest) {
         .insert(order)
         .values({
           id: orderId,
+          organizationId: tenantId,
           orderNumber,
           locationId,
           tableId: tableId || null,
@@ -167,6 +170,7 @@ export async function POST(req: NextRequest) {
 
 export async function GET(req: NextRequest) {
   try {
+    const tenantId = await requireTenantId();
     const { searchParams } = new URL(req.url);
     const locationId = searchParams.get('locationId');
     const tableId = searchParams.get('tableId');
@@ -178,7 +182,7 @@ export async function GET(req: NextRequest) {
     const limit = parseInt(searchParams.get('limit') || '100', 10);
     const offset = (page - 1) * limit;
 
-    const conditions = [];
+    const conditions = [eq(order.organizationId, tenantId)];
 
     if (locationId) {
       conditions.push(eq(order.locationId, locationId));

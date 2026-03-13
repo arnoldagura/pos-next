@@ -163,8 +163,14 @@ export function ProductGrid({ locationId }: ProductGridProps) {
       }
     };
 
+    const handleFocusSearch = () => searchInputRef.current?.focus();
+
     window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
+    window.addEventListener('pos:focus-search', handleFocusSearch);
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+      window.removeEventListener('pos:focus-search', handleFocusSearch);
+    };
   }, []);
 
   const toggleCategory = (categoryId: string) => {
@@ -396,6 +402,12 @@ export function ProductGrid({ locationId }: ProductGridProps) {
                 Esc
               </kbd>{' '}
               Clear
+            </span>
+            <span>
+              <kbd className='px-1.5 py-0.5 bg-gray-100 rounded border'>
+                ?
+              </kbd>{' '}
+              All shortcuts
             </span>
           </div>
 

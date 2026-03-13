@@ -4,6 +4,7 @@ import { productCategory } from '@/drizzle/schema';
 import { eq, isNull, and } from 'drizzle-orm';
 import { protectRoute } from '@/middleware/rbac';
 import { RESOURCES, ACTIONS } from '@/lib/rbac';
+import { requireTenantId } from '@/lib/tenant-context';
 import { updateProductCategorySchema } from '@/lib/validations';
 import { ZodError } from 'zod';
 import { RouteContext, createDefaultRouteContext } from '@/lib/types/route';
@@ -13,12 +14,13 @@ async function getCategoryHandler(
   context: RouteContext<{ id: string }> = createDefaultRouteContext({ id: '' })
 ) {
   try {
+    const tenantId = await requireTenantId();
     const { id } = await context.params;
 
     const [foundCategory] = await db
       .select()
       .from(productCategory)
-      .where(and(eq(productCategory.id, id), isNull(productCategory.deletedAt)))
+      .where(and(eq(productCategory.organizationId, tenantId), eq(productCategory.id, id), isNull(productCategory.deletedAt)))
       .limit(1);
 
     if (!foundCategory) {
@@ -32,7 +34,7 @@ async function getCategoryHandler(
       .select()
       .from(productCategory)
       .where(
-        and(eq(productCategory.parentId, id), isNull(productCategory.deletedAt))
+        and(eq(productCategory.organizationId, tenantId), eq(productCategory.parentId, id), isNull(productCategory.deletedAt))
       )
       .orderBy(productCategory.displayOrder, productCategory.name);
 
@@ -54,6 +56,7 @@ async function updateCategoryHandler(
   context: RouteContext<{ id: string }> = createDefaultRouteContext({ id: '' })
 ) {
   try {
+    const tenantId = await requireTenantId();
     const { id } = await context.params;
     const body = await req.json();
     const validatedData = updateProductCategorySchema.parse(body);
@@ -61,7 +64,7 @@ async function updateCategoryHandler(
     const [existing] = await db
       .select()
       .from(productCategory)
-      .where(and(eq(productCategory.id, id), isNull(productCategory.deletedAt)))
+      .where(and(eq(productCategory.organizationId, tenantId), eq(productCategory.id, id), isNull(productCategory.deletedAt)))
       .limit(1);
 
     if (!existing) {
@@ -75,7 +78,7 @@ async function updateCategoryHandler(
       const slugConflict = await db
         .select()
         .from(productCategory)
-        .where(eq(productCategory.slug, validatedData.slug))
+        .where(and(eq(productCategory.organizationId, tenantId), eq(productCategory.slug, validatedData.slug)))
         .limit(1);
 
       if (slugConflict.length > 0 && slugConflict[0].id !== id) {
@@ -100,7 +103,7 @@ async function updateCategoryHandler(
       const parent = await db
         .select()
         .from(productCategory)
-        .where(eq(productCategory.id, validatedData.parentId))
+        .where(and(eq(productCategory.organizationId, tenantId), eq(productCategory.id, validatedData.parentId)))
         .limit(1);
 
       if (parent.length === 0) {
@@ -124,7 +127,7 @@ async function updateCategoryHandler(
         ...validatedData,
         updatedAt: new Date(),
       })
-      .where(eq(productCategory.id, id))
+      .where(and(eq(productCategory.organizationId, tenantId), eq(productCategory.id, id)))
       .returning();
 
     return NextResponse.json(updatedCategory);
@@ -150,12 +153,13 @@ async function deleteCategoryHandler(
   context: RouteContext<{ id: string }> = createDefaultRouteContext({ id: '' })
 ) {
   try {
+    const tenantId = await requireTenantId();
     const { id } = await context.params;
 
     const [existing] = await db
       .select()
       .from(productCategory)
-      .where(and(eq(productCategory.id, id), isNull(productCategory.deletedAt)))
+      .where(and(eq(productCategory.organizationId, tenantId), eq(productCategory.id, id), isNull(productCategory.deletedAt)))
       .limit(1);
 
     if (!existing) {
@@ -169,7 +173,7 @@ async function deleteCategoryHandler(
       .select()
       .from(productCategory)
       .where(
-        and(eq(productCategory.parentId, id), isNull(productCategory.deletedAt))
+        and(eq(productCategory.organizationId, tenantId), eq(productCategory.parentId, id), isNull(productCategory.deletedAt))
       )
       .limit(1);
 
@@ -190,7 +194,7 @@ async function deleteCategoryHandler(
         deletedAt: new Date(),
         updatedAt: new Date(),
       })
-      .where(eq(productCategory.id, id));
+      .where(and(eq(productCategory.organizationId, tenantId), eq(productCategory.id, id)));
 
     return NextResponse.json({
       success: true,

@@ -1,11 +1,13 @@
 import { db } from '@/db/db';
 import { customer } from '@/drizzle/schema/customers';
 import { randomUUID } from 'crypto';
-import { or, ilike, desc } from 'drizzle-orm';
+import { or, ilike, desc, eq, and } from 'drizzle-orm';
 import { NextRequest, NextResponse } from 'next/server';
+import { requireTenantId } from '@/lib/tenant-context';
 
 export async function GET(req: NextRequest) {
   try {
+    const tenantId = await requireTenantId();
     const { searchParams } = new URL(req.url);
     const search = searchParams.get('search');
     const page = parseInt(searchParams.get('page') || '1', 10);
@@ -17,16 +19,20 @@ export async function GET(req: NextRequest) {
     const customers = search
       ? await query
           .where(
-            or(
-              ilike(customer.name, `%${search}%`),
-              ilike(customer.email, `%${search}%`),
-              ilike(customer.phone, `%${search}%`)
+            and(
+              eq(customer.organizationId, tenantId),
+              or(
+                ilike(customer.name, `%${search}%`),
+                ilike(customer.email, `%${search}%`),
+                ilike(customer.phone, `%${search}%`)
+              )
             )
           )
           .orderBy(desc(customer.createdAt))
           .limit(limit)
           .offset(offset)
       : await query
+          .where(eq(customer.organizationId, tenantId))
           .orderBy(desc(customer.createdAt))
           .limit(limit)
           .offset(offset);
@@ -43,6 +49,7 @@ export async function GET(req: NextRequest) {
 
 export async function POST(req: NextRequest) {
   try {
+    const tenantId = await requireTenantId();
     const body = await req.json();
     const {
       name,
@@ -67,6 +74,7 @@ export async function POST(req: NextRequest) {
       .insert(customer)
       .values({
         id: randomUUID(),
+        organizationId: tenantId,
         name,
         email: email || null,
         phone: phone || null,

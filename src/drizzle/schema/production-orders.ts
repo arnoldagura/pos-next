@@ -13,6 +13,7 @@ import { location } from './locations';
 import { productInventory } from './product-inventories';
 import { materialInventory } from './material-inventories';
 import { material } from './materials';
+import { organization } from './organizations';
 
 export const productionOrderStatusEnum = pgEnum('production_order_status', [
   'draft',
@@ -27,6 +28,9 @@ export const productionOrder = pgTable(
   'production_order',
   {
     id: text('id').primaryKey(),
+    organizationId: text('organization_id')
+      .notNull()
+      .references(() => organization.id, { onDelete: 'cascade' }),
     recipeId: text('recipe_id')
       .notNull()
       .references(() => productionRecipe.id, {
@@ -106,6 +110,7 @@ export const productionOrder = pgTable(
       .notNull(),
   },
   (table) => ({
+    orgIdx: index('production_order_org_idx').on(table.organizationId),
     recipeIdx: index('production_order_recipe_idx').on(table.recipeId),
     locationIdx: index('production_order_location_idx').on(table.locationId),
     outputProductInventoryIdx: index(
@@ -203,6 +208,10 @@ export const productionQualityCheck = pgTable(
 export const productionOrderRelations = relations(
   productionOrder,
   ({ one, many }) => ({
+    organization: one(organization, {
+      fields: [productionOrder.organizationId],
+      references: [organization.id],
+    }),
     recipe: one(productionRecipe, {
       fields: [productionOrder.recipeId],
       references: [productionRecipe.id],

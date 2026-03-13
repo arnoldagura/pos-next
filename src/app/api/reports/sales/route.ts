@@ -1,10 +1,12 @@
 import { db } from '@/db/db';
 import { order, orderItem, location } from '@/drizzle/schema';
+import { requireTenantId } from '@/lib/tenant-context';
 import { eq, and, gte, lte, sql, desc } from 'drizzle-orm';
 import { NextRequest, NextResponse } from 'next/server';
 
 export async function GET(req: NextRequest) {
   try {
+    const tenantId = await requireTenantId();
     const { searchParams } = new URL(req.url);
     const startDate = searchParams.get('startDate');
     const endDate = searchParams.get('endDate');
@@ -23,6 +25,7 @@ export async function GET(req: NextRequest) {
     end.setHours(23, 59, 59, 999);
 
     const conditions = [
+      eq(order.organizationId, tenantId),
       gte(order.createdAt, start),
       lte(order.createdAt, end),
       eq(order.status, 'completed'),

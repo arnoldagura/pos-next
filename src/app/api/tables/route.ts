@@ -7,9 +7,11 @@ import { RESOURCES, ACTIONS } from '@/lib/rbac';
 import { createTableSchema, type TableStatus } from '@/lib/validations';
 import { randomUUID } from 'crypto';
 import { ZodError } from 'zod';
+import { requireTenantId } from '@/lib/tenant-context';
 
 async function getTablesHandler(req: NextRequest) {
   try {
+    const tenantId = await requireTenantId();
     const { searchParams } = new URL(req.url);
     const statusParam = searchParams.get('status');
     const locationId = searchParams.get('locationId');
@@ -17,7 +19,7 @@ async function getTablesHandler(req: NextRequest) {
 
     const query = db.select().from(restaurantTable);
 
-    const conditions = [];
+    const conditions = [eq(restaurantTable.organizationId, tenantId)];
 
     if (statusParam) {
       const statuses = statusParam
@@ -26,9 +28,8 @@ async function getTablesHandler(req: NextRequest) {
       if (statuses.length === 1) {
         conditions.push(eq(restaurantTable.status, statuses[0]));
       } else if (statuses.length > 1) {
-        conditions.push(
-          or(...statuses.map((status) => eq(restaurantTable.status, status)))
-        );
+        const statusCondition = or(...statuses.map((status) => eq(restaurantTable.status, status)));
+        if (statusCondition) conditions.push(statusCondition);
       }
     }
 
@@ -37,12 +38,11 @@ async function getTablesHandler(req: NextRequest) {
     }
 
     if (search) {
-      conditions.push(
-        or(
-          ilike(restaurantTable.name, `%${search}%`),
-          ilike(restaurantTable.number, `%${search}%`)
-        )
+      const searchCondition = or(
+        ilike(restaurantTable.name, `%${search}%`),
+        ilike(restaurantTable.number, `%${search}%`)
       );
+      if (searchCondition) conditions.push(searchCondition);
     }
 
     const tables = await query.where(
@@ -61,6 +61,7 @@ async function getTablesHandler(req: NextRequest) {
 
 async function createTableHandler(req: NextRequest) {
   try {
+    const tenantId = await requireTenantId();
     const body = await req.json();
     const validatedData = createTableSchema.parse(body);
 
@@ -68,6 +69,7 @@ async function createTableHandler(req: NextRequest) {
       .insert(restaurantTable)
       .values({
         id: randomUUID(),
+        organizationId: tenantId,
         ...validatedData,
       })
       .returning();

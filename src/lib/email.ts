@@ -1,12 +1,9 @@
-/**
- * Email service for sending invitations and notifications
- *
- * TODO: Integrate with actual email provider:
- * - Resend (resend.com) - Recommended
- * - SendGrid
- * - AWS SES
- * - Mailgun
- */
+import { Resend } from 'resend';
+
+const RESEND_API_KEY = process.env.RESEND_API_KEY;
+const FROM_EMAIL = process.env.EMAIL_FROM || 'noreply@yourdomain.com';
+
+const resend = RESEND_API_KEY ? new Resend(RESEND_API_KEY) : null;
 
 export interface SendInvitationEmailParams {
   to: string;
@@ -16,9 +13,6 @@ export interface SendInvitationEmailParams {
   expiresInDays: number;
 }
 
-/**
- * Send invitation email to new user
- */
 export async function sendInvitationEmail({
   to,
   name,
@@ -26,63 +20,42 @@ export async function sendInvitationEmail({
   invitationUrl,
   expiresInDays,
 }: SendInvitationEmailParams): Promise<{ success: boolean; error?: string }> {
-  try {
-    // TODO: Replace with actual email service integration
-    // For now, just log the email content
-    console.log('📧 INVITATION EMAIL (Demo Mode)');
-    console.log('================================');
-    console.log(`To: ${to}`);
-    console.log(`Subject: You're invited to join ${organizationName}`);
-    console.log('');
-    console.log('Email Content:');
-    console.log(`Hi ${name || 'there'},`);
-    console.log('');
-    console.log(
-      `You've been invited to join ${organizationName} as an administrator.`
-    );
-    console.log('');
-    console.log(
-      'Click the link below to accept your invitation and set up your account:'
-    );
-    console.log(invitationUrl);
-    console.log('');
-    console.log(`This invitation will expire in ${expiresInDays} days.`);
-    console.log('');
-    console.log(
-      'If you have any questions, please contact your administrator.'
-    );
-    console.log('================================');
+  const subject = `You're invited to join ${organizationName}`;
+  const html = getInvitationEmailTemplate({ name, organizationName, invitationUrl, expiresInDays });
 
-    // TODO: Actual email sending implementation
-    // Example with Resend:
-    // const resend = new Resend(process.env.RESEND_API_KEY);
-    // await resend.emails.send({
-    //   from: 'noreply@yourdomain.com',
-    //   to,
-    //   subject: `You're invited to join ${organizationName}`,
-    //   html: getInvitationEmailTemplate({ name, organizationName, invitationUrl, expiresInDays }),
-    // });
-    console.log(
-      getInvitationEmailTemplate({
-        name,
-        organizationName,
-        invitationUrl,
-        expiresInDays,
-      })
-    );
-    return { success: true };
-  } catch (error) {
-    console.error('Failed to send invitation email:', error);
-    return {
-      success: false,
-      error: error instanceof Error ? error.message : 'Unknown error',
-    };
+  if (resend) {
+    try {
+      const { error } = await resend.emails.send({
+        from: FROM_EMAIL,
+        to,
+        subject,
+        html,
+      });
+
+      if (error) {
+        console.error('Resend error:', error);
+        return { success: false, error: error.message };
+      }
+
+      return { success: true };
+    } catch (error) {
+      console.error('Failed to send invitation email:', error);
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Unknown error',
+      };
+    }
   }
+
+  // Dev fallback: log to console
+  console.log('[EMAIL DEV MODE] Invitation email:');
+  console.log(`  To: ${to}`);
+  console.log(`  Subject: ${subject}`);
+  console.log(`  Link: ${invitationUrl}`);
+  console.log(`  Expires in: ${expiresInDays} days`);
+  return { success: true };
 }
 
-/**
- * HTML email template for invitation
- */
 function getInvitationEmailTemplate({
   name,
   organizationName,

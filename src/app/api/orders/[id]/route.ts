@@ -1,13 +1,15 @@
 import { db } from '@/db/db';
 import { order, orderItem, location } from '@/drizzle/schema';
-import { eq } from 'drizzle-orm';
+import { eq, and } from 'drizzle-orm';
 import { NextRequest, NextResponse } from 'next/server';
+import { requireTenantId } from '@/lib/tenant-context';
 
 export async function GET(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const tenantId = await requireTenantId();
     const { id: orderId } = await params;
 
     const [orderData] = await db
@@ -37,7 +39,7 @@ export async function GET(
       })
       .from(order)
       .leftJoin(location, eq(order.locationId, location.id))
-      .where(eq(order.id, orderId))
+      .where(and(eq(order.id, orderId), eq(order.organizationId, tenantId)))
       .limit(1);
 
     if (!orderData) {

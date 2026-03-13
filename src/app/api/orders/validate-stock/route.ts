@@ -2,9 +2,11 @@ import { db } from '@/db/db';
 import { productInventory } from '@/drizzle/schema';
 import { eq, and } from 'drizzle-orm';
 import { NextRequest, NextResponse } from 'next/server';
+import { requireTenantId } from '@/lib/tenant-context';
 
 export async function POST(req: NextRequest) {
   try {
+    await requireTenantId();
     const body = await req.json();
     const { items, locationId } = body;
 

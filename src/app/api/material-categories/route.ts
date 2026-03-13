@@ -4,18 +4,20 @@ import { materialCategory } from '@/drizzle/schema';
 import { eq, isNull, and } from 'drizzle-orm';
 import { protectRoute } from '@/middleware/rbac';
 import { RESOURCES, ACTIONS } from '@/lib/rbac';
+import { requireTenantId } from '@/lib/tenant-context';
 import { createMaterialCategorySchema, generateSlug } from '@/lib/validations';
 import { randomUUID } from 'crypto';
 import { ZodError } from 'zod';
 
 async function getMaterialCategoriesHandler(req: NextRequest) {
   try {
+    const tenantId = await requireTenantId();
     const { searchParams } = new URL(req.url);
     const parentId = searchParams.get('parentId');
     const isActiveParam = searchParams.get('isActive');
     const includeDeleted = searchParams.get('includeDeleted') === 'true';
 
-    const conditions = [];
+    const conditions = [eq(materialCategory.organizationId, tenantId)];
 
     if (parentId === 'null' || parentId === '') {
       conditions.push(isNull(materialCategory.parentId));
@@ -50,6 +52,7 @@ async function getMaterialCategoriesHandler(req: NextRequest) {
 
 async function createMaterialCategoryHandler(req: NextRequest) {
   try {
+    const tenantId = await requireTenantId();
     const body = await req.json();
     const validatedData = createMaterialCategorySchema.parse(body);
 
@@ -58,7 +61,7 @@ async function createMaterialCategoryHandler(req: NextRequest) {
     const existing = await db
       .select()
       .from(materialCategory)
-      .where(eq(materialCategory.slug, slug))
+      .where(and(eq(materialCategory.organizationId, tenantId), eq(materialCategory.slug, slug)))
       .limit(1);
 
     if (existing.length > 0) {
@@ -72,7 +75,7 @@ async function createMaterialCategoryHandler(req: NextRequest) {
       const parent = await db
         .select()
         .from(materialCategory)
-        .where(eq(materialCategory.id, validatedData.parentId))
+        .where(and(eq(materialCategory.organizationId, tenantId), eq(materialCategory.id, validatedData.parentId)))
         .limit(1);
 
       if (parent.length === 0) {
@@ -87,6 +90,7 @@ async function createMaterialCategoryHandler(req: NextRequest) {
       .insert(materialCategory)
       .values({
         id: randomUUID(),
+        organizationId: tenantId,
         ...validatedData,
         slug,
         parentId: validatedData.parentId || null,

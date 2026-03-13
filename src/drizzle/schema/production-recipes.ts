@@ -10,6 +10,7 @@ import {
 } from 'drizzle-orm/pg-core';
 import { product } from './products';
 import { material } from './materials';
+import { organization } from './organizations';
 
 export const outputTypeEnum = pgEnum('output_type', ['product', 'material']);
 
@@ -17,6 +18,9 @@ export const productionRecipe = pgTable(
   'production_recipe',
   {
     id: text('id').primaryKey(),
+    organizationId: text('organization_id')
+      .notNull()
+      .references(() => organization.id, { onDelete: 'cascade' }),
     name: text('name').notNull(),
     description: text('description'),
     outputType: outputTypeEnum('output_type').notNull(),
@@ -44,6 +48,7 @@ export const productionRecipe = pgTable(
       .notNull(),
   },
   (table) => ({
+    orgIdx: index('production_recipe_org_idx').on(table.organizationId),
     nameIdx: index('production_recipe_name_idx').on(table.name),
     outputTypeIdx: index('production_recipe_output_type_idx').on(
       table.outputType
@@ -93,6 +98,10 @@ export const productionRecipeIngredient = pgTable(
 export const productionRecipeRelations = relations(
   productionRecipe,
   ({ one, many }) => ({
+    organization: one(organization, {
+      fields: [productionRecipe.organizationId],
+      references: [organization.id],
+    }),
     outputProduct: one(product, {
       fields: [productionRecipe.outputProductId],
       references: [product.id],

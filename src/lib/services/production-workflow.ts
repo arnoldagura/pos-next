@@ -8,6 +8,7 @@ import {
   productInventory,
   productInventoryMovement,
 } from '@/drizzle/schema';
+import { requireTenantId } from '@/lib/tenant-context';
 import { eq, and, desc, isNotNull } from 'drizzle-orm';
 import { getMaterialCurrentStock } from './material-inventory-calculation';
 import {
@@ -117,6 +118,7 @@ export function validateStateTransition(
 export async function createFromRecipe(
   input: CreateProductionOrderInput
 ): Promise<string> {
+  const tenantId = await requireTenantId();
   const {
     recipeId,
     locationId,
@@ -232,6 +234,7 @@ export async function createFromRecipe(
 
     await tx.insert(productionOrder).values({
       id: orderId,
+      organizationId: tenantId,
       recipeId,
       locationId,
       plannedQuantity: plannedQuantity.toString(),

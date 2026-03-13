@@ -1,22 +1,24 @@
 import { db } from '@/drizzle/db';
 import { supplier } from '@/drizzle/schema/suppliers';
 import { ACTIONS, RESOURCES } from '@/lib/rbac';
+import { requireTenantId } from '@/lib/tenant-context';
 import { createSupplierSchema } from '@/lib/validations/supplier';
 import { protectRoute } from '@/middleware/rbac';
 import { randomUUID } from 'crypto';
-import { eq, ilike, or } from 'drizzle-orm';
+import { and, eq, ilike, or } from 'drizzle-orm';
 import { NextRequest, NextResponse } from 'next/server';
 import { ZodError } from 'zod';
 
 export async function getSuppliersHandler(req: NextRequest) {
   try {
+    const tenantId = await requireTenantId();
     const { searchParams } = new URL(req.url);
     const isActiveParam = searchParams.get('isActive');
     const search = searchParams.get('search');
 
     const query = db.select().from(supplier);
 
-    const conditions = [];
+    const conditions = [eq(supplier.organizationId, tenantId)];
 
     if (isActiveParam !== null) {
       const isActive = isActiveParam === 'true';
@@ -24,18 +26,17 @@ export async function getSuppliersHandler(req: NextRequest) {
     }
 
     if (search) {
-      conditions.push(
-        or(
-          ilike(supplier.name, `%${search}%`),
-          ilike(supplier.contactPerson, `%${search}%`),
-          ilike(supplier.phone, `%${search}%`),
-          ilike(supplier.address, `%${search}%`)
-        )
+      const searchCondition = or(
+        ilike(supplier.name, `%${search}%`),
+        ilike(supplier.contactPerson, `%${search}%`),
+        ilike(supplier.phone, `%${search}%`),
+        ilike(supplier.address, `%${search}%`)
       );
+      if (searchCondition) conditions.push(searchCondition);
     }
 
     const suppliers = await query.where(
-      conditions.length > 0 ? or(...conditions) : undefined
+      and(...conditions)
     );
 
     return NextResponse.json({ suppliers });
@@ -51,6 +52,7 @@ export async function getSuppliersHandler(req: NextRequest) {
 
 export async function createSupplierHandler(req: NextRequest) {
   try {
+    const tenantId = await requireTenantId();
     const body = await req.json();
     const validatedData = createSupplierSchema.parse(body);
 
@@ -58,6 +60,7 @@ export async function createSupplierHandler(req: NextRequest) {
       .insert(supplier)
       .values({
         id: randomUUID(),
+        organizationId: tenantId,
         ...validatedData,
       })
       .returning();

@@ -1,24 +1,26 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/db/db';
 import { restaurantTable } from '@/drizzle/schema';
-import { eq } from 'drizzle-orm';
+import { eq, and } from 'drizzle-orm';
 import { protectRoute } from '@/middleware/rbac';
 import { RESOURCES, ACTIONS } from '@/lib/rbac';
 import { updateTableSchema } from '@/lib/validations';
 import { RouteContext, createDefaultRouteContext } from '@/lib/types/route';
 import { ZodError } from 'zod';
+import { requireTenantId } from '@/lib/tenant-context';
 
 async function getTableHandler(
   req: NextRequest,
   context: RouteContext<{ id: string }> = createDefaultRouteContext({ id: '' })
 ) {
   try {
+    const tenantId = await requireTenantId();
     const { id } = await context.params;
 
     const [foundTable] = await db
       .select()
       .from(restaurantTable)
-      .where(eq(restaurantTable.id, id))
+      .where(and(eq(restaurantTable.id, id), eq(restaurantTable.organizationId, tenantId)))
       .limit(1);
 
     if (!foundTable) {
@@ -40,6 +42,7 @@ async function updateTableHandler(
   context: RouteContext<{ id: string }> = createDefaultRouteContext({ id: '' })
 ) {
   try {
+    const tenantId = await requireTenantId();
     const { id } = await context.params;
     const body = await req.json();
     const validatedData = updateTableSchema.parse(body);
@@ -50,7 +53,7 @@ async function updateTableHandler(
         ...validatedData,
         updatedAt: new Date(),
       })
-      .where(eq(restaurantTable.id, id))
+      .where(and(eq(restaurantTable.id, id), eq(restaurantTable.organizationId, tenantId)))
       .returning();
 
     if (!updatedTable) {

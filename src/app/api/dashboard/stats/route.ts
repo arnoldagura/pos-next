@@ -7,11 +7,13 @@ import {
   productionOrder,
   materialBatch,
 } from '@/drizzle/schema';
+import { requireTenantId } from '@/lib/tenant-context';
 import { eq, and, sql, gte, lte, desc } from 'drizzle-orm';
 import { NextRequest, NextResponse } from 'next/server';
 
 export async function GET(req: NextRequest) {
   try {
+    const tenantId = await requireTenantId();
     const { searchParams } = new URL(req.url);
     const locationId = searchParams.get('locationId');
 
@@ -31,6 +33,7 @@ export async function GET(req: NextRequest) {
         and(
           gte(order.createdAt, todayStart),
           eq(order.status, 'completed'),
+          eq(order.organizationId, tenantId),
           locationId ? eq(order.locationId, locationId) : undefined
         )
       );
@@ -45,6 +48,7 @@ export async function GET(req: NextRequest) {
         and(
           gte(order.createdAt, weekStart),
           eq(order.status, 'completed'),
+          eq(order.organizationId, tenantId),
           locationId ? eq(order.locationId, locationId) : undefined
         )
       );
@@ -59,6 +63,7 @@ export async function GET(req: NextRequest) {
         and(
           gte(order.createdAt, monthStart),
           eq(order.status, 'completed'),
+          eq(order.organizationId, tenantId),
           locationId ? eq(order.locationId, locationId) : undefined
         )
       );
@@ -70,7 +75,7 @@ export async function GET(req: NextRequest) {
         count: sql<number>`COUNT(*)`,
       })
       .from(order)
-      .where(locationId ? eq(order.locationId, locationId) : undefined)
+      .where(and(eq(order.organizationId, tenantId), locationId ? eq(order.locationId, locationId) : undefined))
       .groupBy(order.status);
 
     // Low Stock Products
@@ -88,6 +93,7 @@ export async function GET(req: NextRequest) {
       .from(productInventory)
       .where(
         and(
+          eq(productInventory.organizationId, tenantId),
           sql`${productInventory.currentQuantity}::numeric <= ${productInventory.alertThreshold}::numeric`,
           locationId ? eq(productInventory.locationId, locationId) : undefined
         )
@@ -107,7 +113,7 @@ export async function GET(req: NextRequest) {
         completedAt: order.completedAt,
       })
       .from(order)
-      .where(locationId ? eq(order.locationId, locationId) : undefined)
+      .where(and(eq(order.organizationId, tenantId), locationId ? eq(order.locationId, locationId) : undefined))
       .orderBy(desc(order.createdAt))
       .limit(10);
 
@@ -126,6 +132,7 @@ export async function GET(req: NextRequest) {
       .innerJoin(order, eq(orderItem.orderId, order.id))
       .where(
         and(
+          eq(order.organizationId, tenantId),
           gte(order.createdAt, thirtyDaysAgo),
           eq(order.status, 'completed'),
           locationId ? eq(order.locationId, locationId) : undefined
@@ -143,7 +150,7 @@ export async function GET(req: NextRequest) {
       })
       .from(productionOrder)
       .where(
-        locationId ? eq(productionOrder.locationId, locationId) : undefined
+        and(eq(productionOrder.organizationId, tenantId), locationId ? eq(productionOrder.locationId, locationId) : undefined)
       )
       .groupBy(productionOrder.status);
 
@@ -156,6 +163,7 @@ export async function GET(req: NextRequest) {
       .from(productInventory)
       .where(
         and(
+          eq(productInventory.organizationId, tenantId),
           sql`${productInventory.currentQuantity}::numeric > 0`,
           locationId ? eq(productInventory.locationId, locationId) : undefined
         )
@@ -183,6 +191,7 @@ export async function GET(req: NextRequest) {
           lte(materialBatch.expiryDate, thirtyDaysLater),
           gte(materialBatch.expiryDate, now),
           sql`${materialBatch.quantity}::numeric > 0`,
+          eq(materialInventory.organizationId, tenantId),
           locationId ? eq(materialInventory.locationId, locationId) : undefined
         )
       )
@@ -199,6 +208,7 @@ export async function GET(req: NextRequest) {
       .from(order)
       .where(
         and(
+          eq(order.organizationId, tenantId),
           gte(order.createdAt, thirtyDaysAgo),
           eq(order.status, 'completed'),
           locationId ? eq(order.locationId, locationId) : undefined

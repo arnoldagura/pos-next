@@ -1,7 +1,8 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useCallback } from 'react';
 import { useCartStore } from '@/stores';
+import { usePosShortcuts } from '@/hooks/use-pos-shortcuts';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Separator } from '@/components/ui/separator';
@@ -60,6 +61,45 @@ export function CartSidebar({ onClose, locationId }: CartSidebarProps) {
   const pendingOrdersCount = allCarts.filter(
     (c) => c.items.length > 0 && c.id !== activeCartId
   ).length;
+
+  const handleShortcutNewOrder = useCallback(() => {
+    const newCartId = createCart();
+    switchCart(newCartId);
+    toast.success('New order started');
+  }, [createCart, switchCart]);
+
+  const handleShortcutSearch = useCallback(() => {
+    window.dispatchEvent(new CustomEvent('pos:focus-search'));
+  }, []);
+
+  const handleShortcutCheckout = useCallback(() => {
+    if (cart && cart.items.length > 0) setShowCheckout(true);
+  }, [cart]);
+
+  const handleShortcutHold = useCallback(() => {
+    if (cart && cart.items.length > 0) {
+      const newCartId = createCart();
+      switchCart(newCartId);
+      toast.success('Order held - new cart ready');
+    }
+  }, [cart, createCart, switchCart]);
+
+  const handleShortcutClear = useCallback(() => {
+    if (cart && cart.items.length > 0) {
+      clear();
+      toast.success('Cart cleared');
+    }
+  }, [cart, clear]);
+
+  usePosShortcuts({
+    onNewOrder: handleShortcutNewOrder,
+    onSearch: handleShortcutSearch,
+    onCheckout: handleShortcutCheckout,
+    onHoldOrder: handleShortcutHold,
+    onPendingOrders: () => setShowPendingOrders(true),
+    onTableSelect: () => setShowTableSelection(true),
+    onClearCart: handleShortcutClear,
+  });
 
   if (!cart) {
     return (
@@ -219,9 +259,9 @@ export function CartSidebar({ onClose, locationId }: CartSidebarProps) {
                   variant='outline'
                   size='sm'
                   onClick={() => handleQuantityChange(item.id, -1)}
-                  className='h-8 w-8 p-0'
+                  className='h-11 w-11 p-0 min-w-[44px]'
                 >
-                  <Minus className='h-3 w-3' />
+                  <Minus className='h-4 w-4' />
                 </Button>
                 <Input
                   type='number'
@@ -232,16 +272,16 @@ export function CartSidebar({ onClose, locationId }: CartSidebarProps) {
                       updateQuantity(item.id, value);
                     }
                   }}
-                  className='h-8 w-16 text-center'
+                  className='h-11 w-16 text-center text-base'
                   min='1'
                 />
                 <Button
                   variant='outline'
                   size='sm'
                   onClick={() => handleQuantityChange(item.id, 1)}
-                  className='h-8 w-8 p-0'
+                  className='h-11 w-11 p-0 min-w-[44px]'
                 >
-                  <Plus className='h-3 w-3' />
+                  <Plus className='h-4 w-4' />
                 </Button>
 
                 <Button
@@ -411,12 +451,12 @@ export function CartSidebar({ onClose, locationId }: CartSidebarProps) {
 
         <div className='space-y-2'>
           <Button
-            className='w-full'
+            className='w-full min-h-[48px] text-base'
             size='lg'
             onClick={handleCheckout}
             disabled={cart.items.length === 0}
           >
-            Checkout
+            Checkout (F3)
           </Button>
 
           <div className='grid grid-cols-2 gap-2'>
@@ -424,18 +464,20 @@ export function CartSidebar({ onClose, locationId }: CartSidebarProps) {
               variant='outline'
               onClick={handleHoldOrder}
               disabled={cart.items.length === 0}
+              className='min-h-[44px]'
             >
               <Clock className='h-4 w-4 mr-2' />
-              Hold Order
+              Hold (F4)
             </Button>
 
             <Button
               variant='outline'
               onClick={handleClearCart}
               disabled={cart.items.length === 0}
+              className='min-h-[44px]'
             >
               <Trash2 className='h-4 w-4 mr-2' />
-              Clear
+              Clear (F8)
             </Button>
           </div>
         </div>

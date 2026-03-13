@@ -14,7 +14,7 @@ interface Order {
   orderNumber: string;
   total: string;
   status: string;
-  paymentMethod: string;
+  paymentMethod: string | null;
   paymentStatus: string;
   createdAt: Date;
   completedAt: Date | null;
@@ -81,7 +81,7 @@ export function RecentOrdersTable({ orders }: RecentOrdersTableProps) {
                 </Badge>
               </TableCell>
               <TableCell className="capitalize">
-                {order.paymentMethod.replace('_', ' ')}
+                {order.paymentMethod ? order.paymentMethod.replace('_', ' ') : 'not specified'}
               </TableCell>
               <TableCell className="text-right font-medium">
                 {formatCurrency(parseFloat(order.total))}

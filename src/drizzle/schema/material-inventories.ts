@@ -11,11 +11,15 @@ import {
 import { material } from './materials';
 import { location } from './locations';
 import { supplier } from './suppliers';
+import { organization } from './organizations';
 
 export const materialInventory = pgTable(
   'material_inventory',
   {
     id: text('id').primaryKey(),
+    organizationId: text('organization_id')
+      .notNull()
+      .references(() => organization.id, { onDelete: 'cascade' }),
     variantName: text('variant_name'),
     materialId: text('material_id')
       .notNull()
@@ -46,6 +50,7 @@ export const materialInventory = pgTable(
       .notNull(),
   },
   (table) => ({
+    orgIdx: index('material_inventory_org_idx').on(table.organizationId),
     materialLocationUnique: unique(
       'material_inventory_material_location_unique'
     ).on(table.materialId, table.locationId),
@@ -136,6 +141,10 @@ export const materialInventoryMovement = pgTable(
 export const materialInventoryRelations = relations(
   materialInventory,
   ({ one, many }) => ({
+    organization: one(organization, {
+      fields: [materialInventory.organizationId],
+      references: [organization.id],
+    }),
     material: one(material, {
       fields: [materialInventory.materialId],
       references: [material.id],

@@ -1,23 +1,25 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/db/db';
 import { location } from '@/drizzle/schema';
-import { eq } from 'drizzle-orm';
+import { eq, and } from 'drizzle-orm';
 import { protectRoute } from '@/middleware/rbac';
 import { RESOURCES, ACTIONS } from '@/lib/rbac';
 import { updateLocationSchema } from '@/lib/validations';
 import { RouteContext, createDefaultRouteContext } from '@/lib/types/route';
+import { requireTenantId } from '@/lib/tenant-context';
 
 async function getLocationHandler(
   req: NextRequest,
   context: RouteContext<{ id: string }> = createDefaultRouteContext({ id: '' })
 ) {
   try {
+    const tenantId = await requireTenantId();
     const { id } = await context.params;
 
     const [foundLocation] = await db
       .select()
       .from(location)
-      .where(eq(location.id, id))
+      .where(and(eq(location.id, id), eq(location.organizationId, tenantId)))
       .limit(1);
 
     if (!foundLocation) {
@@ -42,6 +44,7 @@ async function updateLocationHandler(
   context: RouteContext<{ id: string }> = createDefaultRouteContext({ id: '' })
 ) {
   try {
+    const tenantId = await requireTenantId();
     const { id } = await context.params;
     const body = await req.json();
     const validatedData = updateLocationSchema.parse(body);
@@ -52,7 +55,7 @@ async function updateLocationHandler(
         ...validatedData,
         updatedAt: new Date(),
       })
-      .where(eq(location.id, id))
+      .where(and(eq(location.id, id), eq(location.organizationId, tenantId)))
       .returning();
 
     if (!updatedLocation) {
@@ -87,11 +90,12 @@ async function deleteLocationHandler(
   context: RouteContext<{ id: string }> = createDefaultRouteContext({ id: '' })
 ) {
   try {
+    const tenantId = await requireTenantId();
     const { id } = await context.params;
 
     const [deletedLocation] = await db
       .delete(location)
-      .where(eq(location.id, id))
+      .where(and(eq(location.id, id), eq(location.organizationId, tenantId)))
       .returning({ id: location.id });
 
     if (!deletedLocation) {

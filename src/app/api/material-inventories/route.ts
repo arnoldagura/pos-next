@@ -4,6 +4,7 @@ import { materialInventory } from '@/drizzle/schema';
 import { eq, desc, and, sql } from 'drizzle-orm';
 import { z } from 'zod';
 import { randomUUID } from 'crypto';
+import { requireTenantId } from '@/lib/tenant-context';
 
 const createMaterialInventorySchema = z.object({
   materialId: z.string().min(1, 'Material is required'),
@@ -23,6 +24,7 @@ const createMaterialInventorySchema = z.object({
 // GET /api/material-inventories - List material inventories with filters
 export async function GET(request: NextRequest) {
   try {
+    const tenantId = await requireTenantId();
     const searchParams = request.nextUrl.searchParams;
     const page = parseInt(searchParams.get('page') || '1');
     const limit = parseInt(searchParams.get('limit') || '20');
@@ -32,7 +34,7 @@ export async function GET(request: NextRequest) {
     const locationId = searchParams.get('locationId');
     const search = searchParams.get('search');
 
-    const whereConditions = [];
+    const whereConditions = [eq(materialInventory.organizationId, tenantId)];
 
     if (materialId) {
       whereConditions.push(eq(materialInventory.materialId, materialId));
@@ -130,6 +132,7 @@ export async function GET(request: NextRequest) {
 // POST /api/material-inventories - Create new material inventory
 export async function POST(request: NextRequest) {
   try {
+    const tenantId = await requireTenantId();
     const body = await request.json();
 
     const validation = createMaterialInventorySchema.safeParse(body);
@@ -155,6 +158,7 @@ export async function POST(request: NextRequest) {
 
     const existing = await db.query.materialInventory.findFirst({
       where: and(
+        eq(materialInventory.organizationId, tenantId),
         eq(materialInventory.materialId, materialId),
         eq(materialInventory.locationId, locationId)
       ),
@@ -174,6 +178,7 @@ export async function POST(request: NextRequest) {
       .insert(materialInventory)
       .values({
         id: randomUUID(),
+        organizationId: tenantId,
         materialId,
         locationId,
         variantName: variantName || null,

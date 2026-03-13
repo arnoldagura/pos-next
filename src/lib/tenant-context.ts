@@ -273,9 +273,9 @@ export async function setCurrentTenant(
   }
 
   // Check rate limit
-  if (isTenantSwitchRateLimited(session.user.id)) {
-    const remaining = getRemainingTenantSwitches(session.user.id);
-    const resetTime = getTenantSwitchResetTime(session.user.id);
+  if (await isTenantSwitchRateLimited(session.user.id)) {
+    const remaining = await getRemainingTenantSwitches(session.user.id);
+    const resetTime = await getTenantSwitchResetTime(session.user.id);
     throw new TenantSwitchRateLimitError(
       `Too many tenant switches. ${remaining} remaining. Try again in ${resetTime} seconds.`
     );

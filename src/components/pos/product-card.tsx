@@ -73,7 +73,7 @@ export const ProductCard = memo(function ProductCard({
       {!isOutOfStock && (
         <Button
           size='sm'
-          className='w-full mt-3 opacity-0 group-hover:opacity-100 transition-opacity'
+          className='w-full mt-3 opacity-100 lg:opacity-0 lg:group-hover:opacity-100 transition-opacity min-h-[44px]'
           onClick={(e) => {
             e.stopPropagation();
             onAddToCart(product);

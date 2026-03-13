@@ -1,6 +1,7 @@
 import { db } from '@/drizzle/db';
 import { product } from '@/drizzle/schema/products';
 import { ACTIONS, RESOURCES } from '@/lib/rbac';
+import { requireTenantId } from '@/lib/tenant-context';
 import { createProductSchema } from '@/lib/validations/product';
 import { protectRoute } from '@/middleware/rbac';
 import { randomUUID } from 'crypto';
@@ -10,6 +11,7 @@ import { ZodError } from 'zod';
 
 export async function getProductsHandler(req: NextRequest) {
   try {
+    const tenantId = await requireTenantId();
     const { searchParams } = new URL(req.url);
     const statusParam = searchParams.get('status');
     const categoryId = searchParams.get('categoryId');
@@ -20,7 +22,7 @@ export async function getProductsHandler(req: NextRequest) {
     const limit = parseInt(searchParams.get('limit') || '50', 10);
     const offset = (page - 1) * limit;
 
-    const conditions = [];
+    const conditions = [eq(product.organizationId, tenantId)];
 
     if (!includeDeleted) {
       conditions.push(isNull(product.deletedAt));
@@ -36,12 +38,11 @@ export async function getProductsHandler(req: NextRequest) {
     }
 
     if (search) {
-      conditions.push(
-        or(
-          ilike(product.name, `%${search}%`),
-          ilike(product.description, `%${search}%`)
-        )
+      const searchCondition = or(
+        ilike(product.name, `%${search}%`),
+        ilike(product.description, `%${search}%`)
       );
+      if (searchCondition) conditions.push(searchCondition);
     }
 
     const whereClause = conditions.length > 0 ? and(...conditions) : undefined;
@@ -80,13 +81,14 @@ export async function getProductsHandler(req: NextRequest) {
 
 export async function createProductHandler(req: NextRequest) {
   try {
+    const tenantId = await requireTenantId();
     const body = await req.json();
     const validatedData = createProductSchema.parse(body);
 
     const existingProduct = await db
       .select()
       .from(product)
-      .where(eq(product.name, validatedData.name))
+      .where(and(eq(product.organizationId, tenantId), eq(product.name, validatedData.name)))
       .limit(1);
 
     if (existingProduct.length > 0) {
@@ -100,6 +102,7 @@ export async function createProductHandler(req: NextRequest) {
       .insert(product)
       .values({
         id: randomUUID(),
+        organizationId: tenantId,
         ...validatedData,
       })
       .returning();

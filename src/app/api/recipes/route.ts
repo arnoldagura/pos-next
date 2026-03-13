@@ -1,5 +1,6 @@
 import { db } from '@/db/db';
 import { productionRecipe, productionRecipeIngredient } from '@/drizzle/schema';
+import { requireTenantId } from '@/lib/tenant-context';
 import { and, count, desc, eq, ilike, or } from 'drizzle-orm';
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
@@ -27,6 +28,7 @@ const createRecipeSchema = z.object({
 // GET /api/recipes - List recipes with filtering
 export async function GET(req: NextRequest) {
   try {
+    const tenantId = await requireTenantId();
     const { searchParams } = new URL(req.url);
     const search = searchParams.get('search');
     const outputType = searchParams.get('outputType');
@@ -35,15 +37,14 @@ export async function GET(req: NextRequest) {
     const limit = parseInt(searchParams.get('limit') || '20', 10);
     const offset = (page - 1) * limit;
 
-    const conditions = [];
+    const conditions = [eq(productionRecipe.organizationId, tenantId)];
 
     if (search) {
-      conditions.push(
-        or(
-          ilike(productionRecipe.name, `%${search}%`),
-          ilike(productionRecipe.description, `%${search}%`)
-        )
+      const searchCondition = or(
+        ilike(productionRecipe.name, `%${search}%`),
+        ilike(productionRecipe.description, `%${search}%`)
       );
+      if (searchCondition) conditions.push(searchCondition);
     }
 
     if (outputType === 'product' || outputType === 'material') {
@@ -100,6 +101,7 @@ export async function GET(req: NextRequest) {
 // POST /api/recipes - Create new recipe
 export async function POST(req: NextRequest) {
   try {
+    const tenantId = await requireTenantId();
     const body = await req.json();
     const validatedData = createRecipeSchema.parse(body);
 
@@ -130,6 +132,7 @@ export async function POST(req: NextRequest) {
     await db.transaction(async (tx) => {
       await tx.insert(productionRecipe).values({
         id: recipeId,
+        organizationId: tenantId,
         name: validatedData.name,
         description: validatedData.description || null,
         outputType: validatedData.outputType,

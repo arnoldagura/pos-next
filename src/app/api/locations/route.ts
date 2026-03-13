@@ -1,15 +1,17 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/db/db';
 import { location } from '@/drizzle/schema';
-import { eq, ilike, or } from 'drizzle-orm';
+import { eq, ilike, or, and } from 'drizzle-orm';
 import { protectRoute } from '@/middleware/rbac';
 import { RESOURCES, ACTIONS } from '@/lib/rbac';
 import { createLocationSchema } from '@/lib/validations';
 import { randomUUID } from 'crypto';
 import { ZodError } from 'zod';
+import { requireTenantId } from '@/lib/tenant-context';
 
 async function getLocationsHandler(req: NextRequest) {
   try {
+    const tenantId = await requireTenantId();
     const { searchParams } = new URL(req.url);
     const isActiveParam = searchParams.get('isActive');
     const search = searchParams.get('search');
@@ -17,7 +19,7 @@ async function getLocationsHandler(req: NextRequest) {
     const query = db.select().from(location);
 
     // Build where conditions
-    const conditions = [];
+    const conditions = [eq(location.organizationId, tenantId)];
 
     if (isActiveParam !== null) {
       const isActive = isActiveParam === 'true';
@@ -25,17 +27,16 @@ async function getLocationsHandler(req: NextRequest) {
     }
 
     if (search) {
-      conditions.push(
-        or(
-          ilike(location.name, `%${search}%`),
-          ilike(location.address, `%${search}%`),
-          ilike(location.city, `%${search}%`)
-        )
+      const searchCondition = or(
+        ilike(location.name, `%${search}%`),
+        ilike(location.address, `%${search}%`),
+        ilike(location.city, `%${search}%`)
       );
+      if (searchCondition) conditions.push(searchCondition);
     }
 
     const locations = await query.where(
-      conditions.length > 0 ? or(...conditions) : undefined
+      and(...conditions)
     );
 
     return NextResponse.json({ locations });
@@ -50,6 +51,7 @@ async function getLocationsHandler(req: NextRequest) {
 
 async function createLocationHandler(req: NextRequest) {
   try {
+    const tenantId = await requireTenantId();
     const body = await req.json();
     const validatedData = createLocationSchema.parse(body);
 
@@ -57,6 +59,7 @@ async function createLocationHandler(req: NextRequest) {
       .insert(location)
       .values({
         id: randomUUID(),
+        organizationId: tenantId,
         ...validatedData,
       })
       .returning();

@@ -1,6 +1,7 @@
 import { db } from '@/drizzle/db';
 import { material } from '@/drizzle/schema/materials';
 import { ACTIONS, RESOURCES } from '@/lib/rbac';
+import { requireTenantId } from '@/lib/tenant-context';
 import { MaterialType } from '@/lib/types';
 import { createMaterialSchema } from '@/lib/validations/material';
 import { protectRoute } from '@/middleware/rbac';
@@ -11,6 +12,7 @@ import { ZodError } from 'zod';
 
 export async function getMaterialsHandler(req: NextRequest) {
   try {
+    const tenantId = await requireTenantId();
     const { searchParams } = new URL(req.url);
     const statusParam = searchParams.get('status');
     const categoryId = searchParams.get('categoryId');
@@ -22,7 +24,7 @@ export async function getMaterialsHandler(req: NextRequest) {
     const limit = parseInt(searchParams.get('limit') || '50', 10);
     const offset = (page - 1) * limit;
 
-    const conditions = [];
+    const conditions = [eq(material.organizationId, tenantId)];
 
     if (!includeDeleted) {
       conditions.push(isNull(material.deletedAt));
@@ -42,12 +44,11 @@ export async function getMaterialsHandler(req: NextRequest) {
     }
 
     if (search) {
-      conditions.push(
-        or(
-          ilike(material.name, `%${search}%`),
-          ilike(material.description, `%${search}%`)
-        )
+      const searchCondition = or(
+        ilike(material.name, `%${search}%`),
+        ilike(material.description, `%${search}%`)
       );
+      if (searchCondition) conditions.push(searchCondition);
     }
 
     const whereClause = conditions.length > 0 ? and(...conditions) : undefined;
@@ -86,6 +87,7 @@ export async function getMaterialsHandler(req: NextRequest) {
 
 export async function createMaterialHandler(req: NextRequest) {
   try {
+    const tenantId = await requireTenantId();
     const body = await req.json();
     const validatedData = createMaterialSchema.parse(body);
 
@@ -93,6 +95,7 @@ export async function createMaterialHandler(req: NextRequest) {
       .insert(material)
       .values({
         id: randomUUID(),
+        organizationId: tenantId,
         ...validatedData,
       })
       .returning();

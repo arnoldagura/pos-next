@@ -1,6 +1,7 @@
 import { db } from '@/db/db';
 import { product, productInventory, location } from '@/drizzle/schema';
 import { ACTIONS, RESOURCES } from '@/lib/rbac';
+import { requireTenantId } from '@/lib/tenant-context';
 import { RouteContext, createDefaultRouteContext } from '@/lib/types';
 import { protectRoute } from '@/middleware/rbac';
 import { eq, and, isNull } from 'drizzle-orm';
@@ -13,6 +14,7 @@ async function getProductByBarcodeHandler(
   })
 ) {
   try {
+    const tenantId = await requireTenantId();
     const { code } = await context.params;
     const { searchParams } = new URL(req.url);
     const locationId = searchParams.get('locationId');
@@ -47,6 +49,7 @@ async function getProductByBarcodeHandler(
       .innerJoin(location, eq(productInventory.locationId, location.id))
       .where(
         and(
+          eq(product.organizationId, tenantId),
           eq(productInventory.barcode, code),
           eq(product.status, true),
           isNull(product.deletedAt),

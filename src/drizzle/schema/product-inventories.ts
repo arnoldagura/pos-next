@@ -10,11 +10,15 @@ import {
 import { product } from './products';
 import { location } from './locations';
 import { productInventoryMovement } from './product-inventory-movements';
+import { organization } from './organizations';
 
 export const productInventory = pgTable(
   'product_inventory',
   {
     id: text('id').primaryKey(),
+    organizationId: text('organization_id')
+      .notNull()
+      .references(() => organization.id, { onDelete: 'cascade' }),
     productId: text('product_id')
       .notNull()
       .references(() => product.id, { onDelete: 'cascade' }),
@@ -45,6 +49,7 @@ export const productInventory = pgTable(
       .notNull(),
   },
   (table) => ({
+    orgIdx: index('product_inventory_org_idx').on(table.organizationId),
     productInventoryLocationVariantUnique: unique(
       'product_inventory_product_location_variant_unique'
     ).on(table.productId, table.locationId, table.variantName),
@@ -59,6 +64,10 @@ export const productInventory = pgTable(
 export const productInventoryRelations = relations(
   productInventory,
   ({ one, many }) => ({
+    organization: one(organization, {
+      fields: [productInventory.organizationId],
+      references: [organization.id],
+    }),
     product: one(product, {
       fields: [productInventory.productId],
       references: [product.id],

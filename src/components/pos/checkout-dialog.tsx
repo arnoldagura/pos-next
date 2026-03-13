@@ -151,6 +151,38 @@ export function CheckoutDialog({
       setOrderId(data.order.id);
       setOrderNumber(data.order.orderNumber);
 
+      // For non-cash payments, try to create PayMongo checkout
+      if (selectedPayment !== 'cash') {
+        try {
+          const paymentRes = await fetch('/api/payments/create-checkout', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              orderId: data.order.id,
+              orderNumber: data.order.orderNumber,
+              items: cart.items.map((item) => ({
+                name: item.name,
+                quantity: item.quantity,
+                amount: item.total,
+              })),
+              total: cart.total,
+              paymentMethod: selectedPayment,
+            }),
+          });
+
+          if (paymentRes.ok) {
+            const paymentData = await paymentRes.json();
+            // Open PayMongo checkout in new tab
+            window.open(paymentData.checkoutUrl, '_blank');
+            toast.success('Payment page opened. Complete payment in the new tab.');
+          }
+          // If PayMongo is not configured (503), fall through to success
+        } catch (e) {
+          console.error('PayMongo checkout error:', e);
+          // Non-blocking: order is created, payment can be completed later
+        }
+      }
+
       if (cart.tableId) {
         try {
           await updateTableStatus(cart.tableId, 'available');
@@ -277,8 +309,8 @@ export function CheckoutDialog({
                         : 'border-gray-200'
                     )}
                   >
-                    <method.icon className='h-5 w-5 text-gray-600' />
-                    <span className='font-medium text-sm'>{method.label}</span>
+                    <method.icon className='h-6 w-6 text-gray-600' />
+                    <span className='font-medium'>{method.label}</span>
                   </button>
                 ))}
               </div>

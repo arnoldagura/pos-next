@@ -1,6 +1,7 @@
 import { db } from '@/db/db';
 import { product, productCategory } from '@/drizzle/schema';
 import { ACTIONS, RESOURCES } from '@/lib/rbac';
+import { requireTenantId } from '@/lib/tenant-context';
 import { RouteContext, createDefaultRouteContext } from '@/lib/types';
 import { updateProductSchema } from '@/lib/validations/product';
 import { protectRoute } from '@/middleware/rbac';
@@ -12,6 +13,7 @@ async function getProductHandler(
   context: RouteContext<{ id: string }> = createDefaultRouteContext({ id: '' })
 ) {
   try {
+    const tenantId = await requireTenantId();
     const { id } = await context.params;
 
     const [foundProduct] = await db
@@ -35,7 +37,7 @@ async function getProductHandler(
       })
       .from(product)
       .leftJoin(productCategory, eq(product.categoryId, productCategory.id))
-      .where(and(eq(product.id, id), isNull(product.deletedAt)))
+      .where(and(eq(product.organizationId, tenantId), eq(product.id, id), isNull(product.deletedAt)))
       .limit(1);
 
     if (!foundProduct) {
@@ -57,6 +59,7 @@ async function updateProductHandler(
   context: RouteContext<{ id: string }> = createDefaultRouteContext({ id: '' })
 ) {
   try {
+    const tenantId = await requireTenantId();
     const { id } = await context.params;
     const body = await req.json();
     const validatedData = updateProductSchema.parse(body);
@@ -66,7 +69,7 @@ async function updateProductHandler(
     const [updatedProduct] = await db
       .update(product)
       .set({ ...updateData, updatedAt: new Date() })
-      .where(eq(product.id, id))
+      .where(and(eq(product.organizationId, tenantId), eq(product.id, id)))
       .returning();
 
     if (!updatedProduct) {
@@ -98,13 +101,14 @@ async function deleteProductHandler(
   context: RouteContext<{ id: string }> = createDefaultRouteContext({ id: '' })
 ) {
   try {
+    const tenantId = await requireTenantId();
     const { id } = await context.params;
 
     // Soft delete - set deletedAt timestamp
     const [deletedProduct] = await db
       .update(product)
       .set({ deletedAt: new Date() })
-      .where(and(eq(product.id, id), isNull(product.deletedAt)))
+      .where(and(eq(product.organizationId, tenantId), eq(product.id, id), isNull(product.deletedAt)))
       .returning({ id: product.id });
 
     if (!deletedProduct) {

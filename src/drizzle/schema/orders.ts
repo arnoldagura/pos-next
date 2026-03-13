@@ -12,6 +12,7 @@ import { product } from './products';
 import { location } from './locations';
 import { restaurantTable } from './tables';
 import { user } from './auth';
+import { organization } from './organizations';
 
 export const orderStatusEnum = pgEnum('order_status', [
   'pending',
@@ -40,6 +41,9 @@ export const order = pgTable(
   'order',
   {
     id: text('id').primaryKey(),
+    organizationId: text('organization_id')
+      .notNull()
+      .references(() => organization.id, { onDelete: 'cascade' }),
     orderNumber: text('order_number').notNull().unique(),
     locationId: text('location_id')
       .notNull()
@@ -64,6 +68,7 @@ export const order = pgTable(
     total: numeric('total', { precision: 10, scale: 2 }).notNull(),
     amountPaid: numeric('amount_paid', { precision: 10, scale: 2 }),
     changeGiven: numeric('change_given', { precision: 10, scale: 2 }),
+    paymentReference: text('payment_reference'),
     notes: text('notes'),
     createdBy: text('created_by').references(() => user.id, {
       onDelete: 'set null',
@@ -77,6 +82,7 @@ export const order = pgTable(
       .notNull(),
   },
   (table) => ({
+    orgIdx: index('order_org_idx').on(table.organizationId),
     orderNumberIdx: index('order_number_idx').on(table.orderNumber),
     locationIdx: index('order_location_idx').on(table.locationId),
     statusIdx: index('order_status_idx').on(table.status),
@@ -123,6 +129,10 @@ export const orderItem = pgTable(
 );
 
 export const orderRelations = relations(order, ({ one, many }) => ({
+  organization: one(organization, {
+    fields: [order.organizationId],
+    references: [organization.id],
+  }),
   location: one(location, {
     fields: [order.locationId],
     references: [location.id],
