@@ -427,7 +427,7 @@ export function CheckoutDialog({ open, onOpenChange, locationId }: CheckoutDialo
           <div className='flex flex-col items-center justify-center py-12'>
             <Loader2 className='h-16 w-16 text-blue-600 animate-spin mb-4' />
             <p className='text-lg font-medium'>Processing your order...</p>
-            <p className='text-sm text-gray-500 mt-2'>Please wait</p>
+            <p className='text-sm text-muted-foreground mt-2'>Please wait</p>
           </div>
         )}
 

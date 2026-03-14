@@ -12,8 +12,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { MapPin, ShoppingCart, Keyboard } from 'lucide-react';
+import { MapPin, ShoppingCart, Keyboard, Sun, Moon } from 'lucide-react';
 import { useCartStore } from '@/stores';
+import { useTheme } from '@/contexts/theme-context';
 
 type Location = {
   id: string;
@@ -29,6 +30,11 @@ export function POSClient() {
 
   const cart = useCartStore((state) => state.getActiveCart());
   const itemCount = isClient ? cart?.items.length || 0 : 0;
+  const { theme, setTheme } = useTheme();
+
+  const toggleTheme = () => {
+    setTheme(theme === 'dark' ? 'light' : 'dark');
+  };
 
   useEffect(() => {
     setIsClient(true);
@@ -69,12 +75,12 @@ export function POSClient() {
   return (
     <div className='flex h-screen overflow-hidden '>
       <div className='flex-1 flex flex-col overflow-hidden'>
-        <div className=' border-b px-6 py-4 flex items-center justify-between'>
-          <div className='flex items-center gap-4'>
-            <h1 className='text-2xl font-bold'>Point of Sale</h1>
+        <div className=' border-b px-4 sm:px-6 py-3 sm:py-4 flex items-center justify-between'>
+          <div className='flex items-center gap-2 sm:gap-4'>
+            <h1 className='text-lg sm:text-2xl font-bold'>POS</h1>
 
             <div className='flex items-center gap-2'>
-              <MapPin className='h-4 w-4 text-gray-500' />
+              <MapPin className='h-4 w-4 text-muted-foreground' />
               <Select value={selectedLocation} onValueChange={setSelectedLocation}>
                 <SelectTrigger className='w-[200px]'>
                   <SelectValue placeholder='Select location' />
@@ -91,6 +97,15 @@ export function POSClient() {
           </div>
 
           <div className='flex items-center gap-2'>
+            <Button
+              variant='ghost'
+              size='sm'
+              onClick={toggleTheme}
+              className='text-muted-foreground'
+              title={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
+            >
+              {theme === 'dark' ? <Sun className='h-4 w-4' /> : <Moon className='h-4 w-4' />}
+            </Button>
             <Button
               variant='ghost'
               size='sm'

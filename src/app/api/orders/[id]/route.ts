@@ -1,5 +1,5 @@
 import { db } from '@/db/db';
-import { order, orderItem, location, orderStatusEnum } from '@/drizzle/schema';
+import { order, orderItem, location, orderStatusEnum, organization } from '@/drizzle/schema';
 import { eq, and } from 'drizzle-orm';
 import { NextRequest, NextResponse } from 'next/server';
 import { requireTenantId } from '@/lib/tenant-context';
@@ -55,9 +55,21 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
 
     const items = await db.select().from(orderItem).where(eq(orderItem.orderId, orderId));
 
+    // Fetch org branding for receipt
+    const [org] = await db
+      .select({ settings: organization.settings })
+      .from(organization)
+      .where(eq(organization.id, tenantId))
+      .limit(1);
+
+    const branding = org?.settings?.branding;
+
     return NextResponse.json({
       order: orderData,
       items,
+      branding: branding
+        ? { logo: branding.logo, companyName: branding.companyName }
+        : undefined,
     });
   } catch (error) {
     console.error('Error fetching order:', error);

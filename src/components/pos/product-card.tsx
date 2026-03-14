@@ -32,7 +32,7 @@ export const ProductCard = memo(function ProductCard({
       )}
       onClick={() => !isOutOfStock && onAddToCart(product)}
     >
-      <div className='aspect-square relative mb-3 bg-gray-100 rounded-md overflow-hidden'>
+      <div className='aspect-square relative mb-3 bg-muted rounded-md overflow-hidden'>
         {product.image ? (
           <Image
             src={product.image}
@@ -42,7 +42,7 @@ export const ProductCard = memo(function ProductCard({
             sizes='(max-width: 768px) 50vw, 25vw'
           />
         ) : (
-          <div className='w-full h-full flex items-center justify-center text-gray-400'>
+          <div className='w-full h-full flex items-center justify-center text-muted-foreground'>
             <ShoppingCart className='h-12 w-12' />
           </div>
         )}

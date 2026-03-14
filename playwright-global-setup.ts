@@ -1,83 +1,65 @@
 import { chromium, FullConfig } from '@playwright/test';
+import dotenv from 'dotenv';
+
+dotenv.config();
 
 /**
  * Global setup for E2E tests
- * Creates a test user and stores authentication session
+ * Logs in as the E2E test user and stores auth session.
+ *
+ * Prerequisites:
+ *   1. Run `npx tsx src/db/seed-e2e-user.ts` to create the test user
+ *   2. Set E2E_TEST_EMAIL and E2E_TEST_PASSWORD in .env
  */
 async function globalSetup(config: FullConfig) {
-  const baseURL = (config.use?.baseURL as string) || 'http://localhost:3000';
+  const baseURL = config?.use?.baseURL || 'http://localhost:3000';
 
-  // Launch a browser instance for setup
+  const testEmail = process.env.E2E_TEST_EMAIL || 'e2e-test@example.com';
+  const testPassword = process.env.E2E_TEST_PASSWORD || 'Test@123456';
+
   const browser = await chromium.launch();
   const context = await browser.newContext();
   const page = await context.newPage();
 
   try {
-    // Test credentials
-    const testEmail = 'e2e-test@example.com';
-    const testPassword = 'Test@123456';
-    const testName = 'E2E Test User';
+    console.log(`E2E auth setup: logging in as ${testEmail}...`);
 
-    console.log('Setting up E2E test user...');
+    // Sign in via Better Auth API endpoint
+    const signInResponse = await page.request.post(`${baseURL}/api/auth/sign-in/email`, {
+      data: {
+        email: testEmail,
+        password: testPassword,
+      },
+    });
 
-    // First, try to create user via API (more reliable than UI)
-    try {
-      const signUpResponse = await page.request.post(`${baseURL}/api/auth/sign-up`, {
-        data: {
-          name: testName,
-          email: testEmail,
-          password: testPassword,
-        },
-      });
+    if (signInResponse.ok()) {
+      console.log('Signed in via API');
+    } else {
+      console.log(`API sign-in failed (${signInResponse.status()}), trying UI...`);
 
-      if (!signUpResponse.ok()) {
-        console.log(`Sign up API failed (${signUpResponse.status()}), trying UI...`);
-      } else {
-        console.log('✓ Test user created via API');
-      }
-    } catch (error) {
-      console.log('Sign up API not available, trying UI registration...');
-    }
-
-    // Try to log in via UI
-    try {
+      // Fall back to UI login
       await page.goto(`${baseURL}/login`);
-      await page.waitForLoadState('networkidle', { timeout: 10000 });
-
-      // Wait for form to be interactive
-      await page.waitForSelector('input[type="email"]', { timeout: 5000 });
-
-      // Fill login form
+      await page.waitForSelector('input[type="email"]', { timeout: 10000 });
       await page.fill('input[type="email"]', testEmail);
       await page.fill('input[type="password"]', testPassword);
       await page.click('button[type="submit"]');
 
-      // Wait for navigation to dashboard or inventory page
-      try {
-        await page.waitForURL('**/dashboard', { timeout: 10000 });
-        console.log('✓ Successfully logged in and reached dashboard');
-      } catch {
-        // Try waiting for any navigation away from login
-        await page.waitForURL((url) => !url.toString().includes('/login'), {
-          timeout: 5000,
-        });
-        console.log('✓ Successfully logged in');
-      }
-    } catch (error) {
-      console.warn('Login failed:', error instanceof Error ? error.message : String(error));
-      console.log('Continuing with unauthenticated state...');
+      // Wait for redirect away from login
+      await page.waitForURL((url) => !url.toString().includes('/login'), {
+        timeout: 15000,
+      });
+      console.log('Signed in via UI');
     }
 
-    // Save auth state for tests
-    await context.storageState({
-      path: 'auth-state.json',
-    });
-
-    console.log('✓ E2E test authentication setup completed');
+    // Save auth state (cookies/session) for tests
+    await context.storageState({ path: 'auth-state.json' });
+    console.log('Auth state saved to auth-state.json');
   } catch (error) {
-    console.error('Global setup error:', error instanceof Error ? error.message : String(error));
-    // Don't fail the entire test suite if setup fails
-    // Tests will just fail with auth errors which is clearer
+    console.error('E2E auth setup failed:', error instanceof Error ? error.message : String(error));
+    console.log('Tests will run without authentication.');
+
+    // Write empty state so tests don't crash looking for the file
+    await context.storageState({ path: 'auth-state.json' });
   } finally {
     await context.close();
     await browser.close();

@@ -284,7 +284,7 @@ export function ProductGrid({ locationId }: ProductGridProps) {
       <div className='p-4 border-b  space-y-3'>
         <div className='flex gap-2'>
           <div className='flex-1 relative'>
-            <Search className='absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400' />
+            <Search className='absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground' />
             <Input
               ref={searchInputRef}
               placeholder='Search products... (Ctrl+K)'
@@ -294,8 +294,8 @@ export function ProductGrid({ locationId }: ProductGridProps) {
             />
           </div>
 
-          <div className='w-64 relative'>
-            <Barcode className='absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400' />
+          <div className='hidden sm:block w-64 relative'>
+            <Barcode className='absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground' />
             <Input
               ref={barcodeInputRef}
               placeholder='Scan barcode... (Ctrl+B)'
@@ -341,7 +341,7 @@ export function ProductGrid({ locationId }: ProductGridProps) {
 
               <div className='space-y-2'>
                 {categories.length === 0 ? (
-                  <div className='text-center text-sm text-gray-500 py-4'>
+                  <div className='text-center text-sm text-muted-foreground py-4'>
                     No categories available
                   </div>
                 ) : (
@@ -364,18 +364,18 @@ export function ProductGrid({ locationId }: ProductGridProps) {
         </div>
 
         <div className='flex items-center justify-between'>
-          <div className='flex gap-4 text-xs text-gray-500'>
+          <div className='hidden lg:flex gap-4 text-xs text-muted-foreground'>
             <span>
-              <kbd className='px-1.5 py-0.5 bg-gray-100 rounded border'>Ctrl+K</kbd> Search
+              <kbd className='px-1.5 py-0.5 bg-muted rounded border'>Ctrl+K</kbd> Search
             </span>
             <span>
-              <kbd className='px-1.5 py-0.5 bg-gray-100 rounded border'>Ctrl+B</kbd> Barcode
+              <kbd className='px-1.5 py-0.5 bg-muted rounded border'>Ctrl+B</kbd> Barcode
             </span>
             <span>
-              <kbd className='px-1.5 py-0.5 bg-gray-100 rounded border'>Esc</kbd> Clear
+              <kbd className='px-1.5 py-0.5 bg-muted rounded border'>Esc</kbd> Clear
             </span>
             <span>
-              <kbd className='px-1.5 py-0.5 bg-gray-100 rounded border'>?</kbd> All shortcuts
+              <kbd className='px-1.5 py-0.5 bg-muted rounded border'>?</kbd> All shortcuts
             </span>
           </div>
 
@@ -388,7 +388,7 @@ export function ProductGrid({ locationId }: ProductGridProps) {
                     {category.name}
                     <button
                       onClick={() => toggleCategory(categoryId)}
-                      className='ml-1 hover:bg-gray-300 rounded-full p-0.5'
+                      className='ml-1 hover:bg-muted rounded-full p-0.5'
                     >
                       <X className='h-3 w-3' />
                     </button>
@@ -408,8 +408,8 @@ export function ProductGrid({ locationId }: ProductGridProps) {
             ))}
           </div>
         ) : products.length === 0 ? (
-          <div className='flex flex-col items-center justify-center py-12 text-gray-500'>
-            <ShoppingCart className='h-12 w-12 mb-4 text-gray-300' />
+          <div className='flex flex-col items-center justify-center py-12 text-muted-foreground'>
+            <ShoppingCart className='h-12 w-12 mb-4 text-muted-foreground/30' />
             <p className='text-lg font-medium'>No products found</p>
             <p className='text-sm'>
               {selectedCategories.size > 0 || search
@@ -477,7 +477,7 @@ function ProductCard({ product, stockStatus, inventoryItem, onAddToCart }: Produ
           />
         ) : (
           <div className='w-full h-full flex items-center justify-center'>
-            <ShoppingCart className='h-8 w-8 text-gray-300' />
+            <ShoppingCart className='h-8 w-8 text-muted-foreground/30' />
           </div>
         )}
 
@@ -504,13 +504,13 @@ function ProductCard({ product, stockStatus, inventoryItem, onAddToCart }: Produ
       <div className='flex-1 flex flex-col text-left'>
         <h3 className='font-medium text-sm line-clamp-2 mb-1'>{product.name}</h3>
 
-        {product.sku && <p className='text-xs text-gray-500 mb-1'>SKU: {product.sku}</p>}
+        {product.sku && <p className='text-xs text-muted-foreground mb-1'>SKU: {product.sku}</p>}
 
         <div className='mt-auto'>
           <p className='text-lg font-bold text-blue-600'>${displayPrice.toFixed(2)}</p>
 
           {stockStatus && stockStatus.stock > 0 && (
-            <p className='text-xs text-gray-500'>
+            <p className='text-xs text-muted-foreground'>
               {stockStatus.stock} {displayUnit} available
             </p>
           )}

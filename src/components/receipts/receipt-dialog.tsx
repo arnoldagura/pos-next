@@ -29,6 +29,7 @@ interface ReceiptItem {
 interface ReceiptData {
   orderNumber: string;
   orderDate: Date;
+  orderId?: string;
   location?: {
     name: string;
     address?: string;
@@ -44,6 +45,8 @@ interface ReceiptData {
   changeGiven: string;
   customerName?: string | null;
   tableNumber?: string | null;
+  logoUrl?: string | null;
+  companyName?: string | null;
 }
 
 interface ReceiptDialogProps {

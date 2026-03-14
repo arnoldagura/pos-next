@@ -113,9 +113,9 @@ export function CartSidebar({ onClose, locationId }: CartSidebarProps) {
         </div>
 
         <div className='flex-1 flex flex-col items-center justify-center p-8 text-center'>
-          <ShoppingCart className='h-16 w-16 text-gray-300 mb-4' />
-          <h3 className='text-lg font-medium text-gray-900 mb-2'>Cart is Empty</h3>
-          <p className='text-sm text-gray-500'>Add products to get started</p>
+          <ShoppingCart className='h-16 w-16 text-muted-foreground/30 mb-4' />
+          <h3 className='text-lg font-medium text-foreground mb-2'>Cart is Empty</h3>
+          <p className='text-sm text-muted-foreground'>Add products to get started</p>
         </div>
       </div>
     );
@@ -198,7 +198,7 @@ export function CartSidebar({ onClose, locationId }: CartSidebarProps) {
       <ScrollArea className='flex-1'>
         <div className='p-4 space-y-3'>
           {cart.items.map((item) => (
-            <div key={item.id} className=' rounded-lg p-3 border border-gray-200'>
+            <div key={item.id} className=' rounded-lg p-3 border'>
               <div className='flex gap-3 mb-2'>
                 <div className='w-16 h-16 rounded-md overflow-hidden  border flex-shrink-0'>
                   {item.image ? (
@@ -212,15 +212,15 @@ export function CartSidebar({ onClose, locationId }: CartSidebarProps) {
                     />
                   ) : (
                     <div className='w-full h-full flex items-center justify-center'>
-                      <ShoppingCart className='h-6 w-6 text-gray-300' />
+                      <ShoppingCart className='h-6 w-6 text-muted-foreground/30' />
                     </div>
                   )}
                 </div>
 
                 <div className='flex-1 min-w-0'>
                   <h3 className='font-medium text-sm line-clamp-2 mb-1'>{item.name}</h3>
-                  <p className='text-sm text-gray-600'>${item.price.toFixed(2)} each</p>
-                  {item.sku && <p className='text-xs text-gray-500'>SKU: {item.sku}</p>}
+                  <p className='text-sm text-muted-foreground'>${item.price.toFixed(2)} each</p>
+                  {item.sku && <p className='text-xs text-muted-foreground'>SKU: {item.sku}</p>}
                 </div>
 
                 <Button
@@ -350,10 +350,10 @@ export function CartSidebar({ onClose, locationId }: CartSidebarProps) {
               )}
 
               <div className='flex justify-between items-center mt-2 pt-2 border-t'>
-                <span className='text-sm text-gray-600'>Subtotal:</span>
+                <span className='text-sm text-muted-foreground'>Subtotal:</span>
                 <div className='text-right'>
                   {item.discount > 0 && (
-                    <p className='text-xs text-gray-500 line-through'>
+                    <p className='text-xs text-muted-foreground line-through'>
                       ${item.subtotal.toFixed(2)}
                     </p>
                   )}
@@ -373,8 +373,8 @@ export function CartSidebar({ onClose, locationId }: CartSidebarProps) {
 
         {cart.customerName && (
           <div className='flex items-center gap-2 text-sm'>
-            <User className='h-4 w-4 text-gray-500' />
-            <span className='text-gray-600'>Customer:</span>
+            <User className='h-4 w-4 text-muted-foreground' />
+            <span className='text-muted-foreground'>Customer:</span>
             <span className='font-medium'>{cart.customerName}</span>
           </div>
         )}
@@ -383,7 +383,7 @@ export function CartSidebar({ onClose, locationId }: CartSidebarProps) {
 
         <div className='space-y-2'>
           <div className='flex justify-between text-sm'>
-            <span className='text-gray-600'>Subtotal:</span>
+            <span className='text-muted-foreground'>Subtotal:</span>
             <span>${cart.subtotal.toFixed(2)}</span>
           </div>
 
@@ -396,7 +396,7 @@ export function CartSidebar({ onClose, locationId }: CartSidebarProps) {
 
           {cart.totalTax > 0 && (
             <div className='flex justify-between text-sm'>
-              <span className='text-gray-600'>Tax:</span>
+              <span className='text-muted-foreground'>Tax:</span>
               <span>${cart.totalTax.toFixed(2)}</span>
             </div>
           )}

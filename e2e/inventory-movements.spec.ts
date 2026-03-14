@@ -38,17 +38,15 @@ test.describe('Inventory Movement History', () => {
       return false;
     }
 
-    // Check if main heading is visible (indicates page loaded successfully)
-    const heading = page.getByRole('heading', {
-      name: 'Movement History',
-      level: 1,
-    });
-    return await heading.isVisible({ timeout: 5000 }).catch(() => false);
+    // Check if table is visible (indicates page loaded successfully)
+    // The actual component doesn't have an H1 "Movement History", it's a card title
+    const table = page.locator('table');
+    return await table.isVisible({ timeout: 5000 }).catch(() => false);
   }
 
   test.beforeEach(async ({ page }) => {
-    // Navigate to the movement history page
-    await page.goto(`/inventory/${testInventoryId}/movements`, {
+    // Navigate to the movement history page (correct route is /product-inventories/[id]/movements)
+    await page.goto(`/product-inventories/${testInventoryId}/movements`, {
       waitUntil: 'domcontentloaded',
     });
 
@@ -60,7 +58,7 @@ test.describe('Inventory Movement History', () => {
     if (!ready) {
       test.skip(
         true,
-        'Page not ready - check that dev server is running, database has test data, and authentication is configured'
+        'Page not ready - check that dev server is running, database has test data with inventory ID test-inv-001, and authentication is configured'
       );
     }
   });

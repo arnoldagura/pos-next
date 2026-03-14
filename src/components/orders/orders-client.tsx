@@ -66,6 +66,9 @@ interface ReceiptData {
   changeGiven: string;
   customerName?: string | null;
   tableNumber?: string | null;
+  orderId?: string;
+  logoUrl?: string | null;
+  companyName?: string | null;
 }
 
 const statusColors: Record<string, string> = {
@@ -122,9 +125,10 @@ export function OrdersClient() {
       const response = await fetch(`/api/orders/${orderId}`);
       if (!response.ok) throw new Error('Failed to fetch order details');
 
-      const { order, items } = await response.json();
+      const { order, items, branding } = await response.json();
 
       setSelectedOrder({
+        orderId: order.id,
         orderNumber: order.orderNumber,
         orderDate: order.createdAt,
         location: order.locationName
@@ -151,6 +155,8 @@ export function OrdersClient() {
         changeGiven: order.changeGiven,
         customerName: order.customerName,
         tableNumber: order.tableId,
+        logoUrl: branding?.logo || null,
+        companyName: branding?.companyName || null,
       });
       setReceiptDialogOpen(true);
     } catch (error) {

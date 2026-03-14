@@ -1,5 +1,6 @@
 'use client';
 
+import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { StatsCard } from './stats-card';
 import { RecentOrdersTable } from './recent-orders-table';
@@ -8,14 +9,15 @@ import { TopProductsChart } from './top-products-chart';
 import { OrderStatusChart } from './order-status-chart';
 import { ExpiringMaterials } from './expiring-materials';
 import { ProductionStatus } from './production-status';
+import { DateRangeSelector, DateRange, getDefaultDateRange } from './date-range-selector';
 import { Skeleton } from '@/components/ui/skeleton';
 import {
   DollarSign,
   ShoppingCart,
   Package,
-  TrendingUp,
   RefreshCcw,
   AlertTriangle,
+  Receipt,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { formatCurrency } from '@/lib/utils';
@@ -23,9 +25,15 @@ import { useQuery } from '@tanstack/react-query';
 
 interface DashboardStats {
   sales: {
-    today: { total: string; count: number };
-    week: { total: string; count: number };
-    month: { total: string; count: number };
+    current: { total: string; count: number };
+    previous: { total: string; count: number };
+    averageOrderValue: string;
+    previousAverageOrderValue: string;
+    trends: {
+      revenue: number | null;
+      orders: number | null;
+      avgOrder: number | null;
+    };
   };
   orderStatus: Array<{ status: string; count: number }>;
   lowStock: Array<{
@@ -72,22 +80,33 @@ interface DashboardStats {
   }>;
 }
 
+function trendProps(value: number | null) {
+  if (value === null) return undefined;
+  return { value: Math.abs(value), isPositive: value >= 0 };
+}
+
 export function DashboardClient() {
+  const [dateRange, setDateRange] = useState<DateRange>(getDefaultDateRange);
+
   const {
     data: stats,
     isLoading: loading,
     error,
     refetch,
   } = useQuery<DashboardStats>({
-    queryKey: ['dashboard-stats'],
+    queryKey: ['dashboard-stats', dateRange.startDate, dateRange.endDate],
     queryFn: async () => {
-      const response = await fetch('/api/dashboard/stats');
+      const params = new URLSearchParams({
+        startDate: dateRange.startDate,
+        endDate: dateRange.endDate,
+      });
+      const response = await fetch(`/api/dashboard/stats?${params}`);
       if (!response.ok) {
         throw new Error('Failed to fetch dashboard statistics');
       }
       return response.json();
     },
-    staleTime: 5 * 60 * 1000, // Consider data fresh for 5 minutes
+    staleTime: 5 * 60 * 1000,
     refetchOnWindowFocus: false,
   });
 
@@ -115,36 +134,41 @@ export function DashboardClient() {
 
   return (
     <div className='space-y-6'>
-      <div className='flex items-center justify-between'>
+      <div className='flex flex-col sm:flex-row sm:items-center justify-between gap-4'>
         <h1 className='text-3xl font-bold'>Dashboard</h1>
-        <Button onClick={() => refetch()} variant='outline' size='sm'>
-          <RefreshCcw className='h-4 w-4 mr-2' />
-          Refresh
-        </Button>
+        <div className='flex items-center gap-2'>
+          <DateRangeSelector value={dateRange} onChange={setDateRange} />
+          <Button onClick={() => refetch()} variant='outline' size='sm'>
+            <RefreshCcw className='h-4 w-4' />
+          </Button>
+        </div>
       </div>
 
       {/* Sales Stats */}
       <div className='grid gap-4 md:grid-cols-2 lg:grid-cols-4'>
         <StatsCard
-          title="Today's Sales"
-          value={formatCurrency(parseFloat(stats.sales.today.total))}
-          description={`${stats.sales.today.count} orders`}
+          title='Total Revenue'
+          value={formatCurrency(parseFloat(stats.sales.current.total))}
+          description={dateRange.label}
           icon={DollarSign}
           iconClassName='text-green-600'
+          trend={trendProps(stats.sales.trends.revenue)}
         />
         <StatsCard
-          title='This Week'
-          value={formatCurrency(parseFloat(stats.sales.week.total))}
-          description={`${stats.sales.week.count} orders`}
-          icon={TrendingUp}
-          iconClassName='text-blue-600'
-        />
-        <StatsCard
-          title='This Month'
-          value={formatCurrency(parseFloat(stats.sales.month.total))}
-          description={`${stats.sales.month.count} orders`}
+          title='Orders'
+          value={stats.sales.current.count}
+          description={`prev: ${stats.sales.previous.count}`}
           icon={ShoppingCart}
+          iconClassName='text-blue-600'
+          trend={trendProps(stats.sales.trends.orders)}
+        />
+        <StatsCard
+          title='Avg. Order Value'
+          value={formatCurrency(parseFloat(stats.sales.averageOrderValue))}
+          description={`prev: ${formatCurrency(parseFloat(stats.sales.previousAverageOrderValue))}`}
+          icon={Receipt}
           iconClassName='text-purple-600'
+          trend={trendProps(stats.sales.trends.avgOrder)}
         />
         <StatsCard
           title='Inventory Value'
@@ -201,7 +225,7 @@ export function DashboardClient() {
       {stats.paymentMethods.length > 0 && (
         <Card>
           <CardHeader>
-            <CardTitle>Revenue by Payment Method (Last 30 Days)</CardTitle>
+            <CardTitle>Revenue by Payment Method</CardTitle>
           </CardHeader>
           <CardContent>
             <div className='grid gap-4 md:grid-cols-2 lg:grid-cols-3'>
@@ -232,7 +256,15 @@ export function DashboardClient() {
 function DashboardSkeleton() {
   return (
     <div className='space-y-6'>
-      <Skeleton className='h-10 w-48' />
+      <div className='flex items-center justify-between'>
+        <Skeleton className='h-10 w-48' />
+        <div className='flex gap-2'>
+          <Skeleton className='h-9 w-16' />
+          <Skeleton className='h-9 w-16' />
+          <Skeleton className='h-9 w-16' />
+          <Skeleton className='h-9 w-16' />
+        </div>
+      </div>
       <div className='grid gap-4 md:grid-cols-2 lg:grid-cols-4'>
         {[...Array(4)].map((_, i) => (
           <Card key={i}>

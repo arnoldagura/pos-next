@@ -1,6 +1,7 @@
 'use client';
 
 import { formatCurrency } from '@/lib/utils';
+import { QRCodeSVG } from 'qrcode.react';
 
 interface ReceiptItem {
   productName: string;
@@ -14,6 +15,7 @@ interface ReceiptItem {
 interface ReceiptData {
   orderNumber: string;
   orderDate: Date;
+  orderId?: string;
   location?: {
     name: string;
     address?: string;
@@ -29,6 +31,8 @@ interface ReceiptData {
   changeGiven: string;
   customerName?: string | null;
   tableNumber?: string | null;
+  logoUrl?: string | null;
+  companyName?: string | null;
 }
 
 interface ReceiptTemplateProps {
@@ -36,11 +40,28 @@ interface ReceiptTemplateProps {
 }
 
 export function ReceiptTemplate({ data }: ReceiptTemplateProps) {
+  const displayName = data.companyName || data.location?.name || 'POS System';
+
+  // Build a QR code value with order details for digital receipt lookup
+  const qrValue = data.orderId
+    ? `${typeof window !== 'undefined' ? window.location.origin : ''}/orders/${data.orderId}`
+    : `Order #${data.orderNumber}`;
+
   return (
-    <div className='w-full max-w-sm mx-auto p-6 font-mono text-sm bg-white'>
-      {/* Header */}
+    <div className='w-full max-w-sm mx-auto p-6 font-mono text-sm bg-white text-black'>
+      {/* Header with Logo */}
       <div className='text-center mb-4 border-b-2 border-black pb-4'>
-        <h1 className='text-xl font-bold mb-1'>{data.location?.name || 'POS System'}</h1>
+        {data.logoUrl && (
+          <div className='mb-2 flex justify-center'>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={data.logoUrl}
+              alt={displayName}
+              className='max-h-16 max-w-[200px] object-contain'
+            />
+          </div>
+        )}
+        <h1 className='text-xl font-bold mb-1'>{displayName}</h1>
         {data.location?.address && <p className='text-xs'>{data.location.address}</p>}
         {data.location?.phone && <p className='text-xs'>Tel: {data.location.phone}</p>}
       </div>
@@ -133,8 +154,16 @@ export function ReceiptTemplate({ data }: ReceiptTemplateProps) {
         )}
       </div>
 
+      {/* QR Code */}
+      <div className='flex justify-center border-t-2 border-black pt-4 mb-4'>
+        <div className='text-center'>
+          <QRCodeSVG value={qrValue} size={100} level='M' />
+          <p className='text-[10px] mt-1 text-gray-500'>Scan for digital receipt</p>
+        </div>
+      </div>
+
       {/* Footer */}
-      <div className='text-center text-xs border-t-2 border-black pt-4'>
+      <div className='text-center text-xs border-t-2 border-dashed border-black pt-4'>
         <p className='mb-1'>Thank you for your business!</p>
         <p>Please come again</p>
       </div>
