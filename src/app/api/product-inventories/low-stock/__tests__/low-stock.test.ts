@@ -2,11 +2,10 @@ import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { NextRequest } from 'next/server';
 import { getLowStockHandler } from '../route';
 import * as inventoryCalculation from '@/lib/services/inventory-calculation';
-import { config } from 'dotenv';
-
-config();
-
 // Mock dependencies
+vi.mock('@/db/db', () => ({
+  db: {},
+}));
 vi.mock('@/lib/services/inventory-calculation');
 vi.mock('@/middleware/rbac', () => ({
   protectRoute: (handler: unknown) => handler,
