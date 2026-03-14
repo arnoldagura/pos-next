@@ -10,13 +10,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import {
   Table,
   TableBody,
@@ -80,9 +74,7 @@ export default function MaterialInventoryMovementsClient({
         params.append('type', typeFilter);
       }
 
-      const response = await fetch(
-        `/api/material-inventories/${inventoryId}/movements?${params}`
-      );
+      const response = await fetch(`/api/material-inventories/${inventoryId}/movements?${params}`);
       if (!response.ok) throw new Error('Failed to fetch movements');
 
       const data = await response.json();
@@ -103,11 +95,7 @@ export default function MaterialInventoryMovementsClient({
   return (
     <div className='space-y-6'>
       <div className='flex items-center gap-4'>
-        <Button
-          variant='ghost'
-          size='sm'
-          onClick={() => router.push('/material-inventories')}
-        >
+        <Button variant='ghost' size='sm' onClick={() => router.push('/material-inventories')}>
           <ArrowLeft className='h-4 w-4 mr-2' />
           Back to Inventories
         </Button>
@@ -131,9 +119,7 @@ export default function MaterialInventoryMovementsClient({
             <CardDescription>Current Stock</CardDescription>
             <CardTitle className='text-3xl'>
               {inventory
-                ? `${parseFloat(inventory.currentQuantity).toFixed(2)} ${
-                    inventory.unitOfMeasure
-                  }`
+                ? `${parseFloat(inventory.currentQuantity).toFixed(2)} ${inventory.unitOfMeasure}`
                 : '-'}
             </CardTitle>
           </CardHeader>
@@ -147,9 +133,7 @@ export default function MaterialInventoryMovementsClient({
         <Card>
           <CardHeader className='pb-3'>
             <CardDescription>Location</CardDescription>
-            <CardTitle className='text-xl'>
-              {inventory?.location.name || '-'}
-            </CardTitle>
+            <CardTitle className='text-xl'>{inventory?.location.name || '-'}</CardTitle>
           </CardHeader>
         </Card>
       </div>
@@ -163,9 +147,7 @@ export default function MaterialInventoryMovementsClient({
           <SelectContent>
             <SelectItem value='all'>All Movement Types</SelectItem>
             <SelectItem value='purchase'>Purchase</SelectItem>
-            <SelectItem value='production_consumption'>
-              Production Use
-            </SelectItem>
+            <SelectItem value='production_consumption'>Production Use</SelectItem>
             <SelectItem value='adjustment'>Adjustment</SelectItem>
             <SelectItem value='waste'>Waste</SelectItem>
             <SelectItem value='expired'>Expired</SelectItem>
@@ -196,9 +178,7 @@ export default function MaterialInventoryMovementsClient({
           <Card>
             <CardHeader>
               <CardTitle>Movement History</CardTitle>
-              <CardDescription>
-                Track all inventory movements and transactions
-              </CardDescription>
+              <CardDescription>Track all inventory movements and transactions</CardDescription>
             </CardHeader>
             <CardContent>
               <Table>
@@ -217,26 +197,16 @@ export default function MaterialInventoryMovementsClient({
                 <TableBody>
                   {movements.map((movement) => {
                     const quantity = parseFloat(movement.quantity);
-                    const unitPrice = movement.unitPrice
-                      ? parseFloat(movement.unitPrice)
-                      : null;
-                    const totalValue =
-                      unitPrice !== null ? quantity * unitPrice : null;
+                    const unitPrice = movement.unitPrice ? parseFloat(movement.unitPrice) : null;
+                    const totalValue = unitPrice !== null ? quantity * unitPrice : null;
 
                     return (
                       <TableRow key={movement.id}>
                         <TableCell className='font-medium'>
-                          {format(
-                            new Date(movement.date),
-                            'MMM dd, yyyy HH:mm'
-                          )}
+                          {format(new Date(movement.date), 'MMM dd, yyyy HH:mm')}
                         </TableCell>
                         <TableCell>
-                          <Badge
-                            variant={
-                              movementTypeColors[movement.type] || 'outline'
-                            }
-                          >
+                          <Badge variant={movementTypeColors[movement.type] || 'outline'}>
                             {isPositiveMovement(movement.type) ? (
                               <ArrowUp className='h-3 w-3 mr-1' />
                             ) : (
@@ -247,9 +217,7 @@ export default function MaterialInventoryMovementsClient({
                         </TableCell>
                         <TableCell>
                           {movement.batch ? (
-                            <span className='text-sm font-mono'>
-                              {movement.batch.batchNumber}
-                            </span>
+                            <span className='text-sm font-mono'>{movement.batch.batchNumber}</span>
                           ) : (
                             <span className='text-muted-foreground'>-</span>
                           )}
@@ -257,9 +225,7 @@ export default function MaterialInventoryMovementsClient({
                         <TableCell className='text-right font-medium'>
                           <span
                             className={
-                              isPositiveMovement(movement.type)
-                                ? 'text-green-600'
-                                : 'text-red-600'
+                              isPositiveMovement(movement.type) ? 'text-green-600' : 'text-red-600'
                             }
                           >
                             {isPositiveMovement(movement.type) ? '+' : '-'}
@@ -281,9 +247,7 @@ export default function MaterialInventoryMovementsClient({
                           )}
                         </TableCell>
                         <TableCell>
-                          {movement.remarks || (
-                            <span className='text-muted-foreground'>-</span>
-                          )}
+                          {movement.remarks || <span className='text-muted-foreground'>-</span>}
                         </TableCell>
                         <TableCell>
                           {movement.referenceType && movement.referenceId ? (
@@ -304,11 +268,7 @@ export default function MaterialInventoryMovementsClient({
 
           {totalPages > 1 && (
             <div className='flex justify-center gap-2'>
-              <Button
-                variant='outline'
-                disabled={page === 1}
-                onClick={() => setPage(page - 1)}
-              >
+              <Button variant='outline' disabled={page === 1} onClick={() => setPage(page - 1)}>
                 Previous
               </Button>
               <div className='flex items-center px-4'>

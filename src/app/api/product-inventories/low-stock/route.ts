@@ -9,10 +9,7 @@ export async function getLowStockHandler(req: NextRequest) {
     const locationId = searchParams.get('locationId');
 
     if (!locationId) {
-      return NextResponse.json(
-        { error: 'Location ID is required' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Location ID is required' }, { status: 400 });
     }
 
     const lowStockItems = await getLowStockItems(locationId);
@@ -24,10 +21,7 @@ export async function getLowStockHandler(req: NextRequest) {
   } catch (error) {
     console.error('Error fetching low stock items:', error);
 
-    return NextResponse.json(
-      { error: 'Failed to fetch low stock items' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to fetch low stock items' }, { status: 500 });
   }
 }
 

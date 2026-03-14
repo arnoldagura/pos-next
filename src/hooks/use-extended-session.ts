@@ -41,10 +41,13 @@ export function useExtendedSession() {
   });
 
   return {
-    data: baseSession && extendedUser ? {
-      ...baseSession,
-      user: extendedUser,
-    } : null,
+    data:
+      baseSession && extendedUser
+        ? {
+            ...baseSession,
+            user: extendedUser,
+          }
+        : null,
     isPending: isSessionPending || isExtendedLoading,
     user: extendedUser,
   };

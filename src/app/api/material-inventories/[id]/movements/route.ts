@@ -4,10 +4,7 @@ import { materialInventoryMovement, materialBatch } from '@/drizzle/schema';
 import { eq, desc, and, sql } from 'drizzle-orm';
 import { z } from 'zod';
 import { randomUUID } from 'crypto';
-import {
-  MaterialMovementType,
-  materialMovementTypeSchema,
-} from '@/lib/validations/material';
+import { MaterialMovementType, materialMovementTypeSchema } from '@/lib/validations/material';
 
 const createMovementSchema = z.object({
   type: materialMovementTypeSchema,
@@ -21,10 +18,7 @@ const createMovementSchema = z.object({
 });
 
 // GET /api/material-inventories/[id]/movements - Get movements for a material inventory
-export async function GET(
-  request: NextRequest,
-  context: { params: Promise<{ id: string }> }
-) {
+export async function GET(request: NextRequest, context: { params: Promise<{ id: string }> }) {
   try {
     const { id } = await context.params;
     const searchParams = request.nextUrl.searchParams;
@@ -33,14 +27,10 @@ export async function GET(
     const offset = (page - 1) * limit;
     const type = searchParams.get('type');
 
-    const whereConditions = [
-      eq(materialInventoryMovement.materialInventoryId, id),
-    ];
+    const whereConditions = [eq(materialInventoryMovement.materialInventoryId, id)];
 
     if (type) {
-      whereConditions.push(
-        eq(materialInventoryMovement.type, type as MaterialMovementType)
-      );
+      whereConditions.push(eq(materialInventoryMovement.type, type as MaterialMovementType));
     }
 
     const countResult = await db
@@ -76,18 +66,12 @@ export async function GET(
     });
   } catch (error) {
     console.error('Error fetching movements:', error);
-    return NextResponse.json(
-      { error: 'Failed to fetch movements' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to fetch movements' }, { status: 500 });
   }
 }
 
 // POST /api/material-inventories/[id]/movements - Create a new movement
-export async function POST(
-  request: NextRequest,
-  context: { params: Promise<{ id: string }> }
-) {
+export async function POST(request: NextRequest, context: { params: Promise<{ id: string }> }) {
   try {
     const { id } = await context.params;
     const body = await request.json();
@@ -101,26 +85,15 @@ export async function POST(
       );
     }
 
-    const {
-      type,
-      quantity,
-      unitPrice,
-      batchId,
-      remarks,
-      referenceType,
-      referenceId,
-      createdBy,
-    } = validation.data;
+    const { type, quantity, unitPrice, batchId, remarks, referenceType, referenceId, createdBy } =
+      validation.data;
 
     const inventory = await db.query.materialInventory.findFirst({
       where: eq(materialInventoryMovement.materialInventoryId, id),
     });
 
     if (!inventory) {
-      return NextResponse.json(
-        { error: 'Material inventory not found' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'Material inventory not found' }, { status: 404 });
     }
 
     // Use provided unitPrice or fallback to current inventory cost
@@ -203,9 +176,6 @@ export async function POST(
       return NextResponse.json({ error: error.message }, { status: 400 });
     }
 
-    return NextResponse.json(
-      { error: 'Failed to create movement' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to create movement' }, { status: 500 });
   }
 }

@@ -38,7 +38,9 @@ async function getProductHandler(
       })
       .from(product)
       .leftJoin(productCategory, eq(product.categoryId, productCategory.id))
-      .where(and(eq(product.organizationId, tenantId), eq(product.id, id), isNull(product.deletedAt)))
+      .where(
+        and(eq(product.organizationId, tenantId), eq(product.id, id), isNull(product.deletedAt))
+      )
       .limit(1);
 
     if (!foundProduct) {
@@ -48,10 +50,7 @@ async function getProductHandler(
     return NextResponse.json(foundProduct);
   } catch (error) {
     console.error('Error fetching product:', error);
-    return NextResponse.json(
-      { error: 'Failed to fetch product' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to fetch product' }, { status: 500 });
   }
 }
 
@@ -92,10 +91,7 @@ async function updateProductHandler(
       }
     }
 
-    return NextResponse.json(
-      { error: 'Failed to update product' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to update product' }, { status: 500 });
   }
 }
 
@@ -111,7 +107,9 @@ async function deleteProductHandler(
     const [deletedProduct] = await db
       .update(product)
       .set({ deletedAt: new Date() })
-      .where(and(eq(product.organizationId, tenantId), eq(product.id, id), isNull(product.deletedAt)))
+      .where(
+        and(eq(product.organizationId, tenantId), eq(product.id, id), isNull(product.deletedAt))
+      )
       .returning({ id: product.id });
 
     if (!deletedProduct) {
@@ -123,10 +121,7 @@ async function deleteProductHandler(
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error('Error deleting product:', error);
-    return NextResponse.json(
-      { error: 'Failed to delete product' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to delete product' }, { status: 500 });
   }
 }
 

@@ -68,9 +68,7 @@ export function ThemeSettingsDialog() {
       <DialogContent className='sm:max-w-[500px]'>
         <DialogHeader>
           <DialogTitle>Theme Settings</DialogTitle>
-          <DialogDescription>
-            Customize the appearance of the application
-          </DialogDescription>
+          <DialogDescription>Customize the appearance of the application</DialogDescription>
         </DialogHeader>
 
         <div className='space-y-6 py-4'>
@@ -115,9 +113,7 @@ export function ThemeSettingsDialog() {
                   onClick={() => setColorScheme(scheme.value)}
                   className={cn(
                     'flex items-center justify-between rounded-lg border-2 p-3 transition-all hover:border-primary',
-                    colorScheme === scheme.value
-                      ? 'border-primary bg-primary/5'
-                      : 'border-border'
+                    colorScheme === scheme.value ? 'border-primary bg-primary/5' : 'border-border'
                   )}
                 >
                   <div className='flex items-center gap-2'>
@@ -127,9 +123,7 @@ export function ThemeSettingsDialog() {
                     />
                     <span className='text-sm font-medium'>{scheme.name}</span>
                   </div>
-                  {colorScheme === scheme.value && (
-                    <Check className='h-4 w-4 text-primary' />
-                  )}
+                  {colorScheme === scheme.value && <Check className='h-4 w-4 text-primary' />}
                 </button>
               ))}
             </div>

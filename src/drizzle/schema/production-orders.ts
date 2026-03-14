@@ -1,12 +1,4 @@
-import {
-  date,
-  index,
-  numeric,
-  pgEnum,
-  pgTable,
-  text,
-  timestamp,
-} from 'drizzle-orm/pg-core';
+import { date, index, numeric, pgEnum, pgTable, text, timestamp } from 'drizzle-orm/pg-core';
 import { outputTypeEnum, productionRecipe } from './production-recipes';
 import { relations } from 'drizzle-orm';
 import { location } from './locations';
@@ -49,9 +41,7 @@ export const productionOrder = pgTable(
       precision: 10,
       scale: 2,
     }),
-    status: productionOrderStatusEnum('status')
-      .default('draft')
-      .notNull(),
+    status: productionOrderStatusEnum('status').default('draft').notNull(),
     outputType: outputTypeEnum('output_type').notNull(),
     outputProductInventoryId: text('output_product_inventory_id').references(
       () => productInventory.id,
@@ -113,16 +103,14 @@ export const productionOrder = pgTable(
     orgIdx: index('production_order_org_idx').on(table.organizationId),
     recipeIdx: index('production_order_recipe_idx').on(table.recipeId),
     locationIdx: index('production_order_location_idx').on(table.locationId),
-    outputProductInventoryIdx: index(
-      'production_order_output_product_inventory_idx'
-    ).on(table.outputProductInventoryId),
-    outputMaterialInventoryIdx: index(
-      'production_order_output_material_inventory_idx'
-    ).on(table.outputMaterialInventoryId),
-    statusIdx: index('production_order_status_idx').on(table.status),
-    scheduledDateIdx: index('production_order_scheduled_date_idx').on(
-      table.scheduledDate
+    outputProductInventoryIdx: index('production_order_output_product_inventory_idx').on(
+      table.outputProductInventoryId
     ),
+    outputMaterialInventoryIdx: index('production_order_output_material_inventory_idx').on(
+      table.outputMaterialInventoryId
+    ),
+    statusIdx: index('production_order_status_idx').on(table.status),
+    scheduledDateIdx: index('production_order_scheduled_date_idx').on(table.scheduledDate),
   })
 );
 
@@ -196,67 +184,56 @@ export const productionQualityCheck = pgTable(
     createdAt: timestamp('created_at').defaultNow().notNull(),
   },
   (table) => ({
-    productionOrderIdx: index(
-      'production_quality_check_production_order_idx'
-    ).on(table.productionOrderId),
-    checkedAtIdx: index('production_quality_check_checked_at_idx').on(
-      table.checkedAt
+    productionOrderIdx: index('production_quality_check_production_order_idx').on(
+      table.productionOrderId
     ),
+    checkedAtIdx: index('production_quality_check_checked_at_idx').on(table.checkedAt),
   })
 );
 
-export const productionOrderRelations = relations(
-  productionOrder,
-  ({ one, many }) => ({
-    organization: one(organization, {
-      fields: [productionOrder.organizationId],
-      references: [organization.id],
-    }),
-    recipe: one(productionRecipe, {
-      fields: [productionOrder.recipeId],
-      references: [productionRecipe.id],
-    }),
-    location: one(location, {
-      fields: [productionOrder.locationId],
-      references: [location.id],
-    }),
-    outputProductInventory: one(productInventory, {
-      fields: [productionOrder.outputProductInventoryId],
-      references: [productInventory.id],
-    }),
-    outputMaterialInventory: one(materialInventory, {
-      fields: [productionOrder.outputMaterialInventoryId],
-      references: [materialInventory.id],
-    }),
-    materials: many(productionMaterial),
-    qualityChecks: many(productionQualityCheck),
-  })
-);
+export const productionOrderRelations = relations(productionOrder, ({ one, many }) => ({
+  organization: one(organization, {
+    fields: [productionOrder.organizationId],
+    references: [organization.id],
+  }),
+  recipe: one(productionRecipe, {
+    fields: [productionOrder.recipeId],
+    references: [productionRecipe.id],
+  }),
+  location: one(location, {
+    fields: [productionOrder.locationId],
+    references: [location.id],
+  }),
+  outputProductInventory: one(productInventory, {
+    fields: [productionOrder.outputProductInventoryId],
+    references: [productInventory.id],
+  }),
+  outputMaterialInventory: one(materialInventory, {
+    fields: [productionOrder.outputMaterialInventoryId],
+    references: [materialInventory.id],
+  }),
+  materials: many(productionMaterial),
+  qualityChecks: many(productionQualityCheck),
+}));
 
-export const productionMaterialRelations = relations(
-  productionMaterial,
-  ({ one }) => ({
-    productionOrder: one(productionOrder, {
-      fields: [productionMaterial.productionOrderId],
-      references: [productionOrder.id],
-    }),
-    material: one(material, {
-      fields: [productionMaterial.materialId],
-      references: [material.id],
-    }),
-    materialInventory: one(materialInventory, {
-      fields: [productionMaterial.materialInventoryId],
-      references: [materialInventory.id],
-    }),
-  })
-);
+export const productionMaterialRelations = relations(productionMaterial, ({ one }) => ({
+  productionOrder: one(productionOrder, {
+    fields: [productionMaterial.productionOrderId],
+    references: [productionOrder.id],
+  }),
+  material: one(material, {
+    fields: [productionMaterial.materialId],
+    references: [material.id],
+  }),
+  materialInventory: one(materialInventory, {
+    fields: [productionMaterial.materialInventoryId],
+    references: [materialInventory.id],
+  }),
+}));
 
-export const productionQualityCheckRelations = relations(
-  productionQualityCheck,
-  ({ one }) => ({
-    productionOrder: one(productionOrder, {
-      fields: [productionQualityCheck.productionOrderId],
-      references: [productionOrder.id],
-    }),
-  })
-);
+export const productionQualityCheckRelations = relations(productionQualityCheck, ({ one }) => ({
+  productionOrder: one(productionOrder, {
+    fields: [productionQualityCheck.productionOrderId],
+    references: [productionOrder.id],
+  }),
+}));

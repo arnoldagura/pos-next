@@ -10,10 +10,7 @@ const updateProductionOrderSchema = z.object({
 });
 
 // GET /api/production-orders/[id] - Get single production order
-export async function GET(
-  request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
+export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const { id } = await params;
 
@@ -46,27 +43,18 @@ export async function GET(
     });
 
     if (!order) {
-      return NextResponse.json(
-        { error: 'Production order not found' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'Production order not found' }, { status: 404 });
     }
 
     return NextResponse.json(order);
   } catch (error) {
     console.error('Error fetching production order:', error);
-    return NextResponse.json(
-      { error: 'Failed to fetch production order' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to fetch production order' }, { status: 500 });
   }
 }
 
 // PUT /api/production-orders/[id] - Update production order
-export async function PUT(
-  request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
+export async function PUT(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const { id } = await params;
     const body = await request.json();
@@ -87,10 +75,7 @@ export async function PUT(
     });
 
     if (!existingOrder) {
-      return NextResponse.json(
-        { error: 'Production order not found' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'Production order not found' }, { status: 404 });
     }
 
     if (existingOrder.status !== 'draft') {
@@ -134,10 +119,7 @@ export async function PUT(
       return NextResponse.json({ error: error.message }, { status: 400 });
     }
 
-    return NextResponse.json(
-      { error: 'Failed to update production order' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to update production order' }, { status: 500 });
   }
 }
 
@@ -154,10 +136,7 @@ export async function DELETE(
     });
 
     if (!existingOrder) {
-      return NextResponse.json(
-        { error: 'Production order not found' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'Production order not found' }, { status: 404 });
     }
 
     if (existingOrder.status !== 'draft') {
@@ -174,9 +153,6 @@ export async function DELETE(
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error('Error deleting production order:', error);
-    return NextResponse.json(
-      { error: 'Failed to delete production order' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to delete production order' }, { status: 500 });
   }
 }

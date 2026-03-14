@@ -15,10 +15,7 @@ export async function POST(req: NextRequest) {
     const { token, name, email, password } = body;
 
     if (!token || !name || !email || !password) {
-      return NextResponse.json(
-        { error: 'Missing required fields' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
     }
 
     const validation = await validateInvitationToken(token);
@@ -29,17 +26,10 @@ export async function POST(req: NextRequest) {
     const invitation = validation.invitation!;
 
     if (email.toLowerCase() !== invitation.email.toLowerCase()) {
-      return NextResponse.json(
-        { error: 'Email does not match invitation' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Email does not match invitation' }, { status: 400 });
     }
 
-    const [existingUser] = await db
-      .select()
-      .from(user)
-      .where(eq(user.email, email))
-      .limit(1);
+    const [existingUser] = await db.select().from(user).where(eq(user.email, email)).limit(1);
 
     if (existingUser) {
       return NextResponse.json(
@@ -57,10 +47,7 @@ export async function POST(req: NextRequest) {
     });
 
     if (!result || !result.user) {
-      return NextResponse.json(
-        { error: 'Failed to create user account' },
-        { status: 500 }
-      );
+      return NextResponse.json({ error: 'Failed to create user account' }, { status: 500 });
     }
 
     const userId = result.user.id;
@@ -90,9 +77,6 @@ export async function POST(req: NextRequest) {
     });
   } catch (error) {
     console.error('Error accepting invitation:', error);
-    return NextResponse.json(
-      { error: 'Failed to accept invitation' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to accept invitation' }, { status: 500 });
   }
 }

@@ -15,12 +15,7 @@ async function applyMigration() {
   try {
     console.log('Applying locations migration...');
 
-    const migrationPath = join(
-      process.cwd(),
-      'drizzle',
-      'migration',
-      '0002_eminent_xavin.sql'
-    );
+    const migrationPath = join(process.cwd(), 'drizzle', 'migration', '0002_eminent_xavin.sql');
     const migrationSQL = readFileSync(migrationPath, 'utf-8');
 
     // Execute the migration

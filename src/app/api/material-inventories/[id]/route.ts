@@ -10,17 +10,11 @@ const updateMaterialInventorySchema = z.object({
   defaultSupplierId: z.string().optional().nullable(),
   unitOfMeasure: z.string().optional(),
   cost: z.number().min(0).optional(),
-  alertThreshold: z
-    .number()
-    .nonnegative('Alert threshold must be non-negative')
-    .optional(),
+  alertThreshold: z.number().nonnegative('Alert threshold must be non-negative').optional(),
 });
 
 // GET /api/material-inventories/[id] - Get single material inventory
-export async function GET(
-  request: NextRequest,
-  context: { params: Promise<{ id: string }> }
-) {
+export async function GET(request: NextRequest, context: { params: Promise<{ id: string }> }) {
   try {
     const { id } = await context.params;
     const inventory = await db.query.materialInventory.findFirst({
@@ -44,27 +38,18 @@ export async function GET(
     });
 
     if (!inventory) {
-      return NextResponse.json(
-        { error: 'Material inventory not found' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'Material inventory not found' }, { status: 404 });
     }
 
     return NextResponse.json(inventory);
   } catch (error) {
     console.error('Error fetching material inventory:', error);
-    return NextResponse.json(
-      { error: 'Failed to fetch material inventory' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to fetch material inventory' }, { status: 500 });
   }
 }
 
 // PATCH /api/material-inventories/[id] - Update material inventory
-export async function PATCH(
-  request: NextRequest,
-  context: { params: Promise<{ id: string }> }
-) {
+export async function PATCH(request: NextRequest, context: { params: Promise<{ id: string }> }) {
   try {
     const { id } = await context.params;
     const body = await request.json();
@@ -78,14 +63,8 @@ export async function PATCH(
       );
     }
 
-    const {
-      variantName,
-      sku,
-      defaultSupplierId,
-      unitOfMeasure,
-      cost,
-      alertThreshold,
-    } = validation.data;
+    const { variantName, sku, defaultSupplierId, unitOfMeasure, cost, alertThreshold } =
+      validation.data;
 
     // Fetch current inventory to check for cost changes
     const currentInventory = await db.query.materialInventory.findFirst({
@@ -93,10 +72,7 @@ export async function PATCH(
     });
 
     if (!currentInventory) {
-      return NextResponse.json(
-        { error: 'Material inventory not found' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'Material inventory not found' }, { status: 404 });
     }
 
     const updateData: Partial<typeof materialInventory.$inferInsert> = {};
@@ -134,17 +110,13 @@ export async function PATCH(
 
       if (cost !== undefined && Number(currentInventory.cost || 0) !== cost) {
         await tx.insert(materialInventoryMovement).values({
-          id: `mat_mov_${Date.now()}_${Math.random()
-            .toString(36)
-            .substring(2, 9)}`,
+          id: `mat_mov_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`,
           materialInventoryId: id,
           type: 'adjustment',
           quantity: '0',
           unitPrice: currentInventory.cost || '0',
           date: new Date(),
-          remarks: `Cost updated from $${
-            currentInventory.cost || '0'
-          } to $${cost}`,
+          remarks: `Cost updated from $${currentInventory.cost || '0'} to $${cost}`,
           createdAt: new Date(),
         });
       }
@@ -153,10 +125,7 @@ export async function PATCH(
     });
 
     if (!result) {
-      return NextResponse.json(
-        { error: 'Material inventory not found' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'Material inventory not found' }, { status: 404 });
     }
 
     // Fetch updated inventory with relations
@@ -182,18 +151,12 @@ export async function PATCH(
       return NextResponse.json({ error: error.message }, { status: 400 });
     }
 
-    return NextResponse.json(
-      { error: 'Failed to update material inventory' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to update material inventory' }, { status: 500 });
   }
 }
 
 // DELETE /api/material-inventories/[id] - Delete material inventory
-export async function DELETE(
-  request: NextRequest,
-  context: { params: Promise<{ id: string }> }
-) {
+export async function DELETE(request: NextRequest, context: { params: Promise<{ id: string }> }) {
   try {
     const { id } = await context.params;
     const [deleted] = await db
@@ -202,18 +165,12 @@ export async function DELETE(
       .returning();
 
     if (!deleted) {
-      return NextResponse.json(
-        { error: 'Material inventory not found' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'Material inventory not found' }, { status: 404 });
     }
 
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error('Error deleting material inventory:', error);
-    return NextResponse.json(
-      { error: 'Failed to delete material inventory' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to delete material inventory' }, { status: 500 });
   }
 }

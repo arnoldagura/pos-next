@@ -1,15 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import {
-  Plus,
-  Pencil,
-  Trash2,
-  MapPin,
-  Phone,
-  Mail,
-  Search,
-} from 'lucide-react';
+import { Plus, Pencil, Trash2, MapPin, Phone, Mail, Search } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
@@ -36,9 +28,7 @@ export function LocationsClient() {
   const [locations, setLocations] = useState<Location[]>([]);
   const [loading, setLoading] = useState(true);
   const [showDialog, setShowDialog] = useState(false);
-  const [selectedLocation, setSelectedLocation] = useState<
-    Location | undefined
-  >(undefined);
+  const [selectedLocation, setSelectedLocation] = useState<Location | undefined>(undefined);
   const [searchQuery, setSearchQuery] = useState('');
 
   const fetchLocations = async () => {
@@ -91,9 +81,7 @@ export function LocationsClient() {
       toast.success('Location deleted successfully');
       fetchLocations();
     } catch (error) {
-      toast.error(
-        error instanceof Error ? error.message : 'Failed to delete location'
-      );
+      toast.error(error instanceof Error ? error.message : 'Failed to delete location');
       console.error(error);
     }
   };
@@ -186,9 +174,7 @@ export function LocationsClient() {
                     </div>
                   </TableCell>
                   <TableCell>
-                    <div className='text-sm text-gray-600'>
-                      {formatAddress(location)}
-                    </div>
+                    <div className='text-sm text-gray-600'>{formatAddress(location)}</div>
                   </TableCell>
                   <TableCell>
                     <div className='space-y-1 text-sm'>
@@ -210,9 +196,7 @@ export function LocationsClient() {
                     </div>
                   </TableCell>
                   <TableCell>
-                    <Badge
-                      variant={location.isActive ? 'default' : 'secondary'}
-                    >
+                    <Badge variant={location.isActive ? 'default' : 'secondary'}>
                       {location.isActive ? 'Active' : 'Inactive'}
                     </Badge>
                   </TableCell>

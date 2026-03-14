@@ -27,10 +27,7 @@ const createMovementSchema = z.object({
 });
 
 // GET /api/product-inventories/[id]/movements - Get movements for a specific inventory
-export async function GET(
-  request: NextRequest,
-  context: { params: Promise<{ id: string }> }
-) {
+export async function GET(request: NextRequest, context: { params: Promise<{ id: string }> }) {
   try {
     const { id } = await context.params;
     const searchParams = request.nextUrl.searchParams;
@@ -39,14 +36,10 @@ export async function GET(
     const offset = (page - 1) * limit;
     const type = searchParams.get('type');
 
-    const whereConditions = [
-      eq(productInventoryMovement.productInventoryId, id),
-    ];
+    const whereConditions = [eq(productInventoryMovement.productInventoryId, id)];
 
     if (type) {
-      whereConditions.push(
-        eq(productInventoryMovement.type, type as InventoryMovementType)
-      );
+      whereConditions.push(eq(productInventoryMovement.type, type as InventoryMovementType));
     }
 
     const countResult = await db
@@ -74,18 +67,12 @@ export async function GET(
     });
   } catch (error) {
     console.error('Error fetching movements:', error);
-    return NextResponse.json(
-      { error: 'Failed to fetch movements' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to fetch movements' }, { status: 500 });
   }
 }
 
 // POST /api/product-inventories/[id]/movements - Create a new movement
-export async function POST(
-  request: NextRequest,
-  context: { params: Promise<{ id: string }> }
-) {
+export async function POST(request: NextRequest, context: { params: Promise<{ id: string }> }) {
   try {
     const { id } = await context.params;
     const body = await request.json();
@@ -99,25 +86,15 @@ export async function POST(
       );
     }
 
-    const {
-      type,
-      quantity,
-      unitPrice,
-      remarks,
-      referenceType,
-      referenceId,
-      createdBy,
-    } = validation.data;
+    const { type, quantity, unitPrice, remarks, referenceType, referenceId, createdBy } =
+      validation.data;
 
     const inventoryRecord = await db.query.productInventory.findFirst({
       where: eq(productInventory.id, id),
     });
 
     if (!inventoryRecord) {
-      return NextResponse.json(
-        { error: 'Inventory not found' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'Inventory not found' }, { status: 404 });
     }
 
     const [movement] = await db
@@ -143,9 +120,6 @@ export async function POST(
       return NextResponse.json({ error: error.message }, { status: 400 });
     }
 
-    return NextResponse.json(
-      { error: 'Failed to create movement' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to create movement' }, { status: 500 });
   }
 }

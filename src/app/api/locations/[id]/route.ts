@@ -23,19 +23,13 @@ async function getLocationHandler(
       .limit(1);
 
     if (!foundLocation) {
-      return NextResponse.json(
-        { error: 'Location not found' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'Location not found' }, { status: 404 });
     }
 
     return NextResponse.json(foundLocation);
   } catch (error) {
     console.error('Error fetching location:', error);
-    return NextResponse.json(
-      { error: 'Failed to fetch location' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to fetch location' }, { status: 500 });
   }
 }
 
@@ -59,10 +53,7 @@ async function updateLocationHandler(
       .returning();
 
     if (!updatedLocation) {
-      return NextResponse.json(
-        { error: 'Location not found' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'Location not found' }, { status: 404 });
     }
 
     return NextResponse.json(updatedLocation);
@@ -78,10 +69,7 @@ async function updateLocationHandler(
       }
     }
 
-    return NextResponse.json(
-      { error: 'Failed to update location' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to update location' }, { status: 500 });
   }
 }
 
@@ -99,19 +87,13 @@ async function deleteLocationHandler(
       .returning({ id: location.id });
 
     if (!deletedLocation) {
-      return NextResponse.json(
-        { error: 'Location not found' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'Location not found' }, { status: 404 });
     }
 
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error('Error deleting location:', error);
-    return NextResponse.json(
-      { error: 'Failed to delete location' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to delete location' }, { status: 500 });
   }
 }
 

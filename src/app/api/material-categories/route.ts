@@ -43,10 +43,7 @@ async function getMaterialCategoriesHandler(req: NextRequest) {
     return NextResponse.json({ categories });
   } catch (error) {
     console.error('Error fetching material categories:', error);
-    return NextResponse.json(
-      { error: 'Failed to fetch material categories' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to fetch material categories' }, { status: 500 });
   }
 }
 
@@ -75,14 +72,16 @@ async function createMaterialCategoryHandler(req: NextRequest) {
       const parent = await db
         .select()
         .from(materialCategory)
-        .where(and(eq(materialCategory.organizationId, tenantId), eq(materialCategory.id, validatedData.parentId)))
+        .where(
+          and(
+            eq(materialCategory.organizationId, tenantId),
+            eq(materialCategory.id, validatedData.parentId)
+          )
+        )
         .limit(1);
 
       if (parent.length === 0) {
-        return NextResponse.json(
-          { error: 'Parent category not found' },
-          { status: 400 }
-        );
+        return NextResponse.json({ error: 'Parent category not found' }, { status: 400 });
       }
     }
 
@@ -108,10 +107,7 @@ async function createMaterialCategoryHandler(req: NextRequest) {
       );
     }
 
-    return NextResponse.json(
-      { error: 'Failed to create material category' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to create material category' }, { status: 500 });
   }
 }
 

@@ -36,12 +36,8 @@ import { toast } from 'sonner';
 const stockReceiptSchema = z.object({
   materialInventoryId: z.string().min(1, 'Material inventory is required'),
   batchNumber: z.string().min(1, 'Batch number is required'),
-  quantity: z
-    .string()
-    .refine((val) => parseFloat(val) > 0, 'Quantity must be positive'),
-  cost: z
-    .string()
-    .refine((val) => parseFloat(val) >= 0, 'Cost must be non-negative'),
+  quantity: z.string().refine((val) => parseFloat(val) > 0, 'Quantity must be positive'),
+  cost: z.string().refine((val) => parseFloat(val) >= 0, 'Cost must be non-negative'),
   expiryDate: z.string().optional(),
   remarks: z.string().optional(),
 });
@@ -63,17 +59,10 @@ type StockReceiptDialogProps = {
   onSuccess: () => void;
 };
 
-export function StockReceiptDialog({
-  open,
-  onOpenChange,
-  onSuccess,
-}: StockReceiptDialogProps) {
+export function StockReceiptDialog({ open, onOpenChange, onSuccess }: StockReceiptDialogProps) {
   const [loading, setLoading] = useState(false);
-  const [materialInventories, setMaterialInventories] = useState<
-    MaterialInventory[]
-  >([]);
-  const [selectedInventory, setSelectedInventory] =
-    useState<MaterialInventory | null>(null);
+  const [materialInventories, setMaterialInventories] = useState<MaterialInventory[]>([]);
+  const [selectedInventory, setSelectedInventory] = useState<MaterialInventory | null>(null);
 
   const form = useForm<StockReceiptFormValues>({
     resolver: zodResolver(stockReceiptSchema),
@@ -91,8 +80,7 @@ export function StockReceiptDialog({
     const fetchMaterialInventories = async () => {
       try {
         const response = await fetch('/api/materials/inventory');
-        if (!response.ok)
-          throw new Error('Failed to fetch material inventories');
+        if (!response.ok) throw new Error('Failed to fetch material inventories');
 
         const data = await response.json();
         setMaterialInventories(data.inventory || []);
@@ -110,9 +98,7 @@ export function StockReceiptDialog({
   useEffect(() => {
     const subscription = form.watch((value, { name }) => {
       if (name === 'materialInventoryId') {
-        const inventory = materialInventories.find(
-          (inv) => inv.id === value.materialInventoryId
-        );
+        const inventory = materialInventories.find((inv) => inv.id === value.materialInventoryId);
         setSelectedInventory(inventory || null);
       }
     });
@@ -148,9 +134,7 @@ export function StockReceiptDialog({
       onSuccess();
       onOpenChange(false);
     } catch (error) {
-      toast.error(
-        error instanceof Error ? error.message : 'Failed to receive stock'
-      );
+      toast.error(error instanceof Error ? error.message : 'Failed to receive stock');
       console.error(error);
     } finally {
       setLoading(false);
@@ -162,9 +146,7 @@ export function StockReceiptDialog({
       <DialogContent className='max-w-2xl'>
         <DialogHeader>
           <DialogTitle>Receive Material Stock</DialogTitle>
-          <DialogDescription>
-            Record incoming stock with batch details
-          </DialogDescription>
+          <DialogDescription>Record incoming stock with batch details</DialogDescription>
         </DialogHeader>
 
         <Form form={form} onSubmit={onSubmit} className='space-y-4'>
@@ -220,12 +202,7 @@ export function StockReceiptDialog({
                 <FormItem>
                   <FormLabel>Quantity *</FormLabel>
                   <FormControl>
-                    <Input
-                      type='number'
-                      step='0.01'
-                      placeholder='0.00'
-                      {...field}
-                    />
+                    <Input type='number' step='0.01' placeholder='0.00' {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -241,12 +218,7 @@ export function StockReceiptDialog({
                 <FormItem>
                   <FormLabel>Unit Cost *</FormLabel>
                   <FormControl>
-                    <Input
-                      type='number'
-                      step='0.01'
-                      placeholder='0.00'
-                      {...field}
-                    />
+                    <Input type='number' step='0.01' placeholder='0.00' {...field} />
                   </FormControl>
                   <FormDescription>Cost per unit</FormDescription>
                   <FormMessage />
@@ -287,43 +259,35 @@ export function StockReceiptDialog({
             )}
           />
 
-          {selectedInventory &&
-            form.watch('quantity') &&
-            form.watch('cost') && (
-              <div className='p-4 bg-blue-50 rounded-lg border border-blue-200'>
-                <div className='text-sm font-medium text-blue-900'>
-                  Receipt Summary
+          {selectedInventory && form.watch('quantity') && form.watch('cost') && (
+            <div className='p-4 bg-blue-50 rounded-lg border border-blue-200'>
+              <div className='text-sm font-medium text-blue-900'>Receipt Summary</div>
+              <div className='mt-2 space-y-1 text-sm text-blue-700'>
+                <div>
+                  Material: <span className='font-medium'>{selectedInventory.materialName}</span>
                 </div>
-                <div className='mt-2 space-y-1 text-sm text-blue-700'>
-                  <div>
-                    Material:{' '}
-                    <span className='font-medium'>
-                      {selectedInventory.materialName}
-                    </span>
-                  </div>
-                  <div>
-                    Quantity:{' '}
-                    <span className='font-medium'>
-                      {form.watch('quantity')} {selectedInventory.unitOfMeasure}
-                    </span>
-                  </div>
-                  <div>
-                    Unit Cost:{' '}
-                    <span className='font-medium'>${form.watch('cost')}</span>
-                  </div>
-                  <div className='pt-2 border-t border-blue-300'>
-                    Total Cost:{' '}
-                    <span className='font-bold text-lg'>
-                      $
-                      {(
-                        parseFloat(form.watch('quantity') || '0') *
-                        parseFloat(form.watch('cost') || '0')
-                      ).toFixed(2)}
-                    </span>
-                  </div>
+                <div>
+                  Quantity:{' '}
+                  <span className='font-medium'>
+                    {form.watch('quantity')} {selectedInventory.unitOfMeasure}
+                  </span>
+                </div>
+                <div>
+                  Unit Cost: <span className='font-medium'>${form.watch('cost')}</span>
+                </div>
+                <div className='pt-2 border-t border-blue-300'>
+                  Total Cost:{' '}
+                  <span className='font-bold text-lg'>
+                    $
+                    {(
+                      parseFloat(form.watch('quantity') || '0') *
+                      parseFloat(form.watch('cost') || '0')
+                    ).toFixed(2)}
+                  </span>
                 </div>
               </div>
-            )}
+            </div>
+          )}
 
           <DialogFooter>
             <Button

@@ -70,20 +70,13 @@ describe('Inventory API - POST /api/product-inventory/adjust', () => {
       ]),
     } as never);
 
-    vi.mocked(inventoryCalculation.invalidateInventoryCache).mockReturnValue(
-      undefined
-    );
-    vi.mocked(inventoryCalculation.invalidateLocationCache).mockReturnValue(
-      undefined
-    );
+    vi.mocked(inventoryCalculation.invalidateInventoryCache).mockReturnValue(undefined);
+    vi.mocked(inventoryCalculation.invalidateLocationCache).mockReturnValue(undefined);
 
-    const request = new NextRequest(
-      'http://localhost/api/product-inventory/adjust',
-      {
-        method: 'POST',
-        body: JSON.stringify(adjustmentData),
-      }
-    );
+    const request = new NextRequest('http://localhost/api/product-inventory/adjust', {
+      method: 'POST',
+      body: JSON.stringify(adjustmentData),
+    });
 
     const response = await adjustStockHandler(request);
     const data = await response.json();
@@ -142,20 +135,13 @@ describe('Inventory API - POST /api/product-inventory/adjust', () => {
       ]),
     } as never);
 
-    vi.mocked(inventoryCalculation.invalidateInventoryCache).mockReturnValue(
-      undefined
-    );
-    vi.mocked(inventoryCalculation.invalidateLocationCache).mockReturnValue(
-      undefined
-    );
+    vi.mocked(inventoryCalculation.invalidateInventoryCache).mockReturnValue(undefined);
+    vi.mocked(inventoryCalculation.invalidateLocationCache).mockReturnValue(undefined);
 
-    const request = new NextRequest(
-      'http://localhost/api/product-inventory/adjust',
-      {
-        method: 'POST',
-        body: JSON.stringify(adjustmentData),
-      }
-    );
+    const request = new NextRequest('http://localhost/api/product-inventory/adjust', {
+      method: 'POST',
+      body: JSON.stringify(adjustmentData),
+    });
 
     const response = await adjustStockHandler(request);
     const data = await response.json();
@@ -190,13 +176,10 @@ describe('Inventory API - POST /api/product-inventory/adjust', () => {
       unitOfMeasure: 'pcs',
     });
 
-    const request = new NextRequest(
-      'http://localhost/api/product-inventory/adjust',
-      {
-        method: 'POST',
-        body: JSON.stringify(adjustmentData),
-      }
-    );
+    const request = new NextRequest('http://localhost/api/product-inventory/adjust', {
+      method: 'POST',
+      body: JSON.stringify(adjustmentData),
+    });
 
     const response = await adjustStockHandler(request);
     const data = await response.json();
@@ -206,17 +189,14 @@ describe('Inventory API - POST /api/product-inventory/adjust', () => {
   });
 
   it('should validate remarks are required', async () => {
-    const request = new NextRequest(
-      'http://localhost/api/product-inventory/adjust',
-      {
-        method: 'POST',
-        body: JSON.stringify({
-          inventoryId: 'inv-1',
-          quantity: 10,
-          // Missing remarks
-        }),
-      }
-    );
+    const request = new NextRequest('http://localhost/api/product-inventory/adjust', {
+      method: 'POST',
+      body: JSON.stringify({
+        inventoryId: 'inv-1',
+        quantity: 10,
+        // Missing remarks
+      }),
+    });
 
     const response = await adjustStockHandler(request);
     const data = await response.json();

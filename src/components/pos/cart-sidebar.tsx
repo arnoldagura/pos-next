@@ -39,14 +39,8 @@ export function CartSidebar({ onClose, locationId }: CartSidebarProps) {
   const activeCartId = useCartStore((state) => state.activeCartId);
 
   const allCarts = useMemo(() => Array.from(carts.values()), [carts]);
-  const {
-    updateQuantity,
-    removeItem,
-    applyItemDiscount,
-    clear,
-    createCart,
-    switchCart,
-  } = useCartStore();
+  const { updateQuantity, removeItem, applyItemDiscount, clear, createCart, switchCart } =
+    useCartStore();
 
   const [editingDiscount, setEditingDiscount] = useState<{
     itemId: string;
@@ -120,9 +114,7 @@ export function CartSidebar({ onClose, locationId }: CartSidebarProps) {
 
         <div className='flex-1 flex flex-col items-center justify-center p-8 text-center'>
           <ShoppingCart className='h-16 w-16 text-gray-300 mb-4' />
-          <h3 className='text-lg font-medium text-gray-900 mb-2'>
-            Cart is Empty
-          </h3>
+          <h3 className='text-lg font-medium text-gray-900 mb-2'>Cart is Empty</h3>
           <p className='text-sm text-gray-500'>Add products to get started</p>
         </div>
       </div>
@@ -141,11 +133,7 @@ export function CartSidebar({ onClose, locationId }: CartSidebarProps) {
     }
   };
 
-  const handleApplyDiscount = (
-    itemId: string,
-    discount: number,
-    type: DiscountType
-  ) => {
+  const handleApplyDiscount = (itemId: string, discount: number, type: DiscountType) => {
     applyItemDiscount(itemId, discount, type);
     setEditingDiscount(null);
     toast.success('Discount applied');
@@ -210,10 +198,7 @@ export function CartSidebar({ onClose, locationId }: CartSidebarProps) {
       <ScrollArea className='flex-1'>
         <div className='p-4 space-y-3'>
           {cart.items.map((item) => (
-            <div
-              key={item.id}
-              className=' rounded-lg p-3 border border-gray-200'
-            >
+            <div key={item.id} className=' rounded-lg p-3 border border-gray-200'>
               <div className='flex gap-3 mb-2'>
                 <div className='w-16 h-16 rounded-md overflow-hidden  border flex-shrink-0'>
                   {item.image ? (
@@ -233,15 +218,9 @@ export function CartSidebar({ onClose, locationId }: CartSidebarProps) {
                 </div>
 
                 <div className='flex-1 min-w-0'>
-                  <h3 className='font-medium text-sm line-clamp-2 mb-1'>
-                    {item.name}
-                  </h3>
-                  <p className='text-sm text-gray-600'>
-                    ${item.price.toFixed(2)} each
-                  </p>
-                  {item.sku && (
-                    <p className='text-xs text-gray-500'>SKU: {item.sku}</p>
-                  )}
+                  <h3 className='font-medium text-sm line-clamp-2 mb-1'>{item.name}</h3>
+                  <p className='text-sm text-gray-600'>${item.price.toFixed(2)} each</p>
+                  {item.sku && <p className='text-xs text-gray-500'>SKU: {item.sku}</p>}
                 </div>
 
                 <Button
@@ -294,10 +273,7 @@ export function CartSidebar({ onClose, locationId }: CartSidebarProps) {
                       type: item.discountType,
                     })
                   }
-                  className={cn(
-                    'h-8 ml-auto',
-                    item.discount > 0 && 'bg-green-50 border-green-200'
-                  )}
+                  className={cn('h-8 ml-auto', item.discount > 0 && 'bg-green-50 border-green-200')}
                 >
                   <Percent className='h-3 w-3 mr-1' />
                   {item.discount > 0
@@ -312,11 +288,7 @@ export function CartSidebar({ onClose, locationId }: CartSidebarProps) {
                 <div className=' p-2 rounded border mt-2'>
                   <div className='flex gap-2 mb-2'>
                     <Button
-                      variant={
-                        editingDiscount.type === 'percentage'
-                          ? 'default'
-                          : 'outline'
-                      }
+                      variant={editingDiscount.type === 'percentage' ? 'default' : 'outline'}
                       size='sm'
                       onClick={() =>
                         setEditingDiscount({
@@ -329,9 +301,7 @@ export function CartSidebar({ onClose, locationId }: CartSidebarProps) {
                       <Percent className='h-3 w-3 mr-1' />%
                     </Button>
                     <Button
-                      variant={
-                        editingDiscount.type === 'fixed' ? 'default' : 'outline'
-                      }
+                      variant={editingDiscount.type === 'fixed' ? 'default' : 'outline'}
                       size='sm'
                       onClick={() =>
                         setEditingDiscount({
@@ -372,11 +342,7 @@ export function CartSidebar({ onClose, locationId }: CartSidebarProps) {
                     >
                       Apply
                     </Button>
-                    <Button
-                      size='sm'
-                      variant='outline'
-                      onClick={() => setEditingDiscount(null)}
-                    >
+                    <Button size='sm' variant='outline' onClick={() => setEditingDiscount(null)}>
                       Cancel
                     </Button>
                   </div>
@@ -391,9 +357,7 @@ export function CartSidebar({ onClose, locationId }: CartSidebarProps) {
                       ${item.subtotal.toFixed(2)}
                     </p>
                   )}
-                  <p className='font-semibold text-blue-600'>
-                    ${item.total.toFixed(2)}
-                  </p>
+                  <p className='font-semibold text-blue-600'>${item.total.toFixed(2)}</p>
                 </div>
               </div>
             </div>
@@ -402,11 +366,7 @@ export function CartSidebar({ onClose, locationId }: CartSidebarProps) {
       </ScrollArea>
 
       <div className='border-t p-4 space-y-3 '>
-        <Button
-          variant='outline'
-          className='w-full'
-          onClick={() => setShowTableSelection(true)}
-        >
+        <Button variant='outline' className='w-full' onClick={() => setShowTableSelection(true)}>
           <Utensils className='h-4 w-4 mr-2' />
           {cart.tableName ? `Table: ${cart.tableName}` : 'Select Table'}
         </Button>
@@ -483,11 +443,7 @@ export function CartSidebar({ onClose, locationId }: CartSidebarProps) {
         </div>
       </div>
 
-      <CheckoutDialog
-        open={showCheckout}
-        onOpenChange={setShowCheckout}
-        locationId={locationId}
-      />
+      <CheckoutDialog open={showCheckout} onOpenChange={setShowCheckout} locationId={locationId} />
 
       <TableSelectionDialog
         open={showTableSelection}
@@ -495,10 +451,7 @@ export function CartSidebar({ onClose, locationId }: CartSidebarProps) {
         locationId={locationId}
       />
 
-      <PendingOrdersPanel
-        open={showPendingOrders}
-        onOpenChange={setShowPendingOrders}
-      />
+      <PendingOrdersPanel open={showPendingOrders} onOpenChange={setShowPendingOrders} />
     </div>
   );
 }

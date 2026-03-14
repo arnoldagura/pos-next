@@ -1,27 +1,35 @@
 import { z } from 'zod';
 
 // Table status enum
-export const tableStatusSchema = z.enum([
-  'available',
-  'occupied',
-  'reserved',
-  'maintenance',
-]);
+export const tableStatusSchema = z.enum(['available', 'occupied', 'reserved', 'maintenance']);
 
 // Create table schema
 export const createTableSchema = z.object({
   number: z.string().min(1, 'Table number is required').max(50, 'Table number is too long'),
   name: z.string().min(1, 'Table name is required').max(255, 'Table name is too long'),
-  capacity: z.number().int().min(1, 'Capacity must be at least 1').max(100, 'Capacity is too large'),
+  capacity: z
+    .number()
+    .int()
+    .min(1, 'Capacity must be at least 1')
+    .max(100, 'Capacity is too large'),
   status: tableStatusSchema.default('available'),
   locationId: z.string().min(1, 'Location is required'),
 });
 
 // Update table schema (all fields optional)
 export const updateTableSchema = z.object({
-  number: z.string().min(1, 'Table number is required').max(50, 'Table number is too long').optional(),
+  number: z
+    .string()
+    .min(1, 'Table number is required')
+    .max(50, 'Table number is too long')
+    .optional(),
   name: z.string().min(1, 'Table name is required').max(255, 'Table name is too long').optional(),
-  capacity: z.number().int().min(1, 'Capacity must be at least 1').max(100, 'Capacity is too large').optional(),
+  capacity: z
+    .number()
+    .int()
+    .min(1, 'Capacity must be at least 1')
+    .max(100, 'Capacity is too large')
+    .optional(),
   status: tableStatusSchema.optional(),
   locationId: z.string().min(1, 'Location is required').optional(),
 });

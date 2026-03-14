@@ -172,9 +172,7 @@ export function UsersClient({ currentUserId }: UsersClientProps) {
                               </Badge>
                             ))
                           ) : (
-                            <span className='text-gray-400 text-sm'>
-                              No roles
-                            </span>
+                            <span className='text-gray-400 text-sm'>No roles</span>
                           )}
                         </div>
                       </TableCell>
@@ -185,9 +183,7 @@ export function UsersClient({ currentUserId }: UsersClientProps) {
                           <Badge variant='outline'>Unverified</Badge>
                         )}
                       </TableCell>
-                      <TableCell>
-                        {new Date(user.createdAt).toLocaleDateString()}
-                      </TableCell>
+                      <TableCell>{new Date(user.createdAt).toLocaleDateString()}</TableCell>
                       <TableCell className='text-right'>
                         <div className='flex gap-2 justify-end'>
                           <Button

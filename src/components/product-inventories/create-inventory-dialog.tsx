@@ -144,9 +144,7 @@ export default function CreateInventoryDialog({
       onSuccess();
     } catch (error) {
       console.error('Error creating inventory:', error);
-      toast.error(
-        error instanceof Error ? error.message : 'Failed to create inventory'
-      );
+      toast.error(error instanceof Error ? error.message : 'Failed to create inventory');
     } finally {
       setSubmitting(false);
     }
@@ -158,9 +156,8 @@ export default function CreateInventoryDialog({
         <DialogHeader>
           <DialogTitle>Add Product to Inventory</DialogTitle>
           <DialogDescription>
-            Set up inventory tracking for a product at a specific location. This
-            creates a unique inventory item with its own pricing and unit of
-            measure.
+            Set up inventory tracking for a product at a specific location. This creates a unique
+            inventory item with its own pricing and unit of measure.
           </DialogDescription>
         </DialogHeader>
 
@@ -245,10 +242,7 @@ export default function CreateInventoryDialog({
               <FormItem>
                 <FormLabel>Variant Name (Optional)</FormLabel>
                 <FormControl>
-                  <Input
-                    placeholder='e.g., Standard, Large, Premium'
-                    {...field}
-                  />
+                  <Input placeholder='e.g., Standard, Large, Premium' {...field} />
                 </FormControl>
                 <FormDescription>
                   Distinguishes different variants of the same product
@@ -266,9 +260,7 @@ export default function CreateInventoryDialog({
                 <FormControl>
                   <Input placeholder='Enter barcode' {...field} />
                 </FormControl>
-                <FormDescription>
-                  Optional barcode for this inventory item
-                </FormDescription>
+                <FormDescription>Optional barcode for this inventory item</FormDescription>
                 <FormMessage />
               </FormItem>
             )}
@@ -281,13 +273,7 @@ export default function CreateInventoryDialog({
                 <FormItem>
                   <FormLabel>Unit Price (Selling) *</FormLabel>
                   <FormControl>
-                    <Input
-                      type='number'
-                      step='0.01'
-                      min='0'
-                      placeholder='0.00'
-                      {...field}
-                    />
+                    <Input type='number' step='0.01' min='0' placeholder='0.00' {...field} />
                   </FormControl>
                   <FormDescription>Price per unit for selling</FormDescription>
                   <FormMessage />
@@ -302,13 +288,7 @@ export default function CreateInventoryDialog({
                 <FormItem>
                   <FormLabel>Cost Price</FormLabel>
                   <FormControl>
-                    <Input
-                      type='number'
-                      step='0.01'
-                      min='0'
-                      placeholder='0.00'
-                      {...field}
-                    />
+                    <Input type='number' step='0.01' min='0' placeholder='0.00' {...field} />
                   </FormControl>
                   <FormDescription>Cost per unit</FormDescription>
                   <FormMessage />
@@ -339,14 +319,7 @@ export default function CreateInventoryDialog({
                 <FormItem>
                   <FormLabel>Tax Rate (%)</FormLabel>
                   <FormControl>
-                    <Input
-                      type='number'
-                      step='0.01'
-                      min='0'
-                      max='100'
-                      placeholder='0'
-                      {...field}
-                    />
+                    <Input type='number' step='0.01' min='0' max='100' placeholder='0' {...field} />
                   </FormControl>
                   <FormDescription>Tax percentage</FormDescription>
                   <FormMessage />
@@ -361,17 +334,9 @@ export default function CreateInventoryDialog({
               <FormItem>
                 <FormLabel>Alert Threshold</FormLabel>
                 <FormControl>
-                  <Input
-                    type='number'
-                    step='0.01'
-                    min='0'
-                    placeholder='10'
-                    {...field}
-                  />
+                  <Input type='number' step='0.01' min='0' placeholder='10' {...field} />
                 </FormControl>
-                <FormDescription>
-                  Get notified when stock falls below this level
-                </FormDescription>
+                <FormDescription>Get notified when stock falls below this level</FormDescription>
                 <FormMessage />
               </FormItem>
             )}

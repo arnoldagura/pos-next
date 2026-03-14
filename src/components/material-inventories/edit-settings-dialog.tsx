@@ -67,8 +67,7 @@ export default function EditSettingsDialog({
     resolver: zodResolver(formSchema),
     defaultValues: {
       alertThreshold: inventory.alertThreshold,
-      unitOfMeasure:
-        inventory.unitOfMeasure || inventory.material.unitOfMeasure,
+      unitOfMeasure: inventory.unitOfMeasure || inventory.material.unitOfMeasure,
       cost: inventory.cost || '',
     },
   });
@@ -77,8 +76,7 @@ export default function EditSettingsDialog({
     if (open) {
       form.reset({
         alertThreshold: inventory.alertThreshold,
-        unitOfMeasure:
-          inventory.unitOfMeasure || inventory.material.unitOfMeasure,
+        unitOfMeasure: inventory.unitOfMeasure || inventory.material.unitOfMeasure,
         cost: inventory.cost || '',
       });
     }
@@ -88,18 +86,15 @@ export default function EditSettingsDialog({
     try {
       setSubmitting(true);
 
-      const response = await fetch(
-        `/api/material-inventories/${inventory.id}`,
-        {
-          method: 'PATCH',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            alertThreshold: parseFloat(values.alertThreshold),
-            unitOfMeasure: values.unitOfMeasure,
-            cost: values.cost ? parseFloat(values.cost) : 0,
-          }),
-        }
-      );
+      const response = await fetch(`/api/material-inventories/${inventory.id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          alertThreshold: parseFloat(values.alertThreshold),
+          unitOfMeasure: values.unitOfMeasure,
+          cost: values.cost ? parseFloat(values.cost) : 0,
+        }),
+      });
 
       if (!response.ok) {
         const error = await response.json();
@@ -111,9 +106,7 @@ export default function EditSettingsDialog({
       onSuccess();
     } catch (error) {
       console.error('Error updating settings:', error);
-      toast.error(
-        error instanceof Error ? error.message : 'Failed to update settings'
-      );
+      toast.error(error instanceof Error ? error.message : 'Failed to update settings');
     } finally {
       setSubmitting(false);
     }
@@ -125,8 +118,7 @@ export default function EditSettingsDialog({
         <DialogHeader>
           <DialogTitle>Edit Inventory Settings</DialogTitle>
           <DialogDescription>
-            Update settings for {inventory.material.name} at{' '}
-            {inventory.location.name}
+            Update settings for {inventory.material.name} at {inventory.location.name}
           </DialogDescription>
         </DialogHeader>
         <Form form={form} onSubmit={onSubmit} className='space-y-4'>
@@ -137,17 +129,9 @@ export default function EditSettingsDialog({
               <FormItem>
                 <FormLabel>Cost per Unit</FormLabel>
                 <FormControl>
-                  <Input
-                    type='number'
-                    step='0.01'
-                    min='0'
-                    placeholder='0.00'
-                    {...field}
-                  />
+                  <Input type='number' step='0.01' min='0' placeholder='0.00' {...field} />
                 </FormControl>
-                <FormDescription>
-                  Default cost per unit of measure (optional)
-                </FormDescription>
+                <FormDescription>Default cost per unit of measure (optional)</FormDescription>
                 <FormMessage />
               </FormItem>
             )}
@@ -170,8 +154,7 @@ export default function EditSettingsDialog({
                 </FormControl>
                 <FormDescription>
                   Get notified when stock falls below this level
-                  {inventory.material.unitOfMeasure &&
-                    ` (in ${inventory.material.unitOfMeasure})`}
+                  {inventory.material.unitOfMeasure && ` (in ${inventory.material.unitOfMeasure})`}
                 </FormDescription>
                 <FormMessage />
               </FormItem>
@@ -185,10 +168,7 @@ export default function EditSettingsDialog({
               <FormItem>
                 <FormLabel>Unit of Measure</FormLabel>
                 <FormControl>
-                  <Input
-                    placeholder={`Default: ${inventory.material.unitOfMeasure}`}
-                    {...field}
-                  />
+                  <Input placeholder={`Default: ${inventory.material.unitOfMeasure}`} {...field} />
                 </FormControl>
                 <FormDescription>
                   Override the default unit of measure for this location

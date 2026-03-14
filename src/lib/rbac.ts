@@ -1,12 +1,6 @@
 import { db } from '@/db/db';
 import { eq, and } from 'drizzle-orm';
-import {
-  userRole,
-  rolePermission,
-  role,
-  permission,
-  userOrganization,
-} from '@/drizzle/schema';
+import { userRole, rolePermission, role, permission, userOrganization } from '@/drizzle/schema';
 
 /**
  * Check if a user has a specific role
@@ -14,10 +8,7 @@ import {
  * @param roleName - The role name to check
  * @returns true if user has the role, false otherwise
  */
-export async function hasRole(
-  userId: string,
-  roleName: string
-): Promise<boolean> {
+export async function hasRole(userId: string, roleName: string): Promise<boolean> {
   const result = await db
     .select()
     .from(userRole)
@@ -34,10 +25,7 @@ export async function hasRole(
  * @param roleNames - Array of role names to check
  * @returns true if user has any of the roles, false otherwise
  */
-export async function hasAnyRole(
-  userId: string,
-  roleNames: string[]
-): Promise<boolean> {
+export async function hasAnyRole(userId: string, roleNames: string[]): Promise<boolean> {
   const roles = await getUserRoles(userId);
   return roles.some((r) => roleNames.includes(r.name));
 }
@@ -92,10 +80,7 @@ export async function getUserPermissions(userId: string) {
       description: permission.description,
     })
     .from(userOrganization)
-    .innerJoin(
-      rolePermission,
-      eq(userOrganization.roleId, rolePermission.roleId)
-    )
+    .innerJoin(rolePermission, eq(userOrganization.roleId, rolePermission.roleId))
     .innerJoin(permission, eq(rolePermission.permissionId, permission.id))
     .where(eq(userOrganization.userId, userId));
 
@@ -115,10 +100,7 @@ export async function getUserPermissions(userId: string) {
  * @param permissionName - The permission name to check (e.g., 'products:create')
  * @returns true if user has the permission, false otherwise
  */
-export async function hasPermission(
-  userId: string,
-  permissionName: string
-): Promise<boolean> {
+export async function hasPermission(userId: string, permissionName: string): Promise<boolean> {
   // Check super admin first (global permissions)
   const isSuperAdmin = await hasRole(userId, ROLES.SUPER_ADMIN);
   if (isSuperAdmin) {
@@ -131,9 +113,7 @@ export async function hasPermission(
     .from(userRole)
     .innerJoin(rolePermission, eq(userRole.roleId, rolePermission.roleId))
     .innerJoin(permission, eq(rolePermission.permissionId, permission.id))
-    .where(
-      and(eq(userRole.userId, userId), eq(permission.name, permissionName))
-    )
+    .where(and(eq(userRole.userId, userId), eq(permission.name, permissionName)))
     .limit(1);
 
   if (legacyResult.length > 0) {
@@ -144,14 +124,9 @@ export async function hasPermission(
   const tenantResult = await db
     .select()
     .from(userOrganization)
-    .innerJoin(
-      rolePermission,
-      eq(userOrganization.roleId, rolePermission.roleId)
-    )
+    .innerJoin(rolePermission, eq(userOrganization.roleId, rolePermission.roleId))
     .innerJoin(permission, eq(rolePermission.permissionId, permission.id))
-    .where(
-      and(eq(userOrganization.userId, userId), eq(permission.name, permissionName))
-    )
+    .where(and(eq(userOrganization.userId, userId), eq(permission.name, permissionName)))
     .limit(1);
 
   return tenantResult.length > 0;
@@ -165,11 +140,7 @@ export async function hasPermission(
  * @param action - The action (e.g., 'create', 'read', 'update', 'delete')
  * @returns true if user has the permission, false otherwise
  */
-export async function can(
-  userId: string,
-  resource: string,
-  action: string
-): Promise<boolean> {
+export async function can(userId: string, resource: string, action: string): Promise<boolean> {
   // Check super admin first (global permissions)
   const isSuperAdmin = await hasRole(userId, ROLES.SUPER_ADMIN);
   if (isSuperAdmin) {
@@ -199,10 +170,7 @@ export async function can(
   const tenantResult = await db
     .select()
     .from(userOrganization)
-    .innerJoin(
-      rolePermission,
-      eq(userOrganization.roleId, rolePermission.roleId)
-    )
+    .innerJoin(rolePermission, eq(userOrganization.roleId, rolePermission.roleId))
     .innerJoin(permission, eq(rolePermission.permissionId, permission.id))
     .where(
       and(
@@ -231,9 +199,7 @@ export async function assignRole(userId: string, roleId: string) {
  * @param roleId - The role's ID
  */
 export async function removeRole(userId: string, roleId: string) {
-  await db
-    .delete(userRole)
-    .where(and(eq(userRole.userId, userId), eq(userRole.roleId, roleId)));
+  await db.delete(userRole).where(and(eq(userRole.userId, userId), eq(userRole.roleId, roleId)));
 }
 
 /**
@@ -253,12 +219,7 @@ export async function assignPermission(roleId: string, permissionId: string) {
 export async function removePermission(roleId: string, permissionId: string) {
   await db
     .delete(rolePermission)
-    .where(
-      and(
-        eq(rolePermission.roleId, roleId),
-        eq(rolePermission.permissionId, permissionId)
-      )
-    );
+    .where(and(eq(rolePermission.roleId, roleId), eq(rolePermission.permissionId, permissionId)));
 }
 
 // Role constants for easy reference
@@ -314,11 +275,7 @@ export async function hasRoleInTenant(
       .from(userRole)
       .innerJoin(role, eq(userRole.roleId, role.id))
       .where(
-        and(
-          eq(userRole.userId, userId),
-          eq(role.name, ROLES.SUPER_ADMIN),
-          eq(role.isGlobal, true)
-        )
+        and(eq(userRole.userId, userId), eq(role.name, ROLES.SUPER_ADMIN), eq(role.isGlobal, true))
       )
       .limit(1);
     return result.length > 0;
@@ -363,10 +320,7 @@ export async function hasAnyRoleInTenant(
  * @param organizationId - The organization ID
  * @returns Array of role objects
  */
-export async function getUserRolesInTenant(
-  userId: string,
-  organizationId: string
-) {
+export async function getUserRolesInTenant(userId: string, organizationId: string) {
   const result = await db
     .select({
       id: role.id,
@@ -376,10 +330,7 @@ export async function getUserRolesInTenant(
     .from(userOrganization)
     .innerJoin(role, eq(userOrganization.roleId, role.id))
     .where(
-      and(
-        eq(userOrganization.userId, userId),
-        eq(userOrganization.organizationId, organizationId)
-      )
+      and(eq(userOrganization.userId, userId), eq(userOrganization.organizationId, organizationId))
     );
 
   return result;
@@ -391,10 +342,7 @@ export async function getUserRolesInTenant(
  * @param organizationId - The organization ID
  * @returns Array of permission objects
  */
-export async function getUserPermissionsInTenant(
-  userId: string,
-  organizationId: string
-) {
+export async function getUserPermissionsInTenant(userId: string, organizationId: string) {
   const result = await db
     .select({
       id: permission.id,
@@ -404,16 +352,10 @@ export async function getUserPermissionsInTenant(
       description: permission.description,
     })
     .from(userOrganization)
-    .innerJoin(
-      rolePermission,
-      eq(userOrganization.roleId, rolePermission.roleId)
-    )
+    .innerJoin(rolePermission, eq(userOrganization.roleId, rolePermission.roleId))
     .innerJoin(permission, eq(rolePermission.permissionId, permission.id))
     .where(
-      and(
-        eq(userOrganization.userId, userId),
-        eq(userOrganization.organizationId, organizationId)
-      )
+      and(eq(userOrganization.userId, userId), eq(userOrganization.organizationId, organizationId))
     );
 
   return result;
@@ -443,10 +385,7 @@ export async function canInTenant(
   const result = await db
     .select()
     .from(userOrganization)
-    .innerJoin(
-      rolePermission,
-      eq(userOrganization.roleId, rolePermission.roleId)
-    )
+    .innerJoin(rolePermission, eq(userOrganization.roleId, rolePermission.roleId))
     .innerJoin(permission, eq(rolePermission.permissionId, permission.id))
     .where(
       and(
@@ -467,11 +406,7 @@ export async function canInTenant(
  * @param roleId - The role's ID
  * @param organizationId - The organization ID
  */
-export async function assignRoleInTenant(
-  userId: string,
-  roleId: string,
-  organizationId: string
-) {
+export async function assignRoleInTenant(userId: string, roleId: string, organizationId: string) {
   await db.insert(userOrganization).values({
     userId,
     roleId,
@@ -484,17 +419,11 @@ export async function assignRoleInTenant(
  * @param userId - The user's ID
  * @param organizationId - The organization ID
  */
-export async function removeRoleFromTenant(
-  userId: string,
-  organizationId: string
-) {
+export async function removeRoleFromTenant(userId: string, organizationId: string) {
   await db
     .delete(userOrganization)
     .where(
-      and(
-        eq(userOrganization.userId, userId),
-        eq(userOrganization.organizationId, organizationId)
-      )
+      and(eq(userOrganization.userId, userId), eq(userOrganization.organizationId, organizationId))
     );
 }
 

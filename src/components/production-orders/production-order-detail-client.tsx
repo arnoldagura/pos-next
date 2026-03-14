@@ -3,13 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { toast } from 'sonner';
@@ -141,9 +135,7 @@ interface ProductionOrderDetailClientProps {
   orderId: string;
 }
 
-export default function ProductionOrderDetailClient({
-  orderId,
-}: ProductionOrderDetailClientProps) {
+export default function ProductionOrderDetailClient({ orderId }: ProductionOrderDetailClientProps) {
   const router = useRouter();
   const [order, setOrder] = useState<ProductionOrder | null>(null);
   const [availability, setAvailability] = useState<MaterialAvailability[]>([]);
@@ -170,9 +162,7 @@ export default function ProductionOrderDetailClient({
 
   const fetchAvailability = async () => {
     try {
-      const response = await fetch(
-        `/api/production-orders/${orderId}/check-availability`
-      );
+      const response = await fetch(`/api/production-orders/${orderId}/check-availability`);
       if (!response.ok) throw new Error('Failed to check availability');
       const data = await response.json();
       console.log('data.availability', data.availability);
@@ -191,14 +181,11 @@ export default function ProductionOrderDetailClient({
   const handleSchedule = async () => {
     try {
       setActionLoading('schedule');
-      const response = await fetch(
-        `/api/production-orders/${orderId}/schedule`,
-        {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({}),
-        }
-      );
+      const response = await fetch(`/api/production-orders/${orderId}/schedule`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({}),
+      });
 
       if (!response.ok) {
         const error = await response.json();
@@ -210,9 +197,7 @@ export default function ProductionOrderDetailClient({
       fetchAvailability();
     } catch (error) {
       console.error('Error scheduling order:', error);
-      toast.error(
-        error instanceof Error ? error.message : 'Failed to schedule order'
-      );
+      toast.error(error instanceof Error ? error.message : 'Failed to schedule order');
     } finally {
       setActionLoading(null);
     }
@@ -236,9 +221,7 @@ export default function ProductionOrderDetailClient({
       fetchOrder();
     } catch (error) {
       console.error('Error starting production:', error);
-      toast.error(
-        error instanceof Error ? error.message : 'Failed to start production'
-      );
+      toast.error(error instanceof Error ? error.message : 'Failed to start production');
     } finally {
       setActionLoading(null);
     }
@@ -266,9 +249,7 @@ export default function ProductionOrderDetailClient({
       fetchOrder();
     } catch (error) {
       console.error('Error cancelling order:', error);
-      toast.error(
-        error instanceof Error ? error.message : 'Failed to cancel order'
-      );
+      toast.error(error instanceof Error ? error.message : 'Failed to cancel order');
     } finally {
       setActionLoading(null);
     }
@@ -287,28 +268,20 @@ export default function ProductionOrderDetailClient({
     return (
       <div className='text-center py-12'>
         <p className='text-muted-foreground'>Production order not found</p>
-        <Button
-          onClick={() => router.push('/production-orders')}
-          className='mt-4'
-        >
+        <Button onClick={() => router.push('/production-orders')} className='mt-4'>
           Back to Orders
         </Button>
       </div>
     );
   }
 
-  const scalingFactor =
-    parseFloat(order.plannedQuantity) / parseFloat(order.recipe.outputQuantity);
+  const scalingFactor = parseFloat(order.plannedQuantity) / parseFloat(order.recipe.outputQuantity);
   const allMaterialsSufficient = availability.every((item) => item.sufficient);
 
   return (
     <div className='space-y-6'>
       <div className='flex items-center gap-4'>
-        <Button
-          variant='ghost'
-          size='sm'
-          onClick={() => router.push('/production-orders')}
-        >
+        <Button variant='ghost' size='sm' onClick={() => router.push('/production-orders')}>
           <ArrowLeft className='h-4 w-4 mr-2' />
           Back
         </Button>
@@ -322,9 +295,7 @@ export default function ProductionOrderDetailClient({
           </p>
         </div>
         <div className='flex flex-wrap gap-2'>
-          <Badge className={statusColors[order.status]}>
-            {statusLabels[order.status]}
-          </Badge>
+          <Badge className={statusColors[order.status]}>{statusLabels[order.status]}</Badge>
           {order.status === 'draft' && (
             <Button
               onClick={handleSchedule}
@@ -404,21 +375,15 @@ export default function ProductionOrderDetailClient({
               <div className='flex items-start justify-between p-3 rounded-lg bg-muted/50'>
                 <div className='flex items-center gap-2'>
                   <MapPin className='h-4 w-4 text-primary' />
-                  <span className='text-sm text-muted-foreground'>
-                    Location
-                  </span>
+                  <span className='text-sm text-muted-foreground'>Location</span>
                 </div>
-                <span className='font-medium text-sm'>
-                  {order.location.name}
-                </span>
+                <span className='font-medium text-sm'>{order.location.name}</span>
               </div>
 
               <div className='flex items-start justify-between p-3 rounded-lg bg-muted/50'>
                 <div className='flex items-center gap-2'>
                   <Package className='h-4 w-4 text-primary' />
-                  <span className='text-sm text-muted-foreground'>
-                    Planned Quantity
-                  </span>
+                  <span className='text-sm text-muted-foreground'>Planned Quantity</span>
                 </div>
                 <span className='font-medium text-sm'>
                   {order.plannedQuantity} {order.recipe.unitOfMeasure}
@@ -429,9 +394,7 @@ export default function ProductionOrderDetailClient({
                 <div className='flex items-start justify-between p-3 rounded-lg bg-green-50 border border-green-200'>
                   <div className='flex items-center gap-2'>
                     <CheckCircle className='h-4 w-4 text-green-600' />
-                    <span className='text-sm text-green-900'>
-                      Actual Quantity
-                    </span>
+                    <span className='text-sm text-green-900'>Actual Quantity</span>
                   </div>
                   <span className='font-medium text-sm text-green-900'>
                     {order.actualQuantity} {order.recipe.unitOfMeasure}
@@ -443,9 +406,7 @@ export default function ProductionOrderDetailClient({
                 <div className='flex items-start justify-between p-3 rounded-lg bg-muted/50'>
                   <div className='flex items-center gap-2'>
                     <Calendar className='h-4 w-4 text-primary' />
-                    <span className='text-sm text-muted-foreground'>
-                      Scheduled Date
-                    </span>
+                    <span className='text-sm text-muted-foreground'>Scheduled Date</span>
                   </div>
                   <span className='font-medium text-sm'>
                     {new Date(order.scheduledDate).toLocaleDateString()}
@@ -457,9 +418,7 @@ export default function ProductionOrderDetailClient({
                 <div className='flex items-start justify-between p-3 rounded-lg bg-muted/50'>
                   <div className='flex items-center gap-2'>
                     <Clock className='h-4 w-4 text-primary' />
-                    <span className='text-sm text-muted-foreground'>
-                      Started
-                    </span>
+                    <span className='text-sm text-muted-foreground'>Started</span>
                   </div>
                   <span className='font-medium text-sm'>
                     {new Date(order.startedAt).toLocaleString()}
@@ -471,9 +430,7 @@ export default function ProductionOrderDetailClient({
                 <div className='flex items-start justify-between p-3 rounded-lg bg-muted/50'>
                   <div className='flex items-center gap-2'>
                     <CheckCircle className='h-4 w-4 text-primary' />
-                    <span className='text-sm text-muted-foreground'>
-                      Completed
-                    </span>
+                    <span className='text-sm text-muted-foreground'>Completed</span>
                   </div>
                   <span className='font-medium text-sm'>
                     {new Date(order.completedAt).toLocaleString()}
@@ -485,12 +442,8 @@ export default function ProductionOrderDetailClient({
             <Separator />
 
             <div className='flex items-center justify-between p-3 rounded-lg bg-primary/5'>
-              <span className='text-sm font-medium text-primary'>
-                Recipe Scaling Factor
-              </span>
-              <span className='font-bold text-primary'>
-                {scalingFactor.toFixed(2)}x
-              </span>
+              <span className='text-sm font-medium text-primary'>Recipe Scaling Factor</span>
+              <span className='font-bold text-primary'>{scalingFactor.toFixed(2)}x</span>
             </div>
           </CardContent>
         </Card>
@@ -502,35 +455,25 @@ export default function ProductionOrderDetailClient({
           <CardContent className='space-y-3'>
             <div className='flex justify-between'>
               <span className='text-muted-foreground'>Material Cost:</span>
-              <span className='font-medium'>
-                ${Number(order.materialCost).toFixed(2)}
-              </span>
+              <span className='font-medium'>${Number(order.materialCost).toFixed(2)}</span>
             </div>
             <div className='flex justify-between'>
               <span className='text-muted-foreground'>Labor Cost:</span>
-              <span className='font-medium'>
-                ${Number(order.laborCost).toFixed(2)}
-              </span>
+              <span className='font-medium'>${Number(order.laborCost).toFixed(2)}</span>
             </div>
             <div className='flex justify-between'>
               <span className='text-muted-foreground'>Overhead Cost:</span>
-              <span className='font-medium'>
-                ${Number(order.overheadCost).toFixed(2)}
-              </span>
+              <span className='font-medium'>${Number(order.overheadCost).toFixed(2)}</span>
             </div>
             <Separator />
             <div className='flex justify-between'>
               <span className='font-semibold'>Total Cost:</span>
-              <span className='font-bold text-lg'>
-                ${Number(order.totalCost).toFixed(2)}
-              </span>
+              <span className='font-bold text-lg'>${Number(order.totalCost).toFixed(2)}</span>
             </div>
             {order.unitCost && (
               <div className='flex justify-between'>
                 <span className='text-muted-foreground'>Unit Cost:</span>
-                <span className='font-medium'>
-                  ${Number(order.unitCost).toFixed(2)}
-                </span>
+                <span className='font-medium'>${Number(order.unitCost).toFixed(2)}</span>
               </div>
             )}
             {order.suggestedPrice && (
@@ -581,21 +524,14 @@ export default function ProductionOrderDetailClient({
                       {availabilityInfo && (
                         <div className='flex items-center gap-2'>
                           {availabilityInfo.sufficient ? (
-                            <Badge
-                              variant='outline'
-                              className='bg-green-50 text-green-700'
-                            >
+                            <Badge variant='outline' className='bg-green-50 text-green-700'>
                               <CheckCircle className='h-3 w-3 mr-1' />
                               Available: {availabilityInfo.available.toFixed(2)}
                             </Badge>
                           ) : (
-                            <Badge
-                              variant='outline'
-                              className='bg-red-50 text-red-700'
-                            >
+                            <Badge variant='outline' className='bg-red-50 text-red-700'>
                               <AlertCircle className='h-3 w-3 mr-1' />
-                              Insufficient:{' '}
-                              {availabilityInfo.available.toFixed(2)}
+                              Insufficient: {availabilityInfo.available.toFixed(2)}
                             </Badge>
                           )}
                         </div>
@@ -604,18 +540,14 @@ export default function ProductionOrderDetailClient({
 
                     <div className='grid grid-cols-2 md:grid-cols-4 gap-4 text-sm'>
                       <div>
-                        <div className='text-muted-foreground text-xs mb-1'>
-                          Planned Quantity
-                        </div>
+                        <div className='text-muted-foreground text-xs mb-1'>Planned Quantity</div>
                         <div className='font-medium'>
                           {material.plannedQuantity} {material.unitOfMeasure}
                         </div>
                       </div>
                       {material.actualQuantity && (
                         <div>
-                          <div className='text-muted-foreground text-xs mb-1'>
-                            Actual Quantity
-                          </div>
+                          <div className='text-muted-foreground text-xs mb-1'>Actual Quantity</div>
                           <div className='font-medium'>
                             {material.actualQuantity} {material.unitOfMeasure}
                           </div>
@@ -623,19 +555,13 @@ export default function ProductionOrderDetailClient({
                       )}
                       {material.unitCost && (
                         <div>
-                          <div className='text-muted-foreground text-xs mb-1'>
-                            Unit Cost
-                          </div>
-                          <div className='font-medium'>
-                            ${Number(material.unitCost).toFixed(2)}
-                          </div>
+                          <div className='text-muted-foreground text-xs mb-1'>Unit Cost</div>
+                          <div className='font-medium'>${Number(material.unitCost).toFixed(2)}</div>
                         </div>
                       )}
                       {material.totalCost && (
                         <div>
-                          <div className='text-muted-foreground text-xs mb-1'>
-                            Total Cost
-                          </div>
+                          <div className='text-muted-foreground text-xs mb-1'>Total Cost</div>
                           <div className='font-medium'>
                             ${Number(material.totalCost).toFixed(2)}
                           </div>
@@ -653,12 +579,10 @@ export default function ProductionOrderDetailClient({
               <div className='flex items-start gap-2'>
                 <AlertCircle className='h-5 w-5 text-yellow-600 mt-0.5' />
                 <div>
-                  <p className='font-medium text-yellow-900'>
-                    Insufficient Materials
-                  </p>
+                  <p className='font-medium text-yellow-900'>Insufficient Materials</p>
                   <p className='text-sm text-yellow-700 mt-1'>
-                    Some materials are not available in sufficient quantities.
-                    Please restock before scheduling this order.
+                    Some materials are not available in sufficient quantities. Please restock before
+                    scheduling this order.
                   </p>
                 </div>
               </div>
@@ -673,9 +597,7 @@ export default function ProductionOrderDetailClient({
             <CardTitle>Production Instructions</CardTitle>
           </CardHeader>
           <CardContent>
-            <pre className='whitespace-pre-wrap text-sm'>
-              {order.recipe.instructions}
-            </pre>
+            <pre className='whitespace-pre-wrap text-sm'>{order.recipe.instructions}</pre>
           </CardContent>
         </Card>
       )}

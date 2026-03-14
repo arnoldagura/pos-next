@@ -40,15 +40,11 @@ const paymentStatusColors: Record<string, string> = {
 
 export function RecentOrdersTable({ orders }: RecentOrdersTableProps) {
   if (orders.length === 0) {
-    return (
-      <div className="text-center py-8 text-muted-foreground">
-        No recent orders found
-      </div>
-    );
+    return <div className='text-center py-8 text-muted-foreground'>No recent orders found</div>;
   }
 
   return (
-    <div className="overflow-x-auto">
+    <div className='overflow-x-auto'>
       <Table>
         <TableHeader>
           <TableRow>
@@ -56,34 +52,28 @@ export function RecentOrdersTable({ orders }: RecentOrdersTableProps) {
             <TableHead>Status</TableHead>
             <TableHead>Payment</TableHead>
             <TableHead>Method</TableHead>
-            <TableHead className="text-right">Total</TableHead>
+            <TableHead className='text-right'>Total</TableHead>
             <TableHead>Date</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
           {orders.map((order) => (
             <TableRow key={order.id}>
-              <TableCell className="font-medium">{order.orderNumber}</TableCell>
+              <TableCell className='font-medium'>{order.orderNumber}</TableCell>
               <TableCell>
-                <Badge
-                  variant="secondary"
-                  className={statusColors[order.status]}
-                >
+                <Badge variant='secondary' className={statusColors[order.status]}>
                   {order.status}
                 </Badge>
               </TableCell>
               <TableCell>
-                <Badge
-                  variant="secondary"
-                  className={paymentStatusColors[order.paymentStatus]}
-                >
+                <Badge variant='secondary' className={paymentStatusColors[order.paymentStatus]}>
                   {order.paymentStatus}
                 </Badge>
               </TableCell>
-              <TableCell className="capitalize">
+              <TableCell className='capitalize'>
                 {order.paymentMethod ? order.paymentMethod.replace('_', ' ') : 'not specified'}
               </TableCell>
-              <TableCell className="text-right font-medium">
+              <TableCell className='text-right font-medium'>
                 {formatCurrency(parseFloat(order.total))}
               </TableCell>
               <TableCell>

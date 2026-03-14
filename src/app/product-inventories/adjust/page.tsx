@@ -3,13 +3,7 @@
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { StockAdjustmentForm } from '@/components/product-inventories/stock-adjustment-form';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import {
@@ -52,8 +46,7 @@ async function fetchInventory(locationId?: string): Promise<InventoryItem[]> {
 
 export default function StockAdjustmentPage() {
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedInventory, setSelectedInventory] =
-    useState<InventoryItem | null>(null);
+  const [selectedInventory, setSelectedInventory] = useState<InventoryItem | null>(null);
 
   const {
     data: inventory,
@@ -78,9 +71,7 @@ export default function StockAdjustmentPage() {
     <div className='container mx-auto py-8 space-y-6'>
       <div>
         <h1 className='text-3xl font-bold'>Stock Adjustment</h1>
-        <p className='text-muted-foreground'>
-          Make corrections to inventory quantities
-        </p>
+        <p className='text-muted-foreground'>Make corrections to inventory quantities</p>
       </div>
 
       <div className='grid grid-cols-1 lg:grid-cols-2 gap-6'>
@@ -88,9 +79,7 @@ export default function StockAdjustmentPage() {
         <Card>
           <CardHeader>
             <CardTitle>Select Product</CardTitle>
-            <CardDescription>
-              Choose a product to adjust its stock level
-            </CardDescription>
+            <CardDescription>Choose a product to adjust its stock level</CardDescription>
           </CardHeader>
           <CardContent className='space-y-4'>
             {/* Search */}
@@ -119,9 +108,7 @@ export default function StockAdjustmentPage() {
               {error && (
                 <Alert variant='destructive' className='m-4'>
                   <AlertTriangle className='h-4 w-4' />
-                  <AlertDescription>
-                    Failed to load inventory. Please try again.
-                  </AlertDescription>
+                  <AlertDescription>Failed to load inventory. Please try again.</AlertDescription>
                 </Alert>
               )}
 
@@ -147,9 +134,7 @@ export default function StockAdjustmentPage() {
                         <TableRow
                           key={item.id}
                           className={`cursor-pointer ${
-                            selectedInventory?.id === item.id
-                              ? 'bg-muted'
-                              : 'hover:bg-muted/50'
+                            selectedInventory?.id === item.id ? 'bg-muted' : 'hover:bg-muted/50'
                           }`}
                           onClick={() => setSelectedInventory(item)}
                         >
@@ -163,9 +148,7 @@ export default function StockAdjustmentPage() {
                           </TableCell>
                           <TableCell className='text-right'>
                             <div className='flex flex-col items-end'>
-                              <span className='font-medium'>
-                                {item.currentStock.toFixed(2)}
-                              </span>
+                              <span className='font-medium'>{item.currentStock.toFixed(2)}</span>
                               {item.unitOfMeasure && (
                                 <span className='text-xs text-muted-foreground'>
                                   {item.unitOfMeasure}
@@ -195,9 +178,7 @@ export default function StockAdjustmentPage() {
           <CardHeader>
             <CardTitle>Adjustment Details</CardTitle>
             <CardDescription>
-              {selectedInventory
-                ? 'Enter adjustment details below'
-                : 'Select a product to begin'}
+              {selectedInventory ? 'Enter adjustment details below' : 'Select a product to begin'}
             </CardDescription>
           </CardHeader>
           <CardContent>

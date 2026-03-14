@@ -29,10 +29,7 @@ export async function POST(req: NextRequest) {
     }
 
     if (!organizationId) {
-      return NextResponse.json(
-        { error: 'Organization ID is required' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Organization ID is required' }, { status: 400 });
     }
 
     const [org] = await db
@@ -42,10 +39,7 @@ export async function POST(req: NextRequest) {
       .limit(1);
 
     if (!org) {
-      return NextResponse.json(
-        { error: 'Organization not found' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'Organization not found' }, { status: 404 });
     }
 
     if (!canRegisterToOrganization(org)) {
@@ -55,17 +49,10 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const [existingUser] = await db
-      .select()
-      .from(user)
-      .where(eq(user.email, email))
-      .limit(1);
+    const [existingUser] = await db.select().from(user).where(eq(user.email, email)).limit(1);
 
     if (existingUser) {
-      return NextResponse.json(
-        { error: 'User with this email already exists' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'User with this email already exists' }, { status: 400 });
     }
 
     const result = await auth.api.signUpEmail({
@@ -77,10 +64,7 @@ export async function POST(req: NextRequest) {
     });
 
     if (!result || !result.user) {
-      return NextResponse.json(
-        { error: 'Failed to create user' },
-        { status: 500 }
-      );
+      return NextResponse.json({ error: 'Failed to create user' }, { status: 500 });
     }
 
     const userId = result.user.id;
@@ -140,9 +124,6 @@ export async function POST(req: NextRequest) {
     );
   } catch (error) {
     console.error('Registration error:', error);
-    return NextResponse.json(
-      { error: 'Failed to register user' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to register user' }, { status: 500 });
   }
 }

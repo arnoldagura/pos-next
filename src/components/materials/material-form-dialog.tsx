@@ -61,9 +61,7 @@ export function MaterialFormDialog({
   onSuccess,
 }: MaterialFormDialogProps) {
   const [loading, setLoading] = useState(false);
-  const [categories, setCategories] = useState<
-    Array<Pick<Category, 'id' | 'name'>>
-  >([]);
+  const [categories, setCategories] = useState<Array<Pick<Category, 'id' | 'name'>>>([]);
 
   const form = useForm<MaterialFormValues>({
     resolver: zodResolver(materialFormSchema),
@@ -79,9 +77,7 @@ export function MaterialFormDialog({
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const categoriesRes = await fetch(
-          '/api/material-categories?isActive=true'
-        );
+        const categoriesRes = await fetch('/api/material-categories?isActive=true');
 
         if (categoriesRes.ok) {
           const catData = await categoriesRes.json();
@@ -141,15 +137,11 @@ export function MaterialFormDialog({
         throw new Error(error.error || 'Failed to save material');
       }
 
-      toast.success(
-        `Material ${material ? 'updated' : 'created'} successfully`
-      );
+      toast.success(`Material ${material ? 'updated' : 'created'} successfully`);
       onSuccess();
       onOpenChange(false);
     } catch (error) {
-      toast.error(
-        error instanceof Error ? error.message : 'Failed to save material'
-      );
+      toast.error(error instanceof Error ? error.message : 'Failed to save material');
       console.error(error);
     } finally {
       setLoading(false);
@@ -160,9 +152,7 @@ export function MaterialFormDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className='max-w-2xl max-h-[90vh] overflow-y-auto'>
         <DialogHeader>
-          <DialogTitle>
-            {material ? 'Edit Material' : 'Add New Material'}
-          </DialogTitle>
+          <DialogTitle>{material ? 'Edit Material' : 'Add New Material'}</DialogTitle>
           <DialogDescription>
             {material
               ? 'Update the material details below'
@@ -234,9 +224,7 @@ export function MaterialFormDialog({
                 <FormItem>
                   <FormLabel>Category</FormLabel>
                   <Select
-                    onValueChange={(value) =>
-                      field.onChange(value === 'none' ? '' : value)
-                    }
+                    onValueChange={(value) => field.onChange(value === 'none' ? '' : value)}
                     value={field.value || 'none'}
                   >
                     <FormControl>
@@ -265,16 +253,11 @@ export function MaterialFormDialog({
               render={({ field }) => (
                 <FormItem className='flex items-center space-x-2 space-y-0'>
                   <FormControl>
-                    <Checkbox
-                      checked={field.value}
-                      onCheckedChange={field.onChange}
-                    />
+                    <Checkbox checked={field.value} onCheckedChange={field.onChange} />
                   </FormControl>
                   <div className='space-y-1 leading-none'>
                     <FormLabel>Active</FormLabel>
-                    <FormDescription>
-                      Material is available for use
-                    </FormDescription>
+                    <FormDescription>Material is available for use</FormDescription>
                   </div>
                 </FormItem>
               )}

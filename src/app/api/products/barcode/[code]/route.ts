@@ -20,10 +20,7 @@ async function getProductByBarcodeHandler(
     const locationId = searchParams.get('locationId');
 
     if (!code) {
-      return NextResponse.json(
-        { error: 'Barcode is required' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Barcode is required' }, { status: 400 });
     }
 
     const [foundInventory] = await db
@@ -59,10 +56,7 @@ async function getProductByBarcodeHandler(
       .limit(1);
 
     if (!foundInventory) {
-      return NextResponse.json(
-        { error: 'Product not found with this barcode' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'Product not found with this barcode' }, { status: 404 });
     }
 
     // Get current stock level
@@ -75,10 +69,7 @@ async function getProductByBarcodeHandler(
     });
   } catch (error) {
     console.error('Error fetching product by barcode:', error);
-    return NextResponse.json(
-      { error: 'Failed to fetch product' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to fetch product' }, { status: 500 });
   }
 }
 

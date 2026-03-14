@@ -1,12 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/db/db';
-import {
-  role,
-  permission,
-  rolePermission,
-  userRole,
-  userOrganization,
-} from '@/drizzle/schema';
+import { role, permission, rolePermission, userRole, userOrganization } from '@/drizzle/schema';
 import { protectRoute } from '@/middleware/rbac';
 import { RESOURCES, ACTIONS } from '@/lib/rbac';
 import { updateRoleSchema } from '@/lib/types/rbac';
@@ -65,8 +59,7 @@ async function getRoleHandler(
       .from(userRole)
       .where(eq(userRole.roleId, id));
 
-    const totalUserCount =
-      (orgUserCount?.count || 0) + (directUserCount?.count || 0);
+    const totalUserCount = (orgUserCount?.count || 0) + (directUserCount?.count || 0);
 
     return NextResponse.json({
       ...foundRole,
@@ -78,10 +71,7 @@ async function getRoleHandler(
     });
   } catch (error) {
     console.error('Error fetching role:', error);
-    return NextResponse.json(
-      { error: 'Failed to fetch role' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to fetch role' }, { status: 500 });
   }
 }
 
@@ -94,11 +84,7 @@ async function updateRoleHandler(
     const body = await req.json();
     const validatedData = updateRoleSchema.parse(body);
 
-    const [existingRole] = await db
-      .select()
-      .from(role)
-      .where(eq(role.id, id))
-      .limit(1);
+    const [existingRole] = await db.select().from(role).where(eq(role.id, id)).limit(1);
 
     if (!existingRole) {
       return NextResponse.json({ error: 'Role not found' }, { status: 404 });
@@ -112,10 +98,7 @@ async function updateRoleHandler(
         .limit(1);
 
       if (nameConflict) {
-        return NextResponse.json(
-          { error: 'Role with this name already exists' },
-          { status: 400 }
-        );
+        return NextResponse.json({ error: 'Role with this name already exists' }, { status: 400 });
       }
     }
 
@@ -126,22 +109,16 @@ async function updateRoleHandler(
     if (validatedData.description !== undefined)
       updateData.description = validatedData.description || null;
 
-    const [updatedRole] = await db
-      .update(role)
-      .set(updateData)
-      .where(eq(role.id, id))
-      .returning();
+    const [updatedRole] = await db.update(role).set(updateData).where(eq(role.id, id)).returning();
 
     if (validatedData.permissionIds !== undefined) {
       await db.delete(rolePermission).where(eq(rolePermission.roleId, id));
 
       if (validatedData.permissionIds.length > 0) {
-        const permissionAssignments = validatedData.permissionIds.map(
-          (permId) => ({
-            roleId: id,
-            permissionId: permId,
-          })
-        );
+        const permissionAssignments = validatedData.permissionIds.map((permId) => ({
+          roleId: id,
+          permissionId: permId,
+        }));
         await db.insert(rolePermission).values(permissionAssignments);
       }
     }
@@ -157,10 +134,7 @@ async function updateRoleHandler(
       );
     }
 
-    return NextResponse.json(
-      { error: 'Failed to update role' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to update role' }, { status: 500 });
   }
 }
 
@@ -171,11 +145,7 @@ async function deleteRoleHandler(
   try {
     const { id } = await context.params;
 
-    const [existingRole] = await db
-      .select()
-      .from(role)
-      .where(eq(role.id, id))
-      .limit(1);
+    const [existingRole] = await db.select().from(role).where(eq(role.id, id)).limit(1);
 
     if (!existingRole) {
       return NextResponse.json({ error: 'Role not found' }, { status: 404 });
@@ -191,8 +161,7 @@ async function deleteRoleHandler(
       .from(userRole)
       .where(eq(userRole.roleId, id));
 
-    const totalUserCount =
-      (orgUserCount?.count || 0) + (directUserCount?.count || 0);
+    const totalUserCount = (orgUserCount?.count || 0) + (directUserCount?.count || 0);
 
     if (totalUserCount > 0) {
       return NextResponse.json(
@@ -211,10 +180,7 @@ async function deleteRoleHandler(
     });
   } catch (error) {
     console.error('Error deleting role:', error);
-    return NextResponse.json(
-      { error: 'Failed to delete role' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to delete role' }, { status: 500 });
   }
 }
 

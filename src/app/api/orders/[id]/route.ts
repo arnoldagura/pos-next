@@ -14,10 +14,7 @@ const VALID_TRANSITIONS: Record<OrderStatus, OrderStatus[]> = {
   cancelled: ['pending', 'processing', 'ready'],
 };
 
-export async function GET(
-  req: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
+export async function GET(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const tenantId = await requireTenantId();
     const { id: orderId } = await params;
@@ -56,10 +53,7 @@ export async function GET(
       return NextResponse.json({ error: 'Order not found' }, { status: 404 });
     }
 
-    const items = await db
-      .select()
-      .from(orderItem)
-      .where(eq(orderItem.orderId, orderId));
+    const items = await db.select().from(orderItem).where(eq(orderItem.orderId, orderId));
 
     return NextResponse.json({
       order: orderData,
@@ -67,17 +61,11 @@ export async function GET(
     });
   } catch (error) {
     console.error('Error fetching order:', error);
-    return NextResponse.json(
-      { error: 'Failed to fetch order' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to fetch order' }, { status: 500 });
   }
 }
 
-export async function PATCH(
-  req: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
+export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const tenantId = await requireTenantId();
     const { id: orderId } = await params;
@@ -85,10 +73,7 @@ export async function PATCH(
     const { status: newStatus } = body;
 
     if (!newStatus || !orderStatusEnum.enumValues.includes(newStatus)) {
-      return NextResponse.json(
-        { error: 'Invalid status' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Invalid status' }, { status: 400 });
     }
 
     // Fetch current order
@@ -132,9 +117,6 @@ export async function PATCH(
     return NextResponse.json({ order: updated });
   } catch (error) {
     console.error('Error updating order status:', error);
-    return NextResponse.json(
-      { error: 'Failed to update order status' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to update order status' }, { status: 500 });
   }
 }

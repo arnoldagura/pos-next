@@ -1,10 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/db/db';
-import {
-  materialInventory,
-  materialBatch,
-  materialInventoryMovement,
-} from '@/drizzle/schema';
+import { materialInventory, materialBatch, materialInventoryMovement } from '@/drizzle/schema';
 import { eq } from 'drizzle-orm';
 import { z } from 'zod';
 import { randomUUID } from 'crypto';
@@ -20,10 +16,7 @@ const addBatchSchema = z.object({
 });
 
 // POST /api/material-inventories/[id]/add-batch - Add new batch to inventory
-export async function POST(
-  request: NextRequest,
-  context: { params: Promise<{ id: string }> }
-) {
+export async function POST(request: NextRequest, context: { params: Promise<{ id: string }> }) {
   try {
     const { id } = await context.params;
 
@@ -37,18 +30,14 @@ export async function POST(
       );
     }
 
-    const { batchNumber, quantity, cost, expiryDate, remarks, createdBy } =
-      validation.data;
+    const { batchNumber, quantity, cost, expiryDate, remarks, createdBy } = validation.data;
 
     const inventory = await db.query.materialInventory.findFirst({
       where: eq(materialInventory.id, id),
     });
 
     if (!inventory) {
-      return NextResponse.json(
-        { error: 'Material inventory not found' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'Material inventory not found' }, { status: 404 });
     }
 
     const [newBatch] = await db

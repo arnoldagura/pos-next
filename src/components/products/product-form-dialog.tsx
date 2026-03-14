@@ -74,9 +74,7 @@ export function ProductFormDialog({
   const [loading, setLoading] = useState(false);
   const [categories, setCategories] = useState<Category[]>([]);
   const [imageFile, setImageFile] = useState<File | null>(null);
-  const [imagePreview, setImagePreview] = useState<string | null>(
-    product?.image || null
-  );
+  const [imagePreview, setImagePreview] = useState<string | null>(product?.image || null);
   const [saveAndAddAnother, setSaveAndAddAnother] = useState(false);
   const [isDirty, setIsDirty] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -212,11 +210,7 @@ export function ProductFormDialog({
         await uploadImage(savedProduct.id);
       }
 
-      toast.success(
-        product
-          ? 'Product updated successfully'
-          : 'Product created successfully'
-      );
+      toast.success(product ? 'Product updated successfully' : 'Product created successfully');
       setIsDirty(false);
 
       if (saveAndAddAnother && !product) {
@@ -235,9 +229,7 @@ export function ProductFormDialog({
         onSuccess();
       }
     } catch (error) {
-      toast.error(
-        error instanceof Error ? error.message : 'Failed to save product'
-      );
+      toast.error(error instanceof Error ? error.message : 'Failed to save product');
       console.error(error);
     } finally {
       setLoading(false);
@@ -246,9 +238,7 @@ export function ProductFormDialog({
 
   const handleClose = () => {
     if (isDirty) {
-      const confirmed = confirm(
-        'You have unsaved changes. Are you sure you want to close?'
-      );
+      const confirmed = confirm('You have unsaved changes. Are you sure you want to close?');
       if (!confirmed) return;
     }
     onOpenChange(false);
@@ -258,9 +248,7 @@ export function ProductFormDialog({
     <Dialog open={open} onOpenChange={handleClose}>
       <DialogContent className='max-w-2xl max-h-[90vh] overflow-y-auto'>
         <DialogHeader>
-          <DialogTitle>
-            {product ? 'Edit Product' : 'Create Product'}
-          </DialogTitle>
+          <DialogTitle>{product ? 'Edit Product' : 'Create Product'}</DialogTitle>
           <DialogDescription>
             {product
               ? 'Update product information and pricing'
@@ -303,9 +291,7 @@ export function ProductFormDialog({
                   onChange={handleImageChange}
                   className='cursor-pointer'
                 />
-                <p className='text-xs text-gray-500'>
-                  PNG, JPG, WebP up to 5MB
-                </p>
+                <p className='text-xs text-gray-500'>PNG, JPG, WebP up to 5MB</p>
               </div>
             </div>
           </div>
@@ -318,10 +304,7 @@ export function ProductFormDialog({
                 <FormItem className='col-span-2'>
                   <FormLabel>Product Name *</FormLabel>
                   <FormControl>
-                    <Input
-                      placeholder='e.g., Premium Coffee Beans'
-                      {...field}
-                    />
+                    <Input placeholder='e.g., Premium Coffee Beans' {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -378,16 +361,11 @@ export function ProductFormDialog({
             render={({ field }) => (
               <FormItem className='flex flex-row items-start space-x-3 space-y-0'>
                 <FormControl>
-                  <Checkbox
-                    checked={field.value}
-                    onCheckedChange={field.onChange}
-                  />
+                  <Checkbox checked={field.value} onCheckedChange={field.onChange} />
                 </FormControl>
                 <div className='space-y-1 leading-none'>
                   <FormLabel>Active</FormLabel>
-                  <FormDescription>
-                    This product will be available for sale
-                  </FormDescription>
+                  <FormDescription>This product will be available for sale</FormDescription>
                 </div>
               </FormItem>
             )}
@@ -399,9 +377,7 @@ export function ProductFormDialog({
                 <Checkbox
                   id='saveAndAddAnother'
                   checked={saveAndAddAnother}
-                  onCheckedChange={(checked) =>
-                    setSaveAndAddAnother(checked as boolean)
-                  }
+                  onCheckedChange={(checked) => setSaveAndAddAnother(checked as boolean)}
                 />
                 <label
                   htmlFor='saveAndAddAnother'
@@ -411,12 +387,7 @@ export function ProductFormDialog({
                 </label>
               </div>
             )}
-            <Button
-              type='button'
-              variant='outline'
-              onClick={handleClose}
-              disabled={loading}
-            >
+            <Button type='button' variant='outline' onClick={handleClose} disabled={loading}>
               Cancel
             </Button>
             <Button type='submit' disabled={loading}>

@@ -310,9 +310,7 @@ async function seedRBAC() {
     console.log('Creating role-permission mappings...');
     const mappings = [];
 
-    for (const [roleName, permissionNames] of Object.entries(
-      rolePermissionMappings,
-    )) {
+    for (const [roleName, permissionNames] of Object.entries(rolePermissionMappings)) {
       const roleRecord = defaultRoles.find((r) => r.name === roleName);
       if (!roleRecord) continue;
 

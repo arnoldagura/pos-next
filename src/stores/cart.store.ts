@@ -45,11 +45,7 @@ interface CartState {
   addItem: (item: Omit<CartItem, 'id' | 'subtotal' | 'total'>) => void;
   removeItem: (itemId: string) => void;
   updateQuantity: (itemId: string, quantity: number) => void;
-  applyItemDiscount: (
-    itemId: string,
-    discount: number,
-    discountType: DiscountType
-  ) => void;
+  applyItemDiscount: (itemId: string, discount: number, discountType: DiscountType) => void;
 
   setTable: (tableId: string, tableName: string) => void;
   setCustomer: (customerId: string, customerName: string) => void;
@@ -79,9 +75,7 @@ const calculateItemTotals = (
 
   return {
     ...item,
-    id:
-      item.id ||
-      `item_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`,
+    id: item.id || `item_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`,
     subtotal,
     total,
   };
@@ -101,9 +95,7 @@ const calculateCartTotals = (cart: Cart): Cart => {
   const totalTax = cart.items.reduce((sum, item) => {
     const itemSubtotal = item.price * item.quantity;
     const discountAmount =
-      item.discountType === 'percentage'
-        ? (itemSubtotal * item.discount) / 100
-        : item.discount;
+      item.discountType === 'percentage' ? (itemSubtotal * item.discount) / 100 : item.discount;
     const afterDiscount = itemSubtotal - discountAmount;
     return sum + (afterDiscount * item.taxRate) / 100;
   }, 0);
@@ -196,9 +188,7 @@ export const useCartStore = create<CartState>()(
           const cart = state.carts.get(cartId);
           if (!cart) return state;
 
-          const existingItemIndex = cart.items.findIndex(
-            (i) => i.productId === item.productId
-          );
+          const existingItemIndex = cart.items.findIndex((i) => i.productId === item.productId);
 
           let updatedItems: CartItem[];
           if (existingItemIndex >= 0) {
@@ -260,9 +250,7 @@ export const useCartStore = create<CartState>()(
           if (!cart) return state;
 
           const updatedItems = cart.items.map((item) =>
-            item.id === itemId
-              ? calculateItemTotals({ ...item, quantity })
-              : item
+            item.id === itemId ? calculateItemTotals({ ...item, quantity }) : item
           );
 
           const updatedCart = calculateCartTotals({
@@ -286,9 +274,7 @@ export const useCartStore = create<CartState>()(
           if (!cart) return state;
 
           const updatedItems = cart.items.map((item) =>
-            item.id === itemId
-              ? calculateItemTotals({ ...item, discount, discountType })
-              : item
+            item.id === itemId ? calculateItemTotals({ ...item, discount, discountType }) : item
           );
 
           const updatedCart = calculateCartTotals({

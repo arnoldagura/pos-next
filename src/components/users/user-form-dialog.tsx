@@ -38,12 +38,7 @@ type UserFormDialogProps = {
   onSuccess: () => void;
 };
 
-export function UserFormDialog({
-  user,
-  open,
-  onOpenChange,
-  onSuccess,
-}: UserFormDialogProps) {
+export function UserFormDialog({ user, open, onOpenChange, onSuccess }: UserFormDialogProps) {
   const [loading, setLoading] = useState(false);
 
   const {
@@ -96,25 +91,15 @@ export function UserFormDialog({
               Name <span className='text-red-500'>*</span>
             </label>
             <Input {...register('name')} placeholder='John Doe' />
-            {errors.name && (
-              <p className='text-sm text-red-500 mt-1'>{errors.name.message}</p>
-            )}
+            {errors.name && <p className='text-sm text-red-500 mt-1'>{errors.name.message}</p>}
           </div>
 
           <div>
             <label className='text-sm font-medium'>
               Email <span className='text-red-500'>*</span>
             </label>
-            <Input
-              {...register('email')}
-              type='email'
-              placeholder='john@example.com'
-            />
-            {errors.email && (
-              <p className='text-sm text-red-500 mt-1'>
-                {errors.email.message}
-              </p>
-            )}
+            <Input {...register('email')} type='email' placeholder='john@example.com' />
+            {errors.email && <p className='text-sm text-red-500 mt-1'>{errors.email.message}</p>}
           </div>
 
           <div className='flex items-center gap-2'>

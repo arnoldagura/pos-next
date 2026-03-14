@@ -61,8 +61,7 @@ export async function getMaterialInventoryHandler(req: NextRequest) {
     const inventoryWithStock = inventoryRecords.map((inv) => ({
       ...inv,
       currentStock: stockLevels[inv.id]?.currentStock || 0,
-      belowThreshold:
-        (stockLevels[inv.id]?.currentStock || 0) <= Number(inv.alertThreshold),
+      belowThreshold: (stockLevels[inv.id]?.currentStock || 0) <= Number(inv.alertThreshold),
     }));
 
     return NextResponse.json({
@@ -77,10 +76,7 @@ export async function getMaterialInventoryHandler(req: NextRequest) {
   } catch (error) {
     console.error('Error fetching material inventory:', error);
 
-    return NextResponse.json(
-      { error: 'Failed to fetch material inventory' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to fetch material inventory' }, { status: 500 });
   }
 }
 

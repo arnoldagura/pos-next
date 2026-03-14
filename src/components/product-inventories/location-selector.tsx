@@ -34,11 +34,7 @@ export function LocationSelector({ value, onChange }: LocationSelectorProps) {
   });
 
   if (isLoading) {
-    return (
-      <div className='w-[200px] text-sm text-muted-foreground'>
-        Loading locations...
-      </div>
-    );
+    return <div className='w-[200px] text-sm text-muted-foreground'>Loading locations...</div>;
   }
 
   return (

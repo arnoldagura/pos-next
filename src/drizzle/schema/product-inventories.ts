@@ -1,12 +1,5 @@
 import { relations } from 'drizzle-orm';
-import {
-  pgTable,
-  text,
-  timestamp,
-  numeric,
-  index,
-  unique,
-} from 'drizzle-orm/pg-core';
+import { pgTable, text, timestamp, numeric, index, unique } from 'drizzle-orm/pg-core';
 import { product } from './products';
 import { location } from './locations';
 import { productInventoryMovement } from './product-inventory-movements';
@@ -36,12 +29,8 @@ export const productInventory = pgTable(
       scale: 2,
     }).notNull(),
     unitOfMeasure: text('unit_of_measure').notNull(),
-    taxRate: numeric('tax_rate', { precision: 5, scale: 2 })
-      .default('0')
-      .notNull(),
-    alertThreshold: numeric('alert_threshold', { precision: 10, scale: 2 })
-      .default('0')
-      .notNull(),
+    taxRate: numeric('tax_rate', { precision: 5, scale: 2 }).default('0').notNull(),
+    alertThreshold: numeric('alert_threshold', { precision: 10, scale: 2 }).default('0').notNull(),
     createdAt: timestamp('created_at').defaultNow().notNull(),
     updatedAt: timestamp('updated_at')
       .defaultNow()
@@ -61,21 +50,18 @@ export const productInventory = pgTable(
   })
 );
 
-export const productInventoryRelations = relations(
-  productInventory,
-  ({ one, many }) => ({
-    organization: one(organization, {
-      fields: [productInventory.organizationId],
-      references: [organization.id],
-    }),
-    product: one(product, {
-      fields: [productInventory.productId],
-      references: [product.id],
-    }),
-    location: one(location, {
-      fields: [productInventory.locationId],
-      references: [location.id],
-    }),
-    movements: many(productInventoryMovement),
-  })
-);
+export const productInventoryRelations = relations(productInventory, ({ one, many }) => ({
+  organization: one(organization, {
+    fields: [productInventory.organizationId],
+    references: [organization.id],
+  }),
+  product: one(product, {
+    fields: [productInventory.productId],
+    references: [product.id],
+  }),
+  location: one(location, {
+    fields: [productInventory.locationId],
+    references: [location.id],
+  }),
+  movements: many(productInventoryMovement),
+}));

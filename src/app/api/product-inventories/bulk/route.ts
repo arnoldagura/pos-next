@@ -5,35 +5,19 @@ import { randomUUID } from 'crypto';
 import { eq, inArray, sql } from 'drizzle-orm';
 import { NextRequest, NextResponse } from 'next/server';
 
-type BulkOperationType =
-  | 'adjust_price'
-  | 'adjust_stock'
-  | 'change_status'
-  | 'update_threshold';
+type BulkOperationType = 'adjust_price' | 'adjust_stock' | 'change_status' | 'update_threshold';
 
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const {
-      inventoryIds,
-      operation,
-      value,
-      adjustmentType = 'percentage',
-      remarks = '',
-    } = body;
+    const { inventoryIds, operation, value, adjustmentType = 'percentage', remarks = '' } = body;
 
     if (!inventoryIds || !Array.isArray(inventoryIds) || inventoryIds.length === 0) {
-      return NextResponse.json(
-        { error: 'No inventory IDs provided' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'No inventory IDs provided' }, { status: 400 });
     }
 
     if (!operation) {
-      return NextResponse.json(
-        { error: 'Operation type is required' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Operation type is required' }, { status: 400 });
     }
 
     await db.transaction(async (tx) => {
@@ -164,10 +148,7 @@ export async function POST(req: NextRequest) {
     console.error('Bulk operation error:', error);
     return NextResponse.json(
       {
-        error:
-          error instanceof Error
-            ? error.message
-            : 'Failed to perform bulk operation',
+        error: error instanceof Error ? error.message : 'Failed to perform bulk operation',
       },
       { status: 500 }
     );

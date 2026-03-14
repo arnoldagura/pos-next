@@ -22,9 +22,7 @@ async function getTablesHandler(req: NextRequest) {
     const conditions = [eq(restaurantTable.organizationId, tenantId)];
 
     if (statusParam) {
-      const statuses = statusParam
-        .split(',')
-        .map((s) => s.trim()) as TableStatus[];
+      const statuses = statusParam.split(',').map((s) => s.trim()) as TableStatus[];
       if (statuses.length === 1) {
         conditions.push(eq(restaurantTable.status, statuses[0]));
       } else if (statuses.length > 1) {
@@ -45,17 +43,12 @@ async function getTablesHandler(req: NextRequest) {
       if (searchCondition) conditions.push(searchCondition);
     }
 
-    const tables = await query.where(
-      conditions.length > 0 ? and(...conditions) : undefined
-    );
+    const tables = await query.where(conditions.length > 0 ? and(...conditions) : undefined);
 
     return NextResponse.json({ data: tables });
   } catch (error) {
     console.error('Error fetching tables:', error);
-    return NextResponse.json(
-      { error: 'Failed to fetch tables' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to fetch tables' }, { status: 500 });
   }
 }
 
@@ -85,10 +78,7 @@ async function createTableHandler(req: NextRequest) {
       );
     }
 
-    return NextResponse.json(
-      { error: 'Failed to create table' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to create table' }, { status: 500 });
   }
 }
 

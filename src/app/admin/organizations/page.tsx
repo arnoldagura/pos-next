@@ -20,13 +20,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Plus, Search, MoreVertical, Edit, Trash, Users } from 'lucide-react';
 import {
   DropdownMenu,
@@ -105,11 +99,7 @@ export default function OrganizationsPage() {
   });
 
   const handleDelete = (id: string, name: string) => {
-    if (
-      confirm(
-        `Are you sure you want to delete "${name}"? This action cannot be undone.`
-      )
-    ) {
+    if (confirm(`Are you sure you want to delete "${name}"? This action cannot be undone.`)) {
       deleteMutation.mutate(id);
     }
   };
@@ -133,17 +123,14 @@ export default function OrganizationsPage() {
         <Card>
           <CardHeader className='pb-2'>
             <CardDescription>Total Organizations</CardDescription>
-            <CardTitle className='text-3xl'>
-              {data?.pagination.total || 0}
-            </CardTitle>
+            <CardTitle className='text-3xl'>{data?.pagination.total || 0}</CardTitle>
           </CardHeader>
         </Card>
         <Card>
           <CardHeader className='pb-2'>
             <CardDescription>Active</CardDescription>
             <CardTitle className='text-3xl text-green-500'>
-              {data?.organizations.filter((o) => o.status === 'active')
-                .length || 0}
+              {data?.organizations.filter((o) => o.status === 'active').length || 0}
             </CardTitle>
           </CardHeader>
         </Card>
@@ -151,8 +138,7 @@ export default function OrganizationsPage() {
           <CardHeader className='pb-2'>
             <CardDescription>Trial</CardDescription>
             <CardTitle className='text-3xl text-blue-500'>
-              {data?.organizations.filter((o) => o.status === 'trial').length ||
-                0}
+              {data?.organizations.filter((o) => o.status === 'trial').length || 0}
             </CardTitle>
           </CardHeader>
         </Card>
@@ -160,8 +146,7 @@ export default function OrganizationsPage() {
           <CardHeader className='pb-2'>
             <CardDescription>Suspended</CardDescription>
             <CardTitle className='text-3xl text-yellow-500'>
-              {data?.organizations.filter((o) => o.status === 'suspended')
-                .length || 0}
+              {data?.organizations.filter((o) => o.status === 'suspended').length || 0}
             </CardTitle>
           </CardHeader>
         </Card>
@@ -233,30 +218,21 @@ export default function OrganizationsPage() {
                             {org.subdomain}.
                             {process.env.NODE_ENV === 'development'
                               ? 'localhost:3000'
-                              : process.env.NEXT_PUBLIC_APP_DOMAIN ||
-                                'yourdomain.com'}
+                              : process.env.NEXT_PUBLIC_APP_DOMAIN || 'yourdomain.com'}
                           </div>
                         )}
                       </div>
                     </TableCell>
                     <TableCell>
-                      <code className='text-xs bg-muted px-2 py-1 rounded'>
-                        {org.slug}
-                      </code>
+                      <code className='text-xs bg-muted px-2 py-1 rounded'>{org.slug}</code>
                     </TableCell>
                     <TableCell>
-                      <Badge
-                        className={statusColors[org.status]}
-                        variant='secondary'
-                      >
+                      <Badge className={statusColors[org.status]} variant='secondary'>
                         {org.status}
                       </Badge>
                     </TableCell>
                     <TableCell>
-                      <Badge
-                        className={tierColors[org.subscriptionTier]}
-                        variant='secondary'
-                      >
+                      <Badge className={tierColors[org.subscriptionTier]} variant='secondary'>
                         {org.subscriptionTier}
                       </Badge>
                     </TableCell>
@@ -306,8 +282,7 @@ export default function OrganizationsPage() {
       {data && data.pagination.totalPages > 1 && (
         <div className='flex items-center justify-between'>
           <div className='text-sm text-muted-foreground'>
-            Showing {(page - 1) * 10 + 1} to{' '}
-            {Math.min(page * 10, data.pagination.total)} of{' '}
+            Showing {(page - 1) * 10 + 1} to {Math.min(page * 10, data.pagination.total)} of{' '}
             {data.pagination.total} organizations
           </div>
           <div className='flex gap-2'>

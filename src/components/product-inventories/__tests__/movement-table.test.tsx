@@ -16,13 +16,9 @@ vi.mock('xlsx', () => ({
 
 // Mock next/link
 vi.mock('next/link', () => ({
-  default: ({
-    children,
-    href,
-  }: {
-    children: React.ReactNode;
-    href: string;
-  }) => <a href={href}>{children}</a>,
+  default: ({ children, href }: { children: React.ReactNode; href: string }) => (
+    <a href={href}>{children}</a>
+  ),
 }));
 
 // Mock window.print
@@ -148,17 +144,11 @@ describe('MovementTable', () => {
 
     const purchaseLink = screen.getByText('purchase - po-001');
     expect(purchaseLink).toBeInTheDocument();
-    expect(purchaseLink.closest('a')).toHaveAttribute(
-      'href',
-      '/dashboard/purchases/po-001'
-    );
+    expect(purchaseLink.closest('a')).toHaveAttribute('href', '/dashboard/purchases/po-001');
 
     const orderLink = screen.getByText('order - ord-001');
     expect(orderLink).toBeInTheDocument();
-    expect(orderLink.closest('a')).toHaveAttribute(
-      'href',
-      '/dashboard/orders/ord-001'
-    );
+    expect(orderLink.closest('a')).toHaveAttribute('href', '/dashboard/orders/ord-001');
   });
 
   it('should show dash when no reference exists', () => {

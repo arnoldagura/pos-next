@@ -13,10 +13,7 @@ export async function POST(req: NextRequest) {
     const { organizationId } = body;
 
     if (!organizationId) {
-      return NextResponse.json(
-        { error: 'Organization ID is required' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Organization ID is required' }, { status: 400 });
     }
 
     // Extract IP and User-Agent for audit logging
@@ -42,9 +39,6 @@ export async function POST(req: NextRequest) {
     }
 
     // Generic error fallback
-    return NextResponse.json(
-      { error: 'Failed to switch organization' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to switch organization' }, { status: 500 });
   }
 }

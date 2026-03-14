@@ -63,20 +63,13 @@ describe('Inventory API - POST /api/product-inventory/movement', () => {
       ]),
     } as never);
 
-    vi.mocked(inventoryCalculation.invalidateInventoryCache).mockReturnValue(
-      undefined
-    );
-    vi.mocked(inventoryCalculation.invalidateLocationCache).mockReturnValue(
-      undefined
-    );
+    vi.mocked(inventoryCalculation.invalidateInventoryCache).mockReturnValue(undefined);
+    vi.mocked(inventoryCalculation.invalidateLocationCache).mockReturnValue(undefined);
 
-    const request = new NextRequest(
-      'http://localhost/api/product-inventory/movement',
-      {
-        method: 'POST',
-        body: JSON.stringify(movementData),
-      }
-    );
+    const request = new NextRequest('http://localhost/api/product-inventory/movement', {
+      method: 'POST',
+      body: JSON.stringify(movementData),
+    });
 
     const response = await createMovementHandler(request);
     const data = await response.json();
@@ -106,23 +99,18 @@ describe('Inventory API - POST /api/product-inventory/movement', () => {
     } as never);
 
     // Mock stock validation (insufficient)
-    vi.mocked(inventoryCalculation.validateStockAvailability).mockResolvedValue(
-      {
-        inventoryId: 'inv-1',
-        available: false,
-        currentStock: 100,
-        requestedQuantity: 150,
-        shortfall: 50,
-      }
-    );
+    vi.mocked(inventoryCalculation.validateStockAvailability).mockResolvedValue({
+      inventoryId: 'inv-1',
+      available: false,
+      currentStock: 100,
+      requestedQuantity: 150,
+      shortfall: 50,
+    });
 
-    const request = new NextRequest(
-      'http://localhost/api/product-inventory/movement',
-      {
-        method: 'POST',
-        body: JSON.stringify(movementData),
-      }
-    );
+    const request = new NextRequest('http://localhost/api/product-inventory/movement', {
+      method: 'POST',
+      body: JSON.stringify(movementData),
+    });
 
     const response = await createMovementHandler(request);
     const data = await response.json();
@@ -139,17 +127,14 @@ describe('Inventory API - POST /api/product-inventory/movement', () => {
       limit: vi.fn().mockResolvedValue([]),
     } as never);
 
-    const request = new NextRequest(
-      'http://localhost/api/product-inventory/movement',
-      {
-        method: 'POST',
-        body: JSON.stringify({
-          inventoryId: 'non-existent',
-          type: 'purchase',
-          quantity: 100,
-        }),
-      }
-    );
+    const request = new NextRequest('http://localhost/api/product-inventory/movement', {
+      method: 'POST',
+      body: JSON.stringify({
+        inventoryId: 'non-existent',
+        type: 'purchase',
+        quantity: 100,
+      }),
+    });
 
     const response = await createMovementHandler(request);
     const data = await response.json();

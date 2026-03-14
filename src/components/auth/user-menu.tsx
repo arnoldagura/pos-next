@@ -79,12 +79,8 @@ export function UserMenu() {
             </AvatarFallback>
           </Avatar>
           <div className='hidden md:block text-left'>
-            <p className='text-sm font-medium leading-none'>
-              {session.user.name}
-            </p>
-            <p className='text-xs text-muted-foreground mt-1'>
-              {session.user.email}
-            </p>
+            <p className='text-sm font-medium leading-none'>{session.user.name}</p>
+            <p className='text-xs text-muted-foreground mt-1'>{session.user.email}</p>
           </div>
         </Button>
       </DropdownMenuTrigger>
@@ -92,9 +88,7 @@ export function UserMenu() {
         <DropdownMenuLabel>
           <div className='flex flex-col space-y-1'>
             <p className='text-sm font-medium'>{session.user.name}</p>
-            <p className='text-xs text-muted-foreground'>
-              {session.user.email}
-            </p>
+            <p className='text-xs text-muted-foreground'>{session.user.email}</p>
           </div>
         </DropdownMenuLabel>
         <DropdownMenuSeparator />

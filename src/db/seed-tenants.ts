@@ -31,8 +31,7 @@ async function seedTenants() {
     const superAdminRole = {
       id: superAdminRoleId,
       name: 'super_admin',
-      description:
-        'Global super administrator with access to all organizations',
+      description: 'Global super administrator with access to all organizations',
       organizationId: null, // Global role
       isGlobal: true,
     };
@@ -461,18 +460,12 @@ async function seedTenants() {
     for (const resource of resources) {
       for (const action of actions) {
         // Skip certain combinations
-        if (
-          resource === 'reports' &&
-          (action === 'update' || action === 'delete')
-        )
-          continue;
+        if (resource === 'reports' && (action === 'update' || action === 'delete')) continue;
 
         defaultPermissions.push({
           id: randomUUID(),
           name: `${resource}:${action}`,
-          description: `${
-            action.charAt(0).toUpperCase() + action.slice(1)
-          } ${resource}`,
+          description: `${action.charAt(0).toUpperCase() + action.slice(1)} ${resource}`,
           resource,
           action,
           organizationId: legacyOrgId,
@@ -492,11 +485,7 @@ async function seedTenants() {
     const rolePermissionMappings = {
       admin: defaultPermissions.map((p) => p.name), // Admin gets all permissions
       manager: defaultPermissions
-        .filter(
-          (p) =>
-            !p.name.startsWith('users:delete') &&
-            !p.name.startsWith('settings:update')
-        )
+        .filter((p) => !p.name.startsWith('users:delete') && !p.name.startsWith('settings:update'))
         .map((p) => p.name),
       cashier: [
         'products:read',
@@ -507,18 +496,11 @@ async function seedTenants() {
         'customers:create',
       ],
       kitchen: ['products:read', 'orders:read', 'orders:update'],
-      inventory: [
-        'products:read',
-        'inventory:create',
-        'inventory:read',
-        'inventory:update',
-      ],
+      inventory: ['products:read', 'inventory:create', 'inventory:read', 'inventory:update'],
     };
 
     const mappings = [];
-    for (const [roleName, permissionNames] of Object.entries(
-      rolePermissionMappings
-    )) {
+    for (const [roleName, permissionNames] of Object.entries(rolePermissionMappings)) {
       const roleRecord = defaultRoles.find((r) => r.name === roleName);
       if (!roleRecord) continue;
 
@@ -539,9 +521,7 @@ async function seedTenants() {
     // ========================================================================
     // 7. ASSIGN EXISTING USERS TO LEGACY ORGANIZATION
     // ========================================================================
-    console.log(
-      '📋 Step 7: Migrating existing users to legacy organization...'
-    );
+    console.log('📋 Step 7: Migrating existing users to legacy organization...');
 
     const existingUsers = await db.select().from(user);
     console.log(`Found ${existingUsers.length} existing users`);
@@ -569,9 +549,7 @@ async function seedTenants() {
     // 8. CREATE SUPER ADMIN USER (OPTIONAL)
     // ========================================================================
     console.log('📋 Step 8: Checking for super admin user...');
-    console.log(
-      'ℹ Super admin user should be created manually via registration'
-    );
+    console.log('ℹ Super admin user should be created manually via registration');
     console.log('ℹ After creating the user, assign super_admin role using:');
     console.log(
       "ℹ   INSERT INTO user_role (user_id, role_id) VALUES ('<user-id>', '" +
@@ -582,13 +560,9 @@ async function seedTenants() {
     // ========================================================================
     // SUMMARY
     // ========================================================================
-    console.log(
-      '════════════════════════════════════════════════════════════════'
-    );
+    console.log('════════════════════════════════════════════════════════════════');
     console.log('✅ TENANT SEED COMPLETED SUCCESSFULLY!');
-    console.log(
-      '════════════════════════════════════════════════════════════════'
-    );
+    console.log('════════════════════════════════════════════════════════════════');
     console.log('\n📊 Summary:');
     console.log(`   • Super Admin Role ID: ${superAdminRoleId}`);
     console.log(`   • Legacy Organization ID: ${legacyOrgId}`);
@@ -598,15 +572,9 @@ async function seedTenants() {
     console.log('\n📝 Next Steps:');
     console.log('   1. Create a super admin user via /register');
     console.log('   2. Assign super_admin role to that user in database');
-    console.log(
-      '   3. Run migrations to add organizationId to business tables'
-    );
-    console.log(
-      "   4. Update existing data with organizationId = '" + legacyOrgId + "'"
-    );
-    console.log(
-      '════════════════════════════════════════════════════════════════\n'
-    );
+    console.log('   3. Run migrations to add organizationId to business tables');
+    console.log("   4. Update existing data with organizationId = '" + legacyOrgId + "'");
+    console.log('════════════════════════════════════════════════════════════════\n');
   } catch (error) {
     console.error('❌ Error seeding tenants:', error);
     throw error;

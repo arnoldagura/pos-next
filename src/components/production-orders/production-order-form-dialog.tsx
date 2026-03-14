@@ -138,12 +138,10 @@ export default function ProductionOrderFormDialog({
   const [materialInventories, setMaterialInventories] = useState<
     Record<string, MaterialInventory[]>
   >({});
-  const [outputProductInventories, setOutputProductInventories] = useState<
-    ProductInventory[]
-  >([]);
-  const [outputMaterialInventories, setOutputMaterialInventories] = useState<
-    MaterialInventory[]
-  >([]);
+  const [outputProductInventories, setOutputProductInventories] = useState<ProductInventory[]>([]);
+  const [outputMaterialInventories, setOutputMaterialInventories] = useState<MaterialInventory[]>(
+    []
+  );
   const [loading, setLoading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [creatingInventory, setCreatingInventory] = useState(false);
@@ -222,10 +220,7 @@ export default function ProductionOrderFormDialog({
     }
   };
 
-  const fetchMaterialInventoriesForMaterial = async (
-    materialId: string,
-    locationId: string
-  ) => {
+  const fetchMaterialInventoriesForMaterial = async (materialId: string, locationId: string) => {
     try {
       const response = await fetch(
         `/api/material-inventories/by-material?materialId=${materialId}&locationId=${locationId}`
@@ -259,9 +254,7 @@ export default function ProductionOrderFormDialog({
     setShowPriceDialog(true);
   };
 
-  const handleCreateProductInventoryWithPrice = async (
-    data: PriceFormValues
-  ) => {
+  const handleCreateProductInventoryWithPrice = async (data: PriceFormValues) => {
     if (!selectedRecipe || !selectedRecipe.outputProduct || !selectedLocation) {
       return;
     }
@@ -292,8 +285,7 @@ export default function ProductionOrderFormDialog({
       console.log('response', response);
       if (!response.ok) {
         const error = await response.json();
-        const errorMessage =
-          error.error || 'Failed to create product inventory';
+        const errorMessage = error.error || 'Failed to create product inventory';
         toast.error(`Failed to create product inventory: ${errorMessage}`);
         throw new Error(errorMessage);
       }
@@ -312,10 +304,7 @@ export default function ProductionOrderFormDialog({
     } catch (error) {
       console.error('Error creating product inventory:', error);
       // Only show toast if we haven't already shown one for a response error
-      if (
-        error instanceof Error &&
-        !error.message.includes('Failed to create')
-      ) {
+      if (error instanceof Error && !error.message.includes('Failed to create')) {
         toast.error(`Failed to create product inventory: ${error.message}`);
       }
     } finally {
@@ -324,11 +313,7 @@ export default function ProductionOrderFormDialog({
   };
 
   const createMaterialInventory = async () => {
-    if (
-      !selectedRecipe ||
-      !selectedRecipe.outputMaterial ||
-      !selectedLocation
-    ) {
+    if (!selectedRecipe || !selectedRecipe.outputMaterial || !selectedLocation) {
       toast.error('Please select a recipe and location first');
       return;
     }
@@ -346,8 +331,7 @@ export default function ProductionOrderFormDialog({
 
       if (!response.ok) {
         const error = await response.json();
-        const errorMessage =
-          error.error || 'Failed to create material inventory';
+        const errorMessage = error.error || 'Failed to create material inventory';
         toast.error(`Failed to create material inventory: ${errorMessage}`);
         throw new Error(errorMessage);
       }
@@ -363,10 +347,7 @@ export default function ProductionOrderFormDialog({
     } catch (error) {
       console.error('Error creating material inventory:', error);
       // Only show toast if we haven't already shown one for a response error
-      if (
-        error instanceof Error &&
-        !error.message.includes('Failed to create')
-      ) {
+      if (error instanceof Error && !error.message.includes('Failed to create')) {
         toast.error(`Failed to create material inventory: ${error.message}`);
       }
     } finally {
@@ -381,8 +362,7 @@ export default function ProductionOrderFormDialog({
         const response = await fetch(
           `/api/product-inventories?productId=${recipe.outputProduct.id}&locationId=${locationId}`
         );
-        if (!response.ok)
-          throw new Error('Failed to fetch product inventories');
+        if (!response.ok) throw new Error('Failed to fetch product inventories');
         const data = await response.json();
         console.log('data', data);
         setOutputProductInventories(data.inventory || []);
@@ -401,8 +381,7 @@ export default function ProductionOrderFormDialog({
         const response = await fetch(
           `/api/material-inventories/by-material?materialId=${recipe.outputMaterial.id}&locationId=${locationId}`
         );
-        if (!response.ok)
-          throw new Error('Failed to fetch material inventories');
+        if (!response.ok) throw new Error('Failed to fetch material inventories');
         const data = await response.json();
         console.log('data', data);
         setOutputMaterialInventories(data.inventory || []);
@@ -446,10 +425,7 @@ export default function ProductionOrderFormDialog({
     }
   };
 
-  const loadRecipeIngredientsToForm = async (
-    recipe: Recipe,
-    locationId: string
-  ) => {
+  const loadRecipeIngredientsToForm = async (recipe: Recipe, locationId: string) => {
     if (!recipe.ingredients || recipe.ingredients.length === 0) return;
 
     const scalingFactor =
@@ -479,8 +455,7 @@ export default function ProductionOrderFormDialog({
         const firstInventory = inventories[0];
 
         if (firstInventory) {
-          const scaledQuantity =
-            parseFloat(ingredient.quantity) * scalingFactor;
+          const scaledQuantity = parseFloat(ingredient.quantity) * scalingFactor;
 
           append({
             materialId: ingredient.materialId,
@@ -491,8 +466,7 @@ export default function ProductionOrderFormDialog({
           });
         } else {
           // If no inventory found, still add the ingredient but without inventory selected
-          const scaledQuantity =
-            parseFloat(ingredient.quantity) * scalingFactor;
+          const scaledQuantity = parseFloat(ingredient.quantity) * scalingFactor;
 
           append({
             materialId: ingredient.materialId,
@@ -502,9 +476,7 @@ export default function ProductionOrderFormDialog({
             cost: '',
           });
 
-          toast.warning(
-            `No inventory found for ${ingredient.material.name} at this location`
-          );
+          toast.warning(`No inventory found for ${ingredient.material.name} at this location`);
         }
       }
     } catch (error) {
@@ -544,25 +516,16 @@ export default function ProductionOrderFormDialog({
   const handleMaterialChange = async (index: number, materialId: string) => {
     const material = materials.find((m) => m.id === materialId);
     if (material) {
-      form.setValue(
-        `ingredients.${index}.unitOfMeasure`,
-        material.unitOfMeasure
-      );
+      form.setValue(`ingredients.${index}.unitOfMeasure`, material.unitOfMeasure);
     }
 
     const locationId = form.getValues('locationId');
     if (locationId) {
-      const inventories = await fetchMaterialInventoriesForMaterial(
-        materialId,
-        locationId
-      );
+      const inventories = await fetchMaterialInventoriesForMaterial(materialId, locationId);
 
       // Auto-select first available inventory
       if (inventories.length > 0) {
-        form.setValue(
-          `ingredients.${index}.materialInventoryId`,
-          inventories[0].id
-        );
+        form.setValue(`ingredients.${index}.materialInventoryId`, inventories[0].id);
       }
     }
   };
@@ -584,10 +547,8 @@ export default function ProductionOrderFormDialog({
             unitOfMeasure: ing.unitOfMeasure,
             cost: ing.cost ? parseFloat(ing.cost) : undefined,
           })),
-          outputProductInventoryId:
-            values.outputProductInventoryId || undefined,
-          outputMaterialInventoryId:
-            values.outputMaterialInventoryId || undefined,
+          outputProductInventoryId: values.outputProductInventoryId || undefined,
+          outputMaterialInventoryId: values.outputMaterialInventoryId || undefined,
         }),
       });
 
@@ -605,11 +566,7 @@ export default function ProductionOrderFormDialog({
       onSuccess();
     } catch (error) {
       console.error('Error creating production order:', error);
-      toast.error(
-        error instanceof Error
-          ? error.message
-          : 'Failed to create production order'
-      );
+      toast.error(error instanceof Error ? error.message : 'Failed to create production order');
     } finally {
       setSubmitting(false);
     }
@@ -622,8 +579,8 @@ export default function ProductionOrderFormDialog({
           <DialogHeader>
             <DialogTitle>Create Production Order</DialogTitle>
             <DialogDescription>
-              Create a new production order from a recipe. You can customize
-              ingredients and select specific material inventories.
+              Create a new production order from a recipe. You can customize ingredients and select
+              specific material inventories.
             </DialogDescription>
           </DialogHeader>
 
@@ -658,8 +615,7 @@ export default function ProductionOrderFormDialog({
                       ) : (
                         recipes.map((recipe) => (
                           <SelectItem key={recipe.id} value={recipe.id}>
-                            {recipe.name} ({recipe.outputQuantity}{' '}
-                            {recipe.unitOfMeasure})
+                            {recipe.name} ({recipe.outputQuantity} {recipe.unitOfMeasure})
                           </SelectItem>
                         ))
                       )}
@@ -667,10 +623,8 @@ export default function ProductionOrderFormDialog({
                   </Select>
                   {selectedRecipe && (
                     <FormDescription>
-                      Output: {selectedRecipe.outputQuantity}{' '}
-                      {selectedRecipe.unitOfMeasure} of{' '}
-                      {selectedRecipe.outputProduct?.name ||
-                        selectedRecipe.outputMaterial?.name}
+                      Output: {selectedRecipe.outputQuantity} {selectedRecipe.unitOfMeasure} of{' '}
+                      {selectedRecipe.outputProduct?.name || selectedRecipe.outputMaterial?.name}
                     </FormDescription>
                   )}
                   <FormMessage />
@@ -710,9 +664,7 @@ export default function ProductionOrderFormDialog({
                       )}
                     </SelectContent>
                   </Select>
-                  <FormDescription>
-                    Materials will be consumed from this location
-                  </FormDescription>
+                  <FormDescription>Materials will be consumed from this location</FormDescription>
                   <FormMessage />
                 </FormItem>
               )}
@@ -736,24 +688,18 @@ export default function ProductionOrderFormDialog({
                         // Recalculate ingredient quantities when planned quantity changes
                         if (selectedRecipe && selectedRecipe.ingredients) {
                           const scalingFactor =
-                            parseFloat(e.target.value) /
-                            parseFloat(selectedRecipe.outputQuantity);
+                            parseFloat(e.target.value) / parseFloat(selectedRecipe.outputQuantity);
                           fields.forEach((_, index) => {
                             const ingredientMaterialId = form.getValues(
                               `ingredients.${index}.materialId`
                             );
-                            const recipeIngredient =
-                              selectedRecipe.ingredients?.find(
-                                (ing) => ing.materialId === ingredientMaterialId
-                              );
+                            const recipeIngredient = selectedRecipe.ingredients?.find(
+                              (ing) => ing.materialId === ingredientMaterialId
+                            );
                             if (recipeIngredient) {
                               const scaledQty =
-                                parseFloat(recipeIngredient.quantity) *
-                                scalingFactor;
-                              form.setValue(
-                                `ingredients.${index}.quantity`,
-                                scaledQty.toFixed(2)
-                              );
+                                parseFloat(recipeIngredient.quantity) * scalingFactor;
+                              form.setValue(`ingredients.${index}.quantity`, scaledQty.toFixed(2));
                             }
                           });
                         }
@@ -765,8 +711,7 @@ export default function ProductionOrderFormDialog({
                       `Ingredients will be scaled by ${
                         field.value
                           ? (
-                              parseFloat(field.value) /
-                              parseFloat(selectedRecipe.outputQuantity)
+                              parseFloat(field.value) / parseFloat(selectedRecipe.outputQuantity)
                             ).toFixed(2)
                           : '0.00'
                       }x`}
@@ -851,28 +796,27 @@ export default function ProductionOrderFormDialog({
                   <FormItem>
                     <div className='flex items-center justify-between'>
                       <FormLabel>Output Material Inventory *</FormLabel>
-                      {outputMaterialInventories.length === 0 &&
-                        selectedLocation && (
-                          <Button
-                            type='button'
-                            variant='outline'
-                            size='sm'
-                            onClick={createMaterialInventory}
-                            disabled={creatingInventory}
-                          >
-                            {creatingInventory ? (
-                              <>
-                                <Loader2 className='h-3 w-3 mr-1 animate-spin' />
-                                Creating...
-                              </>
-                            ) : (
-                              <>
-                                <Plus className='h-3 w-3 mr-1' />
-                                Create New
-                              </>
-                            )}
-                          </Button>
-                        )}
+                      {outputMaterialInventories.length === 0 && selectedLocation && (
+                        <Button
+                          type='button'
+                          variant='outline'
+                          size='sm'
+                          onClick={createMaterialInventory}
+                          disabled={creatingInventory}
+                        >
+                          {creatingInventory ? (
+                            <>
+                              <Loader2 className='h-3 w-3 mr-1 animate-spin' />
+                              Creating...
+                            </>
+                          ) : (
+                            <>
+                              <Plus className='h-3 w-3 mr-1' />
+                              Create New
+                            </>
+                          )}
+                        </Button>
+                      )}
                     </div>
                     <Select
                       onValueChange={field.onChange}
@@ -919,9 +863,7 @@ export default function ProductionOrderFormDialog({
                   <FormControl>
                     <Input type='date' {...field} />
                   </FormControl>
-                  <FormDescription>
-                    When do you plan to start production?
-                  </FormDescription>
+                  <FormDescription>When do you plan to start production?</FormDescription>
                   <FormMessage />
                 </FormItem>
               )}
@@ -961,32 +903,24 @@ export default function ProductionOrderFormDialog({
               {loading && fields.length === 0 ? (
                 <div className='flex items-center justify-center py-8'>
                   <Loader2 className='h-6 w-6 animate-spin text-muted-foreground' />
-                  <span className='ml-2 text-sm text-muted-foreground'>
-                    Loading ingredients...
-                  </span>
+                  <span className='ml-2 text-sm text-muted-foreground'>Loading ingredients...</span>
                 </div>
               ) : fields.length === 0 ? (
                 <div className='text-center py-8 border-2 border-dashed rounded-lg'>
-                  <p className='text-sm text-muted-foreground mb-2'>
-                    No ingredients added yet
-                  </p>
+                  <p className='text-sm text-muted-foreground mb-2'>No ingredients added yet</p>
                   <p className='text-xs text-muted-foreground'>
                     {!selectedRecipe
                       ? 'Select a recipe to load ingredients automatically'
                       : !selectedLocation
-                      ? 'Select a location to continue'
-                      : 'Click "Add Ingredient" to add ingredients manually'}
+                        ? 'Select a location to continue'
+                        : 'Click "Add Ingredient" to add ingredients manually'}
                   </p>
                 </div>
               ) : (
                 <div className='space-y-3'>
                   {fields.map((field, index) => {
-                    const materialId = form.watch(
-                      `ingredients.${index}.materialId`
-                    );
-                    const materialName = materials.find(
-                      (m) => m.id === materialId
-                    )?.name;
+                    const materialId = form.watch(`ingredients.${index}.materialId`);
+                    const materialName = materials.find((m) => m.id === materialId)?.name;
 
                     return (
                       <Card key={field.id}>
@@ -1033,10 +967,7 @@ export default function ProductionOrderFormDialog({
                                     </FormControl>
                                     <SelectContent>
                                       {materials.map((material) => (
-                                        <SelectItem
-                                          key={material.id}
-                                          value={material.id}
-                                        >
+                                        <SelectItem key={material.id} value={material.id}>
                                           {material.name}
                                         </SelectItem>
                                       ))}
@@ -1051,11 +982,8 @@ export default function ProductionOrderFormDialog({
                               control={form.control}
                               name={`ingredients.${index}.materialInventoryId`}
                               render={({ field }) => {
-                                const materialId = form.watch(
-                                  `ingredients.${index}.materialId`
-                                );
-                                const inventories =
-                                  materialInventories[materialId] || [];
+                                const materialId = form.watch(`ingredients.${index}.materialId`);
+                                const inventories = materialInventories[materialId] || [];
 
                                 return (
                                   <FormItem>
@@ -1077,13 +1005,9 @@ export default function ProductionOrderFormDialog({
                                           </div>
                                         ) : (
                                           inventories.map((inv) => (
-                                            <SelectItem
-                                              key={inv.id}
-                                              value={inv.id}
-                                            >
-                                              {inv.variantName ||
-                                                inv.material.name}{' '}
-                                              @ {inv.location.name}
+                                            <SelectItem key={inv.id} value={inv.id}>
+                                              {inv.variantName || inv.material.name} @{' '}
+                                              {inv.location.name}
                                             </SelectItem>
                                           ))
                                         )}
@@ -1124,11 +1048,7 @@ export default function ProductionOrderFormDialog({
                                 <FormItem>
                                   <FormLabel>Unit *</FormLabel>
                                   <FormControl>
-                                    <Input
-                                      placeholder='kg, L, pcs'
-                                      {...field}
-                                      readOnly
-                                    />
+                                    <Input placeholder='kg, L, pcs' {...field} readOnly />
                                   </FormControl>
                                   <FormMessage />
                                 </FormItem>
@@ -1172,14 +1092,12 @@ export default function ProductionOrderFormDialog({
 
                   <div className='text-muted-foreground'>Output:</div>
                   <div className='font-medium'>
-                    {form.watch('plannedQuantity')}{' '}
-                    {selectedRecipe.unitOfMeasure}
+                    {form.watch('plannedQuantity')} {selectedRecipe.unitOfMeasure}
                   </div>
 
                   <div className='text-muted-foreground'>Location:</div>
                   <div className='font-medium'>
-                    {locations.find((l) => l.id === selectedLocation)?.name ||
-                      '-'}
+                    {locations.find((l) => l.id === selectedLocation)?.name || '-'}
                   </div>
 
                   <div className='text-muted-foreground'>Ingredients:</div>
@@ -1197,13 +1115,8 @@ export default function ProductionOrderFormDialog({
               >
                 Cancel
               </Button>
-              <Button
-                type='submit'
-                disabled={submitting || fields.length === 0}
-              >
-                {submitting && (
-                  <Loader2 className='mr-2 h-4 w-4 animate-spin' />
-                )}
+              <Button type='submit' disabled={submitting || fields.length === 0}>
+                {submitting && <Loader2 className='mr-2 h-4 w-4 animate-spin' />}
                 Create Order
               </Button>
             </DialogFooter>
@@ -1242,8 +1155,7 @@ export default function ProductionOrderFormDialog({
                     />
                   </FormControl>
                   <FormDescription>
-                    This will be the selling price per{' '}
-                    {selectedRecipe?.unitOfMeasure || 'unit'}
+                    This will be the selling price per {selectedRecipe?.unitOfMeasure || 'unit'}
                   </FormDescription>
                   <FormMessage />
                 </FormItem>
@@ -1257,10 +1169,7 @@ export default function ProductionOrderFormDialog({
                 <FormItem>
                   <FormLabel>Variant Name (Optional)</FormLabel>
                   <FormControl>
-                    <Input
-                      placeholder='e.g., Standard, Large, Premium'
-                      {...field}
-                    />
+                    <Input placeholder='e.g., Standard, Large, Premium' {...field} />
                   </FormControl>
                   <FormDescription>
                     Distinguishes different variants of the same product
@@ -1280,9 +1189,7 @@ export default function ProductionOrderFormDialog({
                 Cancel
               </Button>
               <Button type='submit' disabled={creatingInventory}>
-                {creatingInventory && (
-                  <Loader2 className='mr-2 h-4 w-4 animate-spin' />
-                )}
+                {creatingInventory && <Loader2 className='mr-2 h-4 w-4 animate-spin' />}
                 Create Inventory
               </Button>
             </DialogFooter>

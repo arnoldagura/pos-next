@@ -32,19 +32,14 @@ async function getPermissionsHandler() {
       .where(
         or(
           eq(permission.isGlobal, true),
-          tenantId
-            ? eq(permission.organizationId, tenantId)
-            : isNull(permission.organizationId)
+          tenantId ? eq(permission.organizationId, tenantId) : isNull(permission.organizationId)
         )
       );
 
     return NextResponse.json({ permissions });
   } catch (error) {
     console.error('Error fetching permissions:', error);
-    return NextResponse.json(
-      { error: 'Failed to fetch permissions' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to fetch permissions' }, { status: 500 });
   }
 }
 
@@ -92,10 +87,7 @@ async function createPermissionHandler(req: NextRequest) {
       );
     }
 
-    return NextResponse.json(
-      { error: 'Failed to create permission' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to create permission' }, { status: 500 });
   }
 }
 

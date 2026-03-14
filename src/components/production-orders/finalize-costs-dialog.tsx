@@ -101,8 +101,7 @@ export default function FinalizeCostsDialog({
   );
   const laborCost = parseFloat(form.watch('laborCost') || '0');
   const overheadCost = parseFloat(form.watch('overheadCost') || '0');
-  const totalCost =
-    calculatedMaterialCost + laborCost + overheadCost || materialCost;
+  const totalCost = calculatedMaterialCost + laborCost + overheadCost || materialCost;
 
   // Fetch materials when dialog opens
   useEffect(() => {
@@ -174,17 +173,14 @@ export default function FinalizeCostsDialog({
       }
 
       // Then finalize costs
-      const response = await fetch(
-        `/api/production-orders/${orderId}/finalize`,
-        {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            laborCost: parseFloat(values.laborCost),
-            overheadCost: parseFloat(values.overheadCost),
-          }),
-        }
-      );
+      const response = await fetch(`/api/production-orders/${orderId}/finalize`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          laborCost: parseFloat(values.laborCost),
+          overheadCost: parseFloat(values.overheadCost),
+        }),
+      });
 
       if (!response.ok) {
         const error = await response.json();
@@ -197,9 +193,7 @@ export default function FinalizeCostsDialog({
       onSuccess();
     } catch (error) {
       console.error('Error finalizing costs:', error);
-      toast.error(
-        error instanceof Error ? error.message : 'Failed to finalize costs'
-      );
+      toast.error(error instanceof Error ? error.message : 'Failed to finalize costs');
     } finally {
       setSubmitting(false);
     }
@@ -211,8 +205,8 @@ export default function FinalizeCostsDialog({
         <DialogHeader>
           <DialogTitle>Finalize Production Costs</DialogTitle>
           <DialogDescription>
-            Review and adjust material costs, add labor and overhead costs to
-            calculate the total production cost.
+            Review and adjust material costs, add labor and overhead costs to calculate the total
+            production cost.
           </DialogDescription>
         </DialogHeader>
 
@@ -232,37 +226,27 @@ export default function FinalizeCostsDialog({
                 {fields.map((field, index) => {
                   const material = materials[index];
                   return (
-                    <Card
-                      key={field.id}
-                      className='border-l-4 border-l-blue-200'
-                    >
+                    <Card key={field.id} className='border-l-4 border-l-blue-200'>
                       <CardContent className='pt-4 pb-4'>
                         <div className='space-y-3'>
                           <div className='flex items-center justify-between'>
                             <div>
-                              <div className='font-medium text-sm'>
-                                {material.materialName}
-                              </div>
+                              <div className='font-medium text-sm'>{material.materialName}</div>
                               <div className='text-xs text-muted-foreground'>
-                                Quantity: {material.quantity}{' '}
-                                {material.unitOfMeasure}
+                                Quantity: {material.quantity} {material.unitOfMeasure}
                               </div>
                             </div>
                           </div>
 
                           <div className='grid grid-cols-2 gap-3'>
                             <div>
-                              <label className='text-xs text-muted-foreground'>
-                                Unit Cost ($)
-                              </label>
+                              <label className='text-xs text-muted-foreground'>Unit Cost ($)</label>
                               <Input
                                 type='number'
                                 step='0.01'
                                 min='0'
                                 value={material.unitCost}
-                                onChange={(e) =>
-                                  handleUnitCostChange(index, e.target.value)
-                                }
+                                onChange={(e) => handleUnitCostChange(index, e.target.value)}
                                 className='mt-1'
                               />
                             </div>
@@ -272,9 +256,7 @@ export default function FinalizeCostsDialog({
                               </label>
                               <Input
                                 type='text'
-                                value={parseFloat(material.totalCost).toFixed(
-                                  2
-                                )}
+                                value={parseFloat(material.totalCost).toFixed(2)}
                                 disabled
                                 className='mt-1 bg-muted'
                               />
@@ -297,18 +279,10 @@ export default function FinalizeCostsDialog({
                   <FormControl>
                     <div className='flex items-center gap-2'>
                       <span className='text-sm'>$</span>
-                      <Input
-                        type='number'
-                        step='0.01'
-                        min='0'
-                        placeholder='0.00'
-                        {...field}
-                      />
+                      <Input type='number' step='0.01' min='0' placeholder='0.00' {...field} />
                     </div>
                   </FormControl>
-                  <FormDescription>
-                    Total labor cost for this production run
-                  </FormDescription>
+                  <FormDescription>Total labor cost for this production run</FormDescription>
                   <FormMessage />
                 </FormItem>
               )}
@@ -323,18 +297,10 @@ export default function FinalizeCostsDialog({
                   <FormControl>
                     <div className='flex items-center gap-2'>
                       <span className='text-sm'>$</span>
-                      <Input
-                        type='number'
-                        step='0.01'
-                        min='0'
-                        placeholder='0.00'
-                        {...field}
-                      />
+                      <Input type='number' step='0.01' min='0' placeholder='0.00' {...field} />
                     </div>
                   </FormControl>
-                  <FormDescription>
-                    Facility, utilities, equipment costs, etc.
-                  </FormDescription>
+                  <FormDescription>Facility, utilities, equipment costs, etc.</FormDescription>
                   <FormMessage />
                 </FormItem>
               )}
@@ -344,9 +310,7 @@ export default function FinalizeCostsDialog({
               <div className='space-y-2 text-sm'>
                 <div className='flex justify-between'>
                   <span className='text-muted-foreground'>Material Cost:</span>
-                  <span className='font-medium'>
-                    ${calculatedMaterialCost.toFixed(2)}
-                  </span>
+                  <span className='font-medium'>${calculatedMaterialCost.toFixed(2)}</span>
                 </div>
                 {laborCost > 0 && (
                   <div className='flex justify-between'>
@@ -356,12 +320,8 @@ export default function FinalizeCostsDialog({
                 )}
                 {overheadCost > 0 && (
                   <div className='flex justify-between'>
-                    <span className='text-muted-foreground'>
-                      Overhead Cost:
-                    </span>
-                    <span className='font-medium'>
-                      ${overheadCost.toFixed(2)}
-                    </span>
+                    <span className='text-muted-foreground'>Overhead Cost:</span>
+                    <span className='font-medium'>${overheadCost.toFixed(2)}</span>
                   </div>
                 )}
                 <div className='flex justify-between pt-2 border-t'>
@@ -393,9 +353,7 @@ export default function FinalizeCostsDialog({
                 Cancel
               </Button>
               <Button type='submit' disabled={submitting}>
-                {submitting && (
-                  <Loader2 className='mr-2 h-4 w-4 animate-spin' />
-                )}
+                {submitting && <Loader2 className='mr-2 h-4 w-4 animate-spin' />}
                 Finalize Costs
               </Button>
             </DialogFooter>

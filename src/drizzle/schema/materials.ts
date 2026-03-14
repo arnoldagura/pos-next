@@ -1,12 +1,5 @@
 import { relations } from 'drizzle-orm';
-import {
-  pgTable,
-  text,
-  timestamp,
-  boolean,
-  index,
-  pgEnum,
-} from 'drizzle-orm/pg-core';
+import { pgTable, text, timestamp, boolean, index, pgEnum } from 'drizzle-orm/pg-core';
 import { materialCategory } from './categories';
 import { organization } from './organizations';
 

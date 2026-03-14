@@ -26,12 +26,7 @@ type DeleteUserDialogProps = {
   onSuccess: () => void;
 };
 
-export function DeleteUserDialog({
-  user,
-  open,
-  onOpenChange,
-  onSuccess,
-}: DeleteUserDialogProps) {
+export function DeleteUserDialog({ user, open, onOpenChange, onSuccess }: DeleteUserDialogProps) {
   const [loading, setLoading] = useState(false);
 
   const handleDelete = async () => {
@@ -62,8 +57,7 @@ export function DeleteUserDialog({
             <DialogTitle>Delete User</DialogTitle>
           </div>
           <DialogDescription>
-            Are you sure you want to delete this user? This action cannot be
-            undone.
+            Are you sure you want to delete this user? This action cannot be undone.
           </DialogDescription>
         </DialogHeader>
 
@@ -88,12 +82,7 @@ export function DeleteUserDialog({
           >
             Cancel
           </Button>
-          <Button
-            type='button'
-            variant='destructive'
-            onClick={handleDelete}
-            disabled={loading}
-          >
+          <Button type='button' variant='destructive' onClick={handleDelete} disabled={loading}>
             {loading ? 'Deleting...' : 'Delete User'}
           </Button>
         </DialogFooter>

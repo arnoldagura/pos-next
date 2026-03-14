@@ -57,9 +57,7 @@ export const ProductCard = memo(function ProductCard({
         <h3 className='font-semibold text-sm line-clamp-2 group-hover:text-blue-600 transition-colors'>
           {product.name}
         </h3>
-        {product.sku && (
-          <p className='text-xs text-muted-foreground'>SKU: {product.sku}</p>
-        )}
+        {product.sku && <p className='text-xs text-muted-foreground'>SKU: {product.sku}</p>}
         <div className='flex items-center justify-between'>
           <span className='text-lg font-bold'>${product.sellingPrice}</span>
           {!isOutOfStock && (

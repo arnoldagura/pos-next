@@ -40,10 +40,7 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ customers });
   } catch (error) {
     console.error('Error fetching customers:', error);
-    return NextResponse.json(
-      { error: 'Failed to fetch customers' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to fetch customers' }, { status: 500 });
   }
 }
 
@@ -51,23 +48,10 @@ export async function POST(req: NextRequest) {
   try {
     const tenantId = await requireTenantId();
     const body = await req.json();
-    const {
-      name,
-      email,
-      phone,
-      address,
-      city,
-      state,
-      zipCode,
-      country,
-      notes,
-    } = body;
+    const { name, email, phone, address, city, state, zipCode, country, notes } = body;
 
     if (!name) {
-      return NextResponse.json(
-        { error: 'Name is required' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Name is required' }, { status: 400 });
     }
 
     const [newCustomer] = await db
@@ -92,9 +76,6 @@ export async function POST(req: NextRequest) {
     return NextResponse.json(newCustomer, { status: 201 });
   } catch (error) {
     console.error('Error creating customer:', error);
-    return NextResponse.json(
-      { error: 'Failed to create customer' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to create customer' }, { status: 500 });
   }
 }

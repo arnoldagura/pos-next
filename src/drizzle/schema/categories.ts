@@ -1,13 +1,5 @@
 import { ColumnBaseConfig, ColumnDataType, relations } from 'drizzle-orm';
-import {
-  pgTable,
-  text,
-  timestamp,
-  boolean,
-  integer,
-  PgColumn,
-  index,
-} from 'drizzle-orm/pg-core';
+import { pgTable, text, timestamp, boolean, integer, PgColumn, index } from 'drizzle-orm/pg-core';
 import { organization } from './organizations';
 
 export const productCategory = pgTable(
@@ -21,8 +13,7 @@ export const productCategory = pgTable(
     description: text('description'),
     slug: text('slug').notNull().unique(),
     parentId: text('parent_id').references(
-      (): PgColumn<ColumnBaseConfig<ColumnDataType, string>, object, object> =>
-        productCategory.id,
+      (): PgColumn<ColumnBaseConfig<ColumnDataType, string>, object, object> => productCategory.id,
       {
         onDelete: 'set null',
       }
@@ -68,8 +59,7 @@ export const materialCategory = pgTable(
     description: text('description'),
     slug: text('slug').notNull().unique(),
     parentId: text('parent_id').references(
-      (): PgColumn<ColumnBaseConfig<ColumnDataType, string>, object, object> =>
-        materialCategory.id,
+      (): PgColumn<ColumnBaseConfig<ColumnDataType, string>, object, object> => materialCategory.id,
       {
         onDelete: 'set null',
       }

@@ -14,11 +14,7 @@ import {
   CommandItem,
   CommandList,
 } from '@/components/ui/command';
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from '@/components/ui/popover';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { toast } from 'sonner';
 
 interface Organization {
@@ -126,9 +122,7 @@ export function TenantSelector({
         >
           <div className='flex items-center gap-2 min-w-0'>
             <Building2 className='h-4 w-4 shrink-0' />
-            <span className='truncate'>
-              {currentOrg?.name || 'Select organization'}
-            </span>
+            <span className='truncate'>{currentOrg?.name || 'Select organization'}</span>
           </div>
           <ChevronsUpDown className='ml-2 h-4 w-4 shrink-0 opacity-50' />
         </Button>
@@ -180,15 +174,11 @@ function OrganizationList({
               <div className='flex flex-col min-w-0 flex-1'>
                 <span className='truncate'>{org.name}</span>
                 {org.role && (
-                  <span className='text-xs text-muted-foreground truncate'>
-                    {org.role}
-                  </span>
+                  <span className='text-xs text-muted-foreground truncate'>{org.role}</span>
                 )}
               </div>
               {org.isDefault && (
-                <span className='ml-2 text-xs bg-muted px-2 py-0.5 rounded'>
-                  Default
-                </span>
+                <span className='ml-2 text-xs bg-muted px-2 py-0.5 rounded'>Default</span>
               )}
             </CommandItem>
           ))}

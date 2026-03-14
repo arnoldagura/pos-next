@@ -1,12 +1,5 @@
 import { relations } from 'drizzle-orm';
-import {
-  pgTable,
-  text,
-  timestamp,
-  numeric,
-  index,
-  pgEnum,
-} from 'drizzle-orm/pg-core';
+import { pgTable, text, timestamp, numeric, index, pgEnum } from 'drizzle-orm/pg-core';
 import { productInventory } from './product-inventories';
 
 export const movementTypeEnum = pgEnum('movement_type', [
@@ -38,27 +31,20 @@ export const productInventoryMovement = pgTable(
     createdAt: timestamp('created_at').defaultNow().notNull(),
   },
   (table) => ({
-    inventoryIdx: index('product_inventory_movement_inventory_idx').on(
-      table.productInventoryId
-    ),
+    inventoryIdx: index('product_inventory_movement_inventory_idx').on(table.productInventoryId),
     typeIdx: index('product_inventory_movement_type_idx').on(table.type),
     dateIdx: index('product_inventory_movement_date_idx').on(table.date),
     referenceIdx: index('product_inventory_movement_reference_idx').on(
       table.referenceType,
       table.referenceId
     ),
-    createdByIdx: index('product_inventory_movement_created_by_idx').on(
-      table.createdBy
-    ),
+    createdByIdx: index('product_inventory_movement_created_by_idx').on(table.createdBy),
   })
 );
 
-export const inventoryMovementRelations = relations(
-  productInventoryMovement,
-  ({ one }) => ({
-    inventory: one(productInventory, {
-      fields: [productInventoryMovement.productInventoryId],
-      references: [productInventory.id],
-    }),
-  })
-);
+export const inventoryMovementRelations = relations(productInventoryMovement, ({ one }) => ({
+  inventory: one(productInventory, {
+    fields: [productInventoryMovement.productInventoryId],
+    references: [productInventory.id],
+  }),
+}));

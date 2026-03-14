@@ -2,10 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { checkMaterialAvailability } from '@/lib/services/production-workflow';
 
 // GET /api/production-orders/[id]/check-availability
-export async function GET(
-  request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
+export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const { id } = await params;
 
@@ -25,9 +22,6 @@ export async function GET(
       return NextResponse.json({ error: error.message }, { status: 400 });
     }
 
-    return NextResponse.json(
-      { error: 'Failed to check material availability' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to check material availability' }, { status: 500 });
   }
 }

@@ -6,11 +6,7 @@ export const metadata: Metadata = {
   description: 'View inventory movements history',
 };
 
-export default async function InventoryMovementsPage({
-  params,
-}: {
-  params: { id: string };
-}) {
+export default async function InventoryMovementsPage({ params }: { params: { id: string } }) {
   const { id } = await params;
 
   console.log('sad');

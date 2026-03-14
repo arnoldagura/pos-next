@@ -13,10 +13,7 @@ async function getUsersHandler(req: NextRequest) {
     const tenantId = await getTenantId();
 
     if (!tenantId) {
-      return NextResponse.json(
-        { error: 'No tenant context available' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'No tenant context available' }, { status: 400 });
     }
 
     const { searchParams } = new URL(req.url);
@@ -46,8 +43,7 @@ async function getUsersHandler(req: NextRequest) {
       updatedAt: user.updatedAt,
     } as const;
 
-    const sortColumn =
-      sortableColumns[sortBy as keyof typeof sortableColumns] || user.createdAt;
+    const sortColumn = sortableColumns[sortBy as keyof typeof sortableColumns] || user.createdAt;
 
     const users = await db
       .selectDistinct({
@@ -76,10 +72,7 @@ async function getUsersHandler(req: NextRequest) {
           .from(userOrganization)
           .innerJoin(role, eq(userOrganization.roleId, role.id))
           .where(
-            and(
-              eq(userOrganization.userId, u.id),
-              eq(userOrganization.organizationId, tenantId)
-            )
+            and(eq(userOrganization.userId, u.id), eq(userOrganization.organizationId, tenantId))
           );
 
         return {
@@ -103,10 +96,7 @@ async function getUsersHandler(req: NextRequest) {
     });
   } catch (error) {
     console.error('Error fetching users:', error);
-    return NextResponse.json(
-      { error: 'Failed to fetch users' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to fetch users' }, { status: 500 });
   }
 }
 
@@ -122,10 +112,7 @@ async function createUserHandler(req: NextRequest) {
     const tenantId = await getTenantId();
 
     if (!tenantId) {
-      return NextResponse.json(
-        { error: 'No tenant context available' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'No tenant context available' }, { status: 400 });
     }
 
     const body = await req.json();
@@ -184,10 +171,7 @@ async function createUserHandler(req: NextRequest) {
     });
 
     if (!result || !result.user) {
-      return NextResponse.json(
-        { error: 'Failed to create user account' },
-        { status: 500 }
-      );
+      return NextResponse.json({ error: 'Failed to create user account' }, { status: 500 });
     }
 
     const userId = result.user.id;
@@ -218,10 +202,7 @@ async function createUserHandler(req: NextRequest) {
       );
     }
 
-    return NextResponse.json(
-      { error: 'Failed to create user' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to create user' }, { status: 500 });
   }
 }
 

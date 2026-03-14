@@ -3,14 +3,14 @@
 import { useEffect, useCallback } from 'react';
 
 export interface PosShortcutHandlers {
-  onNewOrder?: () => void;       // F1
-  onSearch?: () => void;         // F2
-  onCheckout?: () => void;       // F3
-  onHoldOrder?: () => void;      // F4
-  onPendingOrders?: () => void;  // F5
-  onTableSelect?: () => void;    // F6
-  onClearCart?: () => void;      // F8
-  onHelp?: () => void;           // ?
+  onNewOrder?: () => void; // F1
+  onSearch?: () => void; // F2
+  onCheckout?: () => void; // F3
+  onHoldOrder?: () => void; // F4
+  onPendingOrders?: () => void; // F5
+  onTableSelect?: () => void; // F6
+  onClearCart?: () => void; // F8
+  onHelp?: () => void; // ?
 }
 
 export function usePosShortcuts(handlers: PosShortcutHandlers) {
@@ -19,9 +19,7 @@ export function usePosShortcuts(handlers: PosShortcutHandlers) {
       // Don't trigger shortcuts when typing in inputs/textareas
       const target = e.target as HTMLElement;
       const isInput =
-        target.tagName === 'INPUT' ||
-        target.tagName === 'TEXTAREA' ||
-        target.isContentEditable;
+        target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable;
 
       // Allow F-keys and ? even when in inputs (except for search-related)
       if (isInput && !e.key.startsWith('F')) {

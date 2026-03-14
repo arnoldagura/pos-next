@@ -15,14 +15,12 @@ vi.mock('@/hooks/use-movements');
 // Mock the child components
 vi.mock('@/components/inventory/movement-table', () => ({
   MovementTable: ({ movements }: { movements: unknown[] }) => (
-    <div data-testid="movement-table">
-      Movement Table with {movements.length} movements
-    </div>
+    <div data-testid='movement-table'>Movement Table with {movements.length} movements</div>
   ),
 }));
 
 vi.mock('@/components/inventory/movement-filters', () => ({
-  MovementFilters: () => <div data-testid="movement-filters">Filters</div>,
+  MovementFilters: () => <div data-testid='movement-filters'>Filters</div>,
 }));
 
 describe('MovementHistoryPage', () => {

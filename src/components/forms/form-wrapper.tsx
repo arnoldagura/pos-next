@@ -49,10 +49,7 @@ export function FormWrapper<TFieldValues extends FieldValues>({
   };
 
   return (
-    <form
-      onSubmit={form.handleSubmit(handleSubmit)}
-      className={cn('space-y-6', className)}
-    >
+    <form onSubmit={form.handleSubmit(handleSubmit)} className={cn('space-y-6', className)}>
       {children(form)}
     </form>
   );
@@ -96,9 +93,7 @@ export function FormFieldWrapper({
 
       {children}
 
-      {description && !errorMessage && (
-        <p className='text-sm text-gray-500'>{description}</p>
-      )}
+      {description && !errorMessage && <p className='text-sm text-gray-500'>{description}</p>}
 
       {errorMessage && (
         <p role='alert' className='text-sm text-red-500 font-medium'>

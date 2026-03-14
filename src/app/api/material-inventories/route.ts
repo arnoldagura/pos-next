@@ -15,10 +15,7 @@ const createMaterialInventorySchema = z.object({
   currentQuantity: z.number().optional(),
   unitOfMeasure: z.string().min(1, 'Unit of measure is required'),
   cost: z.number().min(0).optional(),
-  alertThreshold: z
-    .number()
-    .nonnegative('Alert threshold must be non-negative')
-    .optional(),
+  alertThreshold: z.number().nonnegative('Alert threshold must be non-negative').optional(),
 });
 
 // GET /api/material-inventories - List material inventories with filters
@@ -122,10 +119,7 @@ export async function GET(request: NextRequest) {
     });
   } catch (error) {
     console.error('Error fetching material inventories:', error);
-    return NextResponse.json(
-      { error: 'Failed to fetch material inventories' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to fetch material inventories' }, { status: 500 });
   }
 }
 
@@ -167,8 +161,7 @@ export async function POST(request: NextRequest) {
     if (existing) {
       return NextResponse.json(
         {
-          error:
-            'Material inventory already exists for this material and location',
+          error: 'Material inventory already exists for this material and location',
         },
         { status: 400 }
       );
@@ -213,9 +206,6 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: error.message }, { status: 400 });
     }
 
-    return NextResponse.json(
-      { error: 'Failed to create material inventory' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to create material inventory' }, { status: 500 });
   }
 }

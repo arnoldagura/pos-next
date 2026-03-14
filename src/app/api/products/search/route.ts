@@ -14,10 +14,7 @@ export async function searchProductsHandler(req: NextRequest) {
     const limit = parseInt(searchParams.get('limit') || '10', 10);
 
     if (!query) {
-      return NextResponse.json(
-        { error: 'Search query is required' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Search query is required' }, { status: 400 });
     }
 
     const products = await db
@@ -44,10 +41,7 @@ export async function searchProductsHandler(req: NextRequest) {
   } catch (error) {
     console.error('Error searching products:', error);
 
-    return NextResponse.json(
-      { error: 'Failed to search products' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to search products' }, { status: 500 });
   }
 }
 

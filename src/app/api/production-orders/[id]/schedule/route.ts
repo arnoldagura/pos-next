@@ -7,10 +7,7 @@ const scheduleSchema = z.object({
 });
 
 // POST /api/production-orders/[id]/schedule
-export async function POST(
-  request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
+export async function POST(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const { id } = await params;
     const body = await request.json();
@@ -36,9 +33,6 @@ export async function POST(
       return NextResponse.json({ error: error.message }, { status: 400 });
     }
 
-    return NextResponse.json(
-      { error: 'Failed to schedule production order' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to schedule production order' }, { status: 500 });
   }
 }

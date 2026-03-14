@@ -123,7 +123,9 @@ async function migrate() {
   // Also create audit_log and user_invitation tables if they don't exist
   console.log('\nStep 6: Creating audit_log and user_invitation tables...');
   try {
-    await sql.unsafe(`CREATE TYPE "public"."invitation_status" AS ENUM('pending', 'accepted', 'expired', 'cancelled')`);
+    await sql.unsafe(
+      `CREATE TYPE "public"."invitation_status" AS ENUM('pending', 'accepted', 'expired', 'cancelled')`
+    );
     console.log('  + invitation_status enum created');
   } catch (e: unknown) {
     const err = e as { code?: string };
@@ -146,7 +148,9 @@ async function migrate() {
       "user_agent" text,
       "timestamp" timestamp DEFAULT now() NOT NULL
     )`);
-    await sql.unsafe(`ALTER TABLE "audit_log" ADD CONSTRAINT "audit_log_user_id_user_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."user"("id") ON DELETE cascade ON UPDATE no action`);
+    await sql.unsafe(
+      `ALTER TABLE "audit_log" ADD CONSTRAINT "audit_log_user_id_user_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."user"("id") ON DELETE cascade ON UPDATE no action`
+    );
     console.log('  + audit_log table created');
   } catch (e: unknown) {
     const err = e as { code?: string };
@@ -173,8 +177,12 @@ async function migrate() {
       "updated_at" timestamp DEFAULT now() NOT NULL,
       CONSTRAINT "user_invitation_token_unique" UNIQUE("token")
     )`);
-    await sql.unsafe(`ALTER TABLE "user_invitation" ADD CONSTRAINT "user_invitation_organization_id_organization_id_fk" FOREIGN KEY ("organization_id") REFERENCES "public"."organization"("id") ON DELETE cascade ON UPDATE no action`);
-    await sql.unsafe(`ALTER TABLE "user_invitation" ADD CONSTRAINT "user_invitation_role_id_role_id_fk" FOREIGN KEY ("role_id") REFERENCES "public"."role"("id") ON DELETE no action ON UPDATE no action`);
+    await sql.unsafe(
+      `ALTER TABLE "user_invitation" ADD CONSTRAINT "user_invitation_organization_id_organization_id_fk" FOREIGN KEY ("organization_id") REFERENCES "public"."organization"("id") ON DELETE cascade ON UPDATE no action`
+    );
+    await sql.unsafe(
+      `ALTER TABLE "user_invitation" ADD CONSTRAINT "user_invitation_role_id_role_id_fk" FOREIGN KEY ("role_id") REFERENCES "public"."role"("id") ON DELETE no action ON UPDATE no action`
+    );
     console.log('  + user_invitation table created');
   } catch (e: unknown) {
     const err = e as { code?: string };

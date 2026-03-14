@@ -14,15 +14,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
-import {
-  Clock,
-  ShoppingCart,
-  Trash2,
-  CheckCircle2,
-  MapPin,
-  User,
-  Package,
-} from 'lucide-react';
+import { Clock, ShoppingCart, Trash2, CheckCircle2, MapPin, User, Package } from 'lucide-react';
 import { toast } from 'sonner';
 import {
   AlertDialog,
@@ -40,10 +32,7 @@ interface PendingOrdersPanelProps {
   onOpenChange?: (open: boolean) => void;
 }
 
-export function PendingOrdersPanel({
-  open,
-  onOpenChange,
-}: PendingOrdersPanelProps) {
+export function PendingOrdersPanel({ open, onOpenChange }: PendingOrdersPanelProps) {
   const carts = useCartStore((state) => state.carts);
   const activeCartId = useCartStore((state) => state.activeCartId);
   const switchCart = useCartStore((state) => state.switchCart);
@@ -53,9 +42,7 @@ export function PendingOrdersPanel({
 
   const allCarts = useMemo(() => Array.from(carts.values()), [carts]);
 
-  const pendingCarts = allCarts.filter(
-    (cart) => cart.items.length > 0 && cart.id !== activeCartId
-  );
+  const pendingCarts = allCarts.filter((cart) => cart.items.length > 0 && cart.id !== activeCartId);
 
   const handleResumeCart = (cartId: string) => {
     switchCart(cartId);
@@ -100,8 +87,7 @@ export function PendingOrdersPanel({
 
       <div className='flex items-center justify-between mb-4'>
         <p className='text-sm text-muted-foreground'>
-          {pendingCarts.length} pending{' '}
-          {pendingCarts.length === 1 ? 'order' : 'orders'}
+          {pendingCarts.length} pending {pendingCarts.length === 1 ? 'order' : 'orders'}
         </p>
       </div>
 
@@ -110,9 +96,7 @@ export function PendingOrdersPanel({
           <div className='flex flex-col items-center justify-center py-12 text-center'>
             <ShoppingCart className='h-16 w-16 text-muted-foreground/50 mb-4' />
             <h3 className='text-lg font-medium mb-2'>No Pending Orders</h3>
-            <p className='text-sm text-muted-foreground'>
-              Hold an order to save it for later
-            </p>
+            <p className='text-sm text-muted-foreground'>Hold an order to save it for later</p>
           </div>
         ) : (
           <div className='space-y-3'>
@@ -161,9 +145,7 @@ export function PendingOrdersPanel({
                       </div>
                     ))}
                     {cart.items.length > 3 && (
-                      <div className='text-muted-foreground/70'>
-                        +{cart.items.length - 3} more
-                      </div>
+                      <div className='text-muted-foreground/70'>+{cart.items.length - 3} more</div>
                     )}
                   </div>
                 </div>
@@ -171,26 +153,16 @@ export function PendingOrdersPanel({
                 {/* Total */}
                 <div className='flex items-center justify-between pt-3 border-t'>
                   <span className='text-sm font-semibold'>Total:</span>
-                  <span className='text-lg font-bold text-primary'>
-                    ${cart.total.toFixed(2)}
-                  </span>
+                  <span className='text-lg font-bold text-primary'>${cart.total.toFixed(2)}</span>
                 </div>
 
                 {/* Actions */}
                 <div className='flex gap-2 mt-3'>
-                  <Button
-                    onClick={() => handleResumeCart(cart.id)}
-                    className='flex-1'
-                    size='sm'
-                  >
+                  <Button onClick={() => handleResumeCart(cart.id)} className='flex-1' size='sm'>
                     <CheckCircle2 className='h-4 w-4 mr-2' />
                     Resume
                   </Button>
-                  <Button
-                    onClick={() => setCartToDelete(cart.id)}
-                    variant='outline'
-                    size='sm'
-                  >
+                  <Button onClick={() => setCartToDelete(cart.id)} variant='outline' size='sm'>
                     <Trash2 className='h-4 w-4' />
                   </Button>
                 </div>
@@ -201,16 +173,13 @@ export function PendingOrdersPanel({
       </ScrollArea>
 
       {/* Delete Confirmation Dialog */}
-      <AlertDialog
-        open={!!cartToDelete}
-        onOpenChange={(open) => !open && setCartToDelete(null)}
-      >
+      <AlertDialog open={!!cartToDelete} onOpenChange={(open) => !open && setCartToDelete(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Delete Pending Order?</AlertDialogTitle>
             <AlertDialogDescription>
-              This action cannot be undone. This will permanently delete this
-              pending order and all its items.
+              This action cannot be undone. This will permanently delete this pending order and all
+              its items.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

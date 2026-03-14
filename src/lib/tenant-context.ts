@@ -49,11 +49,7 @@ export const getTenantId = cache(async (): Promise<string | null> => {
     const domain = parts[parts.length - 1];
 
     // Valid subdomain detection
-    if (
-      subdomain &&
-      subdomain !== 'www' &&
-      !(domain === 'localhost' && parts.length === 1)
-    ) {
+    if (subdomain && subdomain !== 'www' && !(domain === 'localhost' && parts.length === 1)) {
       const [org] = await db
         .select({ id: organization.id })
         .from(organization)
@@ -131,10 +127,7 @@ export const getTenantId = cache(async (): Promise<string | null> => {
 
   // Super admins: Fall back to first available organization
   if (isSuperAdmin) {
-    const [firstOrg] = await db
-      .select({ id: organization.id })
-      .from(organization)
-      .limit(1);
+    const [firstOrg] = await db.select({ id: organization.id }).from(organization).limit(1);
 
     return firstOrg?.id || null;
   }
@@ -215,10 +208,7 @@ export const getUserOrganizations = cache(async () => {
       roleId: userOrganization.roleId,
     })
     .from(userOrganization)
-    .innerJoin(
-      organization,
-      eq(userOrganization.organizationId, organization.id)
-    )
+    .innerJoin(organization, eq(userOrganization.organizationId, organization.id))
     .where(eq(userOrganization.userId, session.user.id));
 
   return userOrgs;
@@ -298,13 +288,7 @@ export async function setCurrentTenant(
     path: '/',
   });
 
-  logTenantSwitch(
-    session.user.id,
-    oldTenantId,
-    tenantId,
-    ipAddress,
-    userAgent
-  ).catch((error) => {
+  logTenantSwitch(session.user.id, oldTenantId, tenantId, ipAddress, userAgent).catch((error) => {
     console.error('Failed to log tenant switch:', error);
   });
 }

@@ -1,10 +1,5 @@
 import { db } from '@/db/db';
-import {
-  order,
-  orderItem,
-  productInventory,
-  orderStatusEnum,
-} from '@/drizzle/schema';
+import { order, orderItem, productInventory, orderStatusEnum } from '@/drizzle/schema';
 import { productInventoryMovement } from '@/drizzle/schema/product-inventory-movements';
 import { randomUUID } from 'crypto';
 import { eq, and, gte, lte, desc } from 'drizzle-orm';
@@ -59,10 +54,7 @@ export async function POST(req: NextRequest) {
     } = body;
 
     if (!locationId || !items || items.length === 0) {
-      return NextResponse.json(
-        { error: 'Missing required fields' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
     }
 
     const result = await db.transaction(async (tx) => {
@@ -130,9 +122,7 @@ export async function POST(req: NextRequest) {
           .limit(1);
 
         if (!inventoryRecord) {
-          throw new Error(
-            `No inventory found for product ${item.productName} at this location`
-          );
+          throw new Error(`No inventory found for product ${item.productName} at this location`);
         }
 
         await tx.insert(productInventoryMovement).values({
@@ -146,8 +136,7 @@ export async function POST(req: NextRequest) {
           referenceId: orderId,
           createdBy: null,
         });
-        const currentQuantity =
-          parseFloat(inventoryRecord.currentQuantity) - item.quantity;
+        const currentQuantity = parseFloat(inventoryRecord.currentQuantity) - item.quantity;
         await tx
           .update(productInventory)
           .set({
@@ -167,8 +156,7 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json(
       {
-        error:
-          error instanceof Error ? error.message : 'Failed to create order',
+        error: error instanceof Error ? error.message : 'Failed to create order',
       },
       { status: 500 }
     );
@@ -238,9 +226,6 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ orders });
   } catch (error) {
     console.error('Error fetching orders:', error);
-    return NextResponse.json(
-      { error: 'Failed to fetch orders' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to fetch orders' }, { status: 500 });
   }
 }

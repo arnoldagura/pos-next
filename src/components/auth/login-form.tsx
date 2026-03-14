@@ -12,10 +12,7 @@ interface LoginFormProps {
   organizationId?: string | null;
 }
 
-export function LoginForm({
-  organizationName,
-  organizationId,
-}: LoginFormProps = {}) {
+export function LoginForm({ organizationName, organizationId }: LoginFormProps = {}) {
   const router = useRouter();
   const [error, setError] = useState<string | null>(null);
 
@@ -94,9 +91,7 @@ export function LoginForm({
             />
           </svg>
         </div>
-        <h1 className='text-2xl sm:text-3xl font-bold text-gray-900'>
-          Welcome back
-        </h1>
+        <h1 className='text-2xl sm:text-3xl font-bold text-gray-900'>Welcome back</h1>
         <p className='text-gray-600 text-sm sm:text-base'>
           {organizationName
             ? `Sign in to ${organizationName}`
@@ -140,11 +135,7 @@ export function LoginForm({
 
           return (
             <>
-              <FormFieldWrapper
-                label='Email'
-                error={errors.email?.message}
-                required
-              >
+              <FormFieldWrapper label='Email' error={errors.email?.message} required>
                 <div className='relative'>
                   <div className='absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none'>
                     <svg
@@ -173,19 +164,13 @@ export function LoginForm({
                 </div>
               </FormFieldWrapper>
 
-              <FormFieldWrapper
-                label='Password'
-                error={errors.password?.message}
-                required
-              >
+              <FormFieldWrapper label='Password' error={errors.password?.message} required>
                 <PasswordInput
                   {...register('password')}
                   placeholder='••••••••'
                   autoComplete='current-password'
                   aria-invalid={errors.password ? 'true' : 'false'}
-                  aria-describedby={
-                    errors.password ? 'password-error' : undefined
-                  }
+                  aria-describedby={errors.password ? 'password-error' : undefined}
                 />
               </FormFieldWrapper>
 
@@ -208,9 +193,7 @@ export function LoginForm({
                 type='submit'
                 disabled={isSubmitting}
                 className='w-full px-4 py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:bg-gray-400 disabled:cursor-not-allowed transition-all duration-200 transform hover:scale-[1.02] active:scale-[0.98] shadow-md'
-                aria-label={
-                  isSubmitting ? 'Signing in' : 'Sign in to your account'
-                }
+                aria-label={isSubmitting ? 'Signing in' : 'Sign in to your account'}
               >
                 {isSubmitting ? (
                   <span className='flex items-center justify-center'>

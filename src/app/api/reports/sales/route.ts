@@ -14,10 +14,7 @@ export async function GET(req: NextRequest) {
     const reportType = searchParams.get('type') || 'summary';
 
     if (!startDate || !endDate) {
-      return NextResponse.json(
-        { error: 'Start date and end date are required' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Start date and end date are required' }, { status: 400 });
     }
 
     const start = new Date(startDate);
@@ -146,18 +143,12 @@ export async function GET(req: NextRequest) {
       });
     }
 
-    return NextResponse.json(
-      { error: 'Invalid report type' },
-      { status: 400 }
-    );
+    return NextResponse.json({ error: 'Invalid report type' }, { status: 400 });
   } catch (error) {
     console.error('Error generating sales report:', error);
     return NextResponse.json(
       {
-        error:
-          error instanceof Error
-            ? error.message
-            : 'Failed to generate sales report',
+        error: error instanceof Error ? error.message : 'Failed to generate sales report',
       },
       { status: 500 }
     );

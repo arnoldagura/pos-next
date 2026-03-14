@@ -36,13 +36,7 @@ import {
 } from '@/components/ui/alert-dialog';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Loader2, AlertTriangle, TrendingUp, TrendingDown } from 'lucide-react';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 
 export const ADJUSTMENT_REASONS = {
   cycle_count: 'Cycle Count',
@@ -75,14 +69,9 @@ interface StockAdjustmentFormProps {
   onCancel?: () => void;
 }
 
-export function StockAdjustmentForm({
-  inventory,
-  onSuccess,
-  onCancel,
-}: StockAdjustmentFormProps) {
+export function StockAdjustmentForm({ inventory, onSuccess, onCancel }: StockAdjustmentFormProps) {
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
-  const [pendingValues, setPendingValues] =
-    useState<AdjustmentFormValues | null>(null);
+  const [pendingValues, setPendingValues] = useState<AdjustmentFormValues | null>(null);
   const queryClient = useQueryClient();
 
   const form = useForm<AdjustmentFormValues>({
@@ -110,9 +99,7 @@ export function StockAdjustmentForm({
         body: JSON.stringify({
           inventoryId: values.inventoryId,
           quantity: values.quantity,
-          remarks: `${ADJUSTMENT_REASONS[values.reason as AdjustmentReason]}: ${
-            values.remarks
-          }`,
+          remarks: `${ADJUSTMENT_REASONS[values.reason as AdjustmentReason]}: ${values.remarks}`,
         }),
       });
 
@@ -168,19 +155,13 @@ export function StockAdjustmentForm({
               <div className='grid grid-cols-2 gap-4'>
                 <div>
                   <p className='text-sm text-muted-foreground'>Current Stock</p>
-                  <p className='text-2xl font-bold'>
-                    {currentStock.toFixed(2)}
-                  </p>
+                  <p className='text-2xl font-bold'>{currentStock.toFixed(2)}</p>
                   {inventory.unitOfMeasure && (
-                    <p className='text-sm text-muted-foreground'>
-                      {inventory.unitOfMeasure}
-                    </p>
+                    <p className='text-sm text-muted-foreground'>{inventory.unitOfMeasure}</p>
                   )}
                 </div>
                 <div>
-                  <p className='text-sm text-muted-foreground'>
-                    New Stock (Preview)
-                  </p>
+                  <p className='text-sm text-muted-foreground'>New Stock (Preview)</p>
                   <div className='flex items-center gap-2'>
                     <p
                       className={`text-2xl font-bold ${
@@ -223,9 +204,7 @@ export function StockAdjustmentForm({
                     step='0.01'
                     placeholder='Enter quantity (positive to add, negative to subtract)'
                     {...field}
-                    onChange={(e) =>
-                      field.onChange(parseFloat(e.target.value) || 0)
-                    }
+                    onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
                   />
                 </FormControl>
                 <FormDescription>
@@ -268,14 +247,9 @@ export function StockAdjustmentForm({
               <FormItem>
                 <FormLabel>Remarks</FormLabel>
                 <FormControl>
-                  <Textarea
-                    placeholder='Provide details about this adjustment...'
-                    {...field}
-                  />
+                  <Textarea placeholder='Provide details about this adjustment...' {...field} />
                 </FormControl>
-                <FormDescription>
-                  Explain why this adjustment is being made
-                </FormDescription>
+                <FormDescription>Explain why this adjustment is being made</FormDescription>
                 <FormMessage />
               </FormItem>
             )}
@@ -301,13 +275,8 @@ export function StockAdjustmentForm({
               Cancel
             </Button>
           )}
-          <Button
-            type='submit'
-            disabled={adjustmentMutation.isPending || !inventory}
-          >
-            {adjustmentMutation.isPending && (
-              <Loader2 className='mr-2 h-4 w-4 animate-spin' />
-            )}
+          <Button type='submit' disabled={adjustmentMutation.isPending || !inventory}>
+            {adjustmentMutation.isPending && <Loader2 className='mr-2 h-4 w-4 animate-spin' />}
             Submit Adjustment
           </Button>
         </div>
@@ -336,9 +305,7 @@ export function StockAdjustmentForm({
                 <span className='text-muted-foreground'>Change:</span>
                 <span
                   className={`font-medium ${
-                    (pendingValues.quantity || 0) > 0
-                      ? 'text-green-600'
-                      : 'text-red-600'
+                    (pendingValues.quantity || 0) > 0 ? 'text-green-600' : 'text-red-600'
                   }`}
                 >
                   {(pendingValues.quantity || 0) > 0 ? '+' : ''}
@@ -359,9 +326,7 @@ export function StockAdjustmentForm({
           )}
           <AlertDialogFooter>
             <AlertDialogCancel onClick={handleCancel}>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={handleConfirm}>
-              Confirm Adjustment
-            </AlertDialogAction>
+            <AlertDialogAction onClick={handleConfirm}>Confirm Adjustment</AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>

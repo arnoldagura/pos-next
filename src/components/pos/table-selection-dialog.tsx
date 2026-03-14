@@ -55,8 +55,7 @@ export function TableSelectionDialog({
   onOpenChange,
   locationId,
 }: TableSelectionDialogProps) {
-  const { tables, isLoading, fetchTables, selectTable, selectedTable } =
-    useTableStore();
+  const { tables, isLoading, fetchTables, selectTable, selectedTable } = useTableStore();
   const { setTable } = useCartStore();
   const [viewingOrder, setViewingOrder] = useState<{
     tableId: string;
@@ -114,8 +113,7 @@ export function TableSelectionDialog({
           <DialogHeader>
             <DialogTitle>Select Table</DialogTitle>
             <DialogDescription>
-              Choose a table for the current order. Color indicators show table
-              status.
+              Choose a table for the current order. Color indicators show table status.
             </DialogDescription>
           </DialogHeader>
 
@@ -128,9 +126,7 @@ export function TableSelectionDialog({
               </div>
             ) : tables.length === 0 ? (
               <div className='flex flex-col items-center justify-center py-12 text-center'>
-                <p className='text-muted-foreground'>
-                  No tables found for this location.
-                </p>
+                <p className='text-muted-foreground'>No tables found for this location.</p>
               </div>
             ) : (
               <div className='grid grid-cols-3 gap-4'>
@@ -159,12 +155,8 @@ export function TableSelectionDialog({
                         </Badge>
                       </div>
 
-                      <div className='text-2xl font-bold mb-2'>
-                        {table.number}
-                      </div>
-                      <div className='text-sm font-medium mb-1'>
-                        {table.name}
-                      </div>
+                      <div className='text-2xl font-bold mb-2'>{table.number}</div>
+                      <div className='text-sm font-medium mb-1'>{table.name}</div>
                       <div className='flex items-center text-xs opacity-90'>
                         <Users className='mr-1 h-3 w-3' />
                         <span>{table.capacity} seats</span>
@@ -180,9 +172,7 @@ export function TableSelectionDialog({
             <div className='border-t pt-4'>
               <p className='text-sm text-muted-foreground'>
                 Current selection:{' '}
-                <span className='font-medium text-foreground'>
-                  {selectedTable.name}
-                </span>
+                <span className='font-medium text-foreground'>{selectedTable.name}</span>
               </p>
             </div>
           )}

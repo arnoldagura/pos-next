@@ -1,8 +1,5 @@
 import { LoginForm } from '@/components/auth/login-form';
-import {
-  getOrganizationFromSubdomain,
-  getCurrentSubdomain,
-} from '@/lib/tenant-registration';
+import { getOrganizationFromSubdomain, getCurrentSubdomain } from '@/lib/tenant-registration';
 import { Suspense } from 'react';
 import Link from 'next/link';
 
@@ -31,13 +28,10 @@ async function LoginContent() {
                   />
                 </svg>
               </div>
-              <h1 className='text-2xl font-bold text-gray-900 mb-2'>
-                Organization Not Found
-              </h1>
+              <h1 className='text-2xl font-bold text-gray-900 mb-2'>Organization Not Found</h1>
               <p className='text-red-600 mb-4'>
-                The subdomain{' '}
-                <span className='font-semibold'>&quot;{subdomain}&quot;</span>{' '}
-                does not exist
+                The subdomain <span className='font-semibold'>&quot;{subdomain}&quot;</span> does
+                not exist
               </p>
             </div>
 
@@ -63,9 +57,7 @@ async function LoginContent() {
 
             <div className='space-y-3'>
               <a
-                href={`${
-                  process.env.NODE_ENV === 'production' ? 'https' : 'http'
-                }://${
+                href={`${process.env.NODE_ENV === 'production' ? 'https' : 'http'}://${
                   process.env.NODE_ENV === 'production'
                     ? process.env.NEXT_PUBLIC_APP_DOMAIN || 'yourapp.com'
                     : 'localhost:3000'
@@ -76,10 +68,7 @@ async function LoginContent() {
               </a>
               <p className='text-center text-sm text-gray-600'>
                 Need help?{' '}
-                <Link
-                  href='/contact'
-                  className='text-blue-600 hover:underline font-medium'
-                >
+                <Link href='/contact' className='text-blue-600 hover:underline font-medium'>
                   Contact support
                 </Link>
               </p>
@@ -97,11 +86,7 @@ async function LoginContent() {
           <div className='mb-6 p-4 bg-blue-50 border-l-4 border-blue-500 rounded-r-lg shadow-sm'>
             <div className='flex items-center'>
               <div className='shrink-0'>
-                <svg
-                  className='h-5 w-5 text-blue-500'
-                  fill='currentColor'
-                  viewBox='0 0 20 20'
-                >
+                <svg className='h-5 w-5 text-blue-500' fill='currentColor' viewBox='0 0 20 20'>
                   <path
                     fillRule='evenodd'
                     d='M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z'

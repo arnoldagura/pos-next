@@ -19,11 +19,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { FileText, Download, Loader2 } from 'lucide-react';
-import {
-  exportToCSV,
-  exportToExcel,
-  getExportFilename,
-} from '@/lib/utils/export-utils';
+import { exportToCSV, exportToExcel, getExportFilename } from '@/lib/utils/export-utils';
 import { formatCurrency } from '@/lib/utils';
 
 interface SalesReportDialogProps {
@@ -102,10 +98,7 @@ type SalesReportData =
 
 type ExportDataRow = Record<string, string | number | null>;
 
-export function SalesReportDialog({
-  open,
-  onOpenChange,
-}: SalesReportDialogProps) {
+export function SalesReportDialog({ open, onOpenChange }: SalesReportDialogProps) {
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
   const [reportType, setReportType] = useState('summary');
@@ -289,37 +282,25 @@ export function SalesReportDialog({
                   <h3 className='font-semibold mb-3'>Summary</h3>
                   <div className='grid grid-cols-2 gap-4'>
                     <div className='border rounded p-3'>
-                      <p className='text-sm text-muted-foreground'>
-                        Total Sales
-                      </p>
+                      <p className='text-sm text-muted-foreground'>Total Sales</p>
                       <p className='text-2xl font-bold'>
-                        {formatCurrency(
-                          parseFloat(reportData.summary.totalSales)
-                        )}
+                        {formatCurrency(parseFloat(reportData.summary.totalSales))}
                       </p>
                     </div>
                     <div className='border rounded p-3'>
-                      <p className='text-sm text-muted-foreground'>
-                        Total Orders
-                      </p>
-                      <p className='text-2xl font-bold'>
-                        {reportData.summary.totalOrders}
-                      </p>
+                      <p className='text-sm text-muted-foreground'>Total Orders</p>
+                      <p className='text-2xl font-bold'>{reportData.summary.totalOrders}</p>
                     </div>
                     <div className='border rounded p-3'>
                       <p className='text-sm text-muted-foreground'>Avg Order</p>
                       <p className='text-2xl font-bold'>
-                        {formatCurrency(
-                          parseFloat(reportData.summary.avgOrderValue)
-                        )}
+                        {formatCurrency(parseFloat(reportData.summary.avgOrderValue))}
                       </p>
                     </div>
                     <div className='border rounded p-3'>
                       <p className='text-sm text-muted-foreground'>Total Tax</p>
                       <p className='text-2xl font-bold'>
-                        {formatCurrency(
-                          parseFloat(reportData.summary.totalTax)
-                        )}
+                        {formatCurrency(parseFloat(reportData.summary.totalTax))}
                       </p>
                     </div>
                   </div>
@@ -327,19 +308,11 @@ export function SalesReportDialog({
               )}
 
               <div className='flex gap-2'>
-                <Button
-                  onClick={handleExportCSV}
-                  variant='outline'
-                  className='flex-1'
-                >
+                <Button onClick={handleExportCSV} variant='outline' className='flex-1'>
                   <Download className='h-4 w-4 mr-2' />
                   Export CSV
                 </Button>
-                <Button
-                  onClick={handleExportExcel}
-                  variant='outline'
-                  className='flex-1'
-                >
+                <Button onClick={handleExportExcel} variant='outline' className='flex-1'>
                   <Download className='h-4 w-4 mr-2' />
                   Export Excel
                 </Button>

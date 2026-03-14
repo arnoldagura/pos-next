@@ -4,9 +4,7 @@ const UPSTASH_URL = process.env.UPSTASH_REDIS_REST_URL;
 const UPSTASH_TOKEN = process.env.UPSTASH_REDIS_REST_TOKEN;
 
 const redis =
-  UPSTASH_URL && UPSTASH_TOKEN
-    ? new Redis({ url: UPSTASH_URL, token: UPSTASH_TOKEN })
-    : undefined;
+  UPSTASH_URL && UPSTASH_TOKEN ? new Redis({ url: UPSTASH_URL, token: UPSTASH_TOKEN }) : undefined;
 
 const DEFAULT_TTL = 300; // 5 minutes
 
@@ -26,11 +24,7 @@ export async function cacheGet<T>(key: string): Promise<T | null> {
 /**
  * Set a cached value with optional TTL (seconds)
  */
-export async function cacheSet<T>(
-  key: string,
-  value: T,
-  ttl: number = DEFAULT_TTL
-): Promise<void> {
+export async function cacheSet<T>(key: string, value: T, ttl: number = DEFAULT_TTL): Promise<void> {
   if (!redis) return;
   try {
     await redis.set(key, value, { ex: ttl });
@@ -67,10 +61,7 @@ export async function cacheInvalidate(prefix: string): Promise<void> {
 /**
  * Build a cache key for product catalog queries
  */
-export function productCacheKey(
-  tenantId: string,
-  params: Record<string, string | null>
-): string {
+export function productCacheKey(tenantId: string, params: Record<string, string | null>): string {
   const parts = Object.entries(params)
     .filter(([, v]) => v !== null && v !== undefined)
     .sort(([a], [b]) => a.localeCompare(b))
@@ -82,9 +73,7 @@ export function productCacheKey(
 /**
  * Invalidate all product cache for a tenant
  */
-export async function invalidateProductCache(
-  tenantId: string
-): Promise<void> {
+export async function invalidateProductCache(tenantId: string): Promise<void> {
   await cacheInvalidate(`cache:products:${tenantId}`);
 }
 

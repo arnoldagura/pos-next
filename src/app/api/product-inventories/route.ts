@@ -1,10 +1,5 @@
 import { db } from '@/db/db';
-import {
-  productInventory,
-  product,
-  location,
-  productInventoryMovement,
-} from '@/drizzle/schema';
+import { productInventory, product, location, productInventoryMovement } from '@/drizzle/schema';
 import { ACTIONS, RESOURCES } from '@/lib/rbac';
 import { createProductInventorySchema } from '@/lib/validations/product';
 import { protectRoute } from '@/middleware/rbac';
@@ -96,8 +91,7 @@ export async function getInventoryHandler(req: NextRequest) {
 
     const inventoryWithStock = inventoryRecords.map((inv) => ({
       ...inv,
-      belowThreshold:
-        (parseFloat(inv.currentQuantity) || 0) <= Number(inv.alertThreshold),
+      belowThreshold: (parseFloat(inv.currentQuantity) || 0) <= Number(inv.alertThreshold),
     }));
 
     return NextResponse.json({
@@ -112,10 +106,7 @@ export async function getInventoryHandler(req: NextRequest) {
   } catch (error) {
     console.error('Error fetching inventory:', error);
 
-    return NextResponse.json(
-      { error: 'Failed to fetch inventory' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to fetch inventory' }, { status: 500 });
   }
 }
 
@@ -178,7 +169,12 @@ export async function createInventoryHandler(req: NextRequest) {
       const existingBarcode = await db
         .select()
         .from(productInventory)
-        .where(and(eq(productInventory.organizationId, tenantId), eq(productInventory.barcode, validatedData.barcode)))
+        .where(
+          and(
+            eq(productInventory.organizationId, tenantId),
+            eq(productInventory.barcode, validatedData.barcode)
+          )
+        )
         .limit(1);
 
       if (existingBarcode.length > 0) {
@@ -196,10 +192,7 @@ export async function createInventoryHandler(req: NextRequest) {
       .limit(1);
 
     if (locationExists.length === 0) {
-      return NextResponse.json(
-        { error: 'Location not found' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'Location not found' }, { status: 404 });
     }
 
     const newInventory = await db
@@ -250,10 +243,7 @@ export async function createInventoryHandler(req: NextRequest) {
       );
     }
 
-    return NextResponse.json(
-      { error: 'Failed to create inventory' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to create inventory' }, { status: 500 });
   }
 }
 

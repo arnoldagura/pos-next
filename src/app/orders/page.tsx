@@ -4,9 +4,12 @@ import { hasPermission } from '@/lib/rbac';
 import { Suspense } from 'react';
 import dynamic from 'next/dynamic';
 
-const OrdersClient = dynamic(() => import('@/components/orders/orders-client').then(mod => ({ default: mod.OrdersClient })), {
-  loading: () => <OrdersLoadingSkeleton />
-});
+const OrdersClient = dynamic(
+  () => import('@/components/orders/orders-client').then((mod) => ({ default: mod.OrdersClient })),
+  {
+    loading: () => <OrdersLoadingSkeleton />,
+  }
+);
 
 function OrdersLoadingSkeleton() {
   return (
@@ -32,9 +35,7 @@ export default async function OrdersPage() {
         <div className='max-w-7xl mx-auto px-4 py-8'>
           <div className='rounded-lg shadow p-6'>
             <h1 className='text-2xl font-bold text-red-600'>Access Denied</h1>
-            <p className='mt-2 text-gray-600'>
-              You do not have permission to view orders.
-            </p>
+            <p className='mt-2 text-gray-600'>You do not have permission to view orders.</p>
           </div>
         </div>
       </div>

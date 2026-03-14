@@ -12,10 +12,7 @@ const VALID_ITEM_TRANSITIONS: Record<ItemStatus, ItemStatus[]> = {
   served: ['ready'],
 };
 
-export async function PATCH(
-  req: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
+export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     await requireTenantId();
     const { id } = await params;
@@ -23,10 +20,7 @@ export async function PATCH(
     const { itemStatus: newStatus } = body;
 
     if (!newStatus || !itemStatusEnum.enumValues.includes(newStatus)) {
-      return NextResponse.json(
-        { error: 'Invalid item status' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Invalid item status' }, { status: 400 });
     }
 
     // Fetch current item
@@ -61,9 +55,6 @@ export async function PATCH(
     return NextResponse.json({ item: updated });
   } catch (error) {
     console.error('Error updating item status:', error);
-    return NextResponse.json(
-      { error: 'Failed to update item status' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to update item status' }, { status: 500 });
   }
 }

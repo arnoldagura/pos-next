@@ -2,13 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { Key, Check, X } from 'lucide-react';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import {
   Table,
   TableBody,
@@ -29,8 +23,7 @@ type PermissionMatrix = {
 export function PermissionsMatrix() {
   const [roles, setRoles] = useState<Role[]>([]);
   const [permissions, setPermissions] = useState<Permission[]>([]);
-  const [permissionsByResource, setPermissionsByResource] =
-    useState<PermissionsByResource>({});
+  const [permissionsByResource, setPermissionsByResource] = useState<PermissionsByResource>({});
   const [matrix, setMatrix] = useState<PermissionMatrix>({});
   const [loading, setLoading] = useState(true);
 
@@ -54,16 +47,13 @@ export function PermissionsMatrix() {
         setPermissions(permsArray);
 
         // Group permissions by resource
-        const grouped = permsArray.reduce(
-          (acc: PermissionsByResource, perm: Permission) => {
-            if (!acc[perm.resource]) {
-              acc[perm.resource] = [];
-            }
-            acc[perm.resource].push(perm);
-            return acc;
-          },
-          {}
-        );
+        const grouped = permsArray.reduce((acc: PermissionsByResource, perm: Permission) => {
+          if (!acc[perm.resource]) {
+            acc[perm.resource] = [];
+          }
+          acc[perm.resource].push(perm);
+          return acc;
+        }, {});
         setPermissionsByResource(grouped);
 
         // Fetch each role's permissions to build the matrix
@@ -121,9 +111,7 @@ export function PermissionsMatrix() {
           <div className='flex flex-col items-center justify-center text-center'>
             <Key className='h-16 w-16 text-gray-300 mb-4' />
             <p className='text-gray-500'>
-              {roles.length === 0
-                ? 'No roles created yet'
-                : 'No permissions available'}
+              {roles.length === 0 ? 'No roles created yet' : 'No permissions available'}
             </p>
           </div>
         </CardContent>
@@ -138,9 +126,7 @@ export function PermissionsMatrix() {
           <Key className='h-5 w-5' />
           Permissions Matrix
         </CardTitle>
-        <CardDescription>
-          Overview of permissions assigned to each role
-        </CardDescription>
+        <CardDescription>Overview of permissions assigned to each role</CardDescription>
       </CardHeader>
 
       <CardContent>
@@ -149,9 +135,7 @@ export function PermissionsMatrix() {
             {Object.entries(permissionsByResource).map(([resource, perms]) => (
               <div key={resource} className='mb-6'>
                 <div className='flex items-center gap-2 mb-3'>
-                  <h3 className='font-semibold text-lg'>
-                    {getResourceLabel(resource)}
-                  </h3>
+                  <h3 className='font-semibold text-lg'>{getResourceLabel(resource)}</h3>
                   <Badge variant='outline'>{perms.length} permissions</Badge>
                 </div>
 
@@ -181,9 +165,7 @@ export function PermissionsMatrix() {
                             <div>
                               <div className='font-medium'>{perm.action}</div>
                               {perm.description && (
-                                <div className='text-xs text-gray-500 mt-1'>
-                                  {perm.description}
-                                </div>
+                                <div className='text-xs text-gray-500 mt-1'>{perm.description}</div>
                               )}
                             </div>
                           </TableCell>

@@ -20,11 +20,7 @@ async function assignAdmin() {
     });
 
     // Get admin role
-    const [adminRole] = await db
-      .select()
-      .from(role)
-      .where(eq(role.name, 'admin'))
-      .limit(1);
+    const [adminRole] = await db.select().from(role).where(eq(role.name, 'admin')).limit(1);
 
     if (!adminRole) {
       console.error('Admin role not found. Run seed-rbac.ts first.');
@@ -42,18 +38,14 @@ async function assignAdmin() {
       .limit(1);
 
     if (existing.length > 0) {
-      console.log(
-        `\n✓ User ${firstUser.name} already has roles assigned.`,
-      );
+      console.log(`\n✓ User ${firstUser.name} already has roles assigned.`);
     } else {
       await db.insert(userRole).values({
         userId: firstUser.id,
         roleId: adminRole.id,
       });
 
-      console.log(
-        `\n✓ Admin role assigned to ${firstUser.name} (${firstUser.email})`,
-      );
+      console.log(`\n✓ Admin role assigned to ${firstUser.name} (${firstUser.email})`);
     }
 
     console.log('\nYou can now access the user management interface!');

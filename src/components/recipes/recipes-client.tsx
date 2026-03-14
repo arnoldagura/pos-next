@@ -1,16 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import {
-  Search,
-  Plus,
-  Copy,
-  Power,
-  ChefHat,
-  Package,
-  MoreVertical,
-  Pencil,
-} from 'lucide-react';
+import { Search, Plus, Copy, Power, ChefHat, Package, MoreVertical, Pencil } from 'lucide-react';
 import {
   Table,
   TableBody,
@@ -86,13 +77,9 @@ export function RecipesClient() {
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [showRecipeDialog, setShowRecipeDialog] = useState(false);
-  const [selectedRecipe, setSelectedRecipe] = useState<Recipe | undefined>(
-    undefined
-  );
+  const [selectedRecipe, setSelectedRecipe] = useState<Recipe | undefined>(undefined);
   const [showCostEstimate, setShowCostEstimate] = useState(false);
-  const [costEstimateRecipe, setCostEstimateRecipe] = useState<
-    Recipe | undefined
-  >(undefined);
+  const [costEstimateRecipe, setCostEstimateRecipe] = useState<Recipe | undefined>(undefined);
 
   const fetchRecipes = async () => {
     try {
@@ -105,8 +92,7 @@ export function RecipesClient() {
       if (search) params.append('search', search);
       if (outputTypeFilter && outputTypeFilter !== 'all')
         params.append('outputType', outputTypeFilter);
-      if (statusFilter && statusFilter !== 'all')
-        params.append('status', statusFilter);
+      if (statusFilter && statusFilter !== 'all') params.append('status', statusFilter);
 
       const response = await fetch(`/api/recipes?${params}`);
       if (!response.ok) throw new Error('Failed to fetch recipes');
@@ -255,12 +241,8 @@ export function RecipesClient() {
       ) : recipes.length === 0 ? (
         <div className='text-center py-12'>
           <ChefHat className='mx-auto h-12 w-12 text-gray-400' />
-          <h3 className='mt-2 text-sm font-medium text-gray-900'>
-            No recipes found
-          </h3>
-          <p className='mt-1 text-sm text-gray-500'>
-            Get started by creating a new recipe.
-          </p>
+          <h3 className='mt-2 text-sm font-medium text-gray-900'>No recipes found</h3>
+          <p className='mt-1 text-sm text-gray-500'>Get started by creating a new recipe.</p>
           <div className='mt-6'>
             <Button onClick={handleCreateRecipe}>
               <Plus className='h-4 w-4 mr-2' />
@@ -289,9 +271,7 @@ export function RecipesClient() {
                       <div>
                         <div className='font-medium'>{recipe.name}</div>
                         {recipe.description && (
-                          <div className='text-sm text-gray-500 mt-1'>
-                            {recipe.description}
-                          </div>
+                          <div className='text-sm text-gray-500 mt-1'>{recipe.description}</div>
                         )}
                       </div>
                     </TableCell>
@@ -325,21 +305,15 @@ export function RecipesClient() {
                           </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align='end'>
-                          <DropdownMenuItem
-                            onClick={() => handleEditRecipe(recipe)}
-                          >
+                          <DropdownMenuItem onClick={() => handleEditRecipe(recipe)}>
                             <Pencil className='h-4 w-4 mr-2' />
                             Edit
                           </DropdownMenuItem>
-                          <DropdownMenuItem
-                            onClick={() => handleViewCostEstimate(recipe)}
-                          >
+                          <DropdownMenuItem onClick={() => handleViewCostEstimate(recipe)}>
                             <Package className='h-4 w-4 mr-2' />
                             Cost Estimate
                           </DropdownMenuItem>
-                          <DropdownMenuItem
-                            onClick={() => handleDuplicateRecipe(recipe.id)}
-                          >
+                          <DropdownMenuItem onClick={() => handleDuplicateRecipe(recipe.id)}>
                             <Copy className='h-4 w-4 mr-2' />
                             Duplicate
                           </DropdownMenuItem>

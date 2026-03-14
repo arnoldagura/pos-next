@@ -43,19 +43,11 @@ type RoleFormDialogProps = {
   onSuccess: () => void;
 };
 
-export function RoleFormDialog({
-  role,
-  open,
-  onOpenChange,
-  onSuccess,
-}: RoleFormDialogProps) {
+export function RoleFormDialog({ role, open, onOpenChange, onSuccess }: RoleFormDialogProps) {
   const [loading, setLoading] = useState(false);
-  const [permissionsByResource, setPermissionsByResource] =
-    useState<PermissionsByResource>({});
+  const [permissionsByResource, setPermissionsByResource] = useState<PermissionsByResource>({});
   const [isDirty, setIsDirty] = useState(false);
-  const [selectedPermissions, setSelectedPermissions] = useState<Set<string>>(
-    new Set()
-  );
+  const [selectedPermissions, setSelectedPermissions] = useState<Set<string>>(new Set());
 
   const form = useForm<CreateRoleInput>({
     resolver: zodResolver(createRoleSchema),
@@ -107,9 +99,7 @@ export function RoleFormDialog({
           if (!roleResponse.ok) throw new Error('Failed to fetch role details');
           const roleData = await roleResponse.json();
 
-          const permIds = new Set<string>(
-            roleData.permissions?.map((p: Permission) => p.id) || []
-          );
+          const permIds = new Set<string>(roleData.permissions?.map((p: Permission) => p.id) || []);
           setSelectedPermissions(permIds);
           form.setValue('permissionIds', Array.from(permIds));
         }
@@ -163,9 +153,7 @@ export function RoleFormDialog({
 
   const toggleAllResourcePermissions = (resource: string) => {
     const resourcePerms = permissionsByResource[resource] || [];
-    const allSelected = resourcePerms.every((p) =>
-      selectedPermissions.has(p.id)
-    );
+    const allSelected = resourcePerms.every((p) => selectedPermissions.has(p.id));
 
     const newSelected = new Set<string>(selectedPermissions);
     resourcePerms.forEach((p) => {
@@ -199,16 +187,12 @@ export function RoleFormDialog({
         throw new Error(error.error || 'Failed to save role');
       }
 
-      toast.success(
-        role ? 'Role updated successfully' : 'Role created successfully'
-      );
+      toast.success(role ? 'Role updated successfully' : 'Role created successfully');
       setIsDirty(false);
       onOpenChange(false);
       onSuccess();
     } catch (error) {
-      toast.error(
-        error instanceof Error ? error.message : 'Failed to save role'
-      );
+      toast.error(error instanceof Error ? error.message : 'Failed to save role');
       console.error(error);
     } finally {
       setLoading(false);
@@ -217,9 +201,7 @@ export function RoleFormDialog({
 
   const handleClose = () => {
     if (isDirty) {
-      const confirmed = confirm(
-        'You have unsaved changes. Are you sure you want to close?'
-      );
+      const confirmed = confirm('You have unsaved changes. Are you sure you want to close?');
       if (!confirmed) return;
     }
     onOpenChange(false);
@@ -256,15 +238,9 @@ export function RoleFormDialog({
                 <FormItem>
                   <FormLabel>Role Name *</FormLabel>
                   <FormControl>
-                    <Input
-                      placeholder='e.g., store_manager'
-                      {...field}
-                      disabled={role?.isGlobal}
-                    />
+                    <Input placeholder='e.g., store_manager' {...field} disabled={role?.isGlobal} />
                   </FormControl>
-                  <FormDescription>
-                    Use lowercase letters and underscores only
-                  </FormDescription>
+                  <FormDescription>Use lowercase letters and underscores only</FormDescription>
                   <FormMessage />
                 </FormItem>
               )}
@@ -293,89 +269,69 @@ export function RoleFormDialog({
             <div className='space-y-3'>
               <div className='flex items-center justify-between'>
                 <FormLabel>Permissions</FormLabel>
-                <Badge variant='secondary'>
-                  {selectedPermissions.size} selected
-                </Badge>
+                <Badge variant='secondary'>{selectedPermissions.size} selected</Badge>
               </div>
 
               <ScrollArea className='h-[300px] rounded-md border p-4'>
                 <div className='space-y-4'>
-                  {Object.entries(permissionsByResource).map(
-                    ([resource, perms]) => {
-                      const allSelected = perms.every((p) =>
-                        selectedPermissions.has(p.id)
-                      );
-                      const someSelected = perms.some((p) =>
-                        selectedPermissions.has(p.id)
-                      );
+                  {Object.entries(permissionsByResource).map(([resource, perms]) => {
+                    const allSelected = perms.every((p) => selectedPermissions.has(p.id));
+                    const someSelected = perms.some((p) => selectedPermissions.has(p.id));
 
-                      return (
-                        <div key={resource} className='space-y-2'>
-                          <div className='flex items-center gap-2'>
-                            <Button
-                              type='button'
-                              variant='ghost'
-                              size='sm'
-                              className='h-6 px-2 font-semibold'
-                              onClick={() =>
-                                toggleAllResourcePermissions(resource)
-                              }
-                            >
-                              {allSelected ? (
-                                <Check className='h-4 w-4 mr-1' />
-                              ) : someSelected ? (
-                                <div className='h-4 w-4 mr-1 rounded border-2 border-primary bg-primary/50' />
-                              ) : null}
-                              {getResourceLabel(resource)}
-                            </Button>
-                            <Badge variant='outline'>{perms.length}</Badge>
-                          </div>
-
-                          <div className='grid grid-cols-1 md:grid-cols-2 gap-2 ml-6'>
-                            {perms.map((perm) => (
-                              <div
-                                key={perm.id}
-                                className='flex items-start space-x-2'
-                              >
-                                <Checkbox
-                                  id={perm.id}
-                                  checked={selectedPermissions.has(perm.id)}
-                                  onCheckedChange={() =>
-                                    togglePermission(perm.id)
-                                  }
-                                />
-                                <div className='flex-1'>
-                                  <label
-                                    htmlFor={perm.id}
-                                    className='text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer'
-                                  >
-                                    {perm.action}
-                                  </label>
-                                  {perm.description && (
-                                    <p className='text-xs text-muted-foreground'>
-                                      {perm.description}
-                                    </p>
-                                  )}
-                                </div>
-                              </div>
-                            ))}
-                          </div>
+                    return (
+                      <div key={resource} className='space-y-2'>
+                        <div className='flex items-center gap-2'>
+                          <Button
+                            type='button'
+                            variant='ghost'
+                            size='sm'
+                            className='h-6 px-2 font-semibold'
+                            onClick={() => toggleAllResourcePermissions(resource)}
+                          >
+                            {allSelected ? (
+                              <Check className='h-4 w-4 mr-1' />
+                            ) : someSelected ? (
+                              <div className='h-4 w-4 mr-1 rounded border-2 border-primary bg-primary/50' />
+                            ) : null}
+                            {getResourceLabel(resource)}
+                          </Button>
+                          <Badge variant='outline'>{perms.length}</Badge>
                         </div>
-                      );
-                    }
-                  )}
+
+                        <div className='grid grid-cols-1 md:grid-cols-2 gap-2 ml-6'>
+                          {perms.map((perm) => (
+                            <div key={perm.id} className='flex items-start space-x-2'>
+                              <Checkbox
+                                id={perm.id}
+                                checked={selectedPermissions.has(perm.id)}
+                                onCheckedChange={() => togglePermission(perm.id)}
+                              />
+                              <div className='flex-1'>
+                                <label
+                                  htmlFor={perm.id}
+                                  className='text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer'
+                                >
+                                  {perm.action}
+                                </label>
+                                {perm.description && (
+                                  <p className='text-xs text-muted-foreground'>
+                                    {perm.description}
+                                  </p>
+                                )}
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    );
+                  })}
                 </div>
               </ScrollArea>
             </div>
           </div>
 
           <DialogFooter>
-            <Button
-              type='button'
-              variant='outline'
-              onClick={handleClose}
-              disabled={loading}
-            >
+            <Button type='button' variant='outline' onClick={handleClose} disabled={loading}>
               Cancel
             </Button>
             <Button type='submit' disabled={loading}>

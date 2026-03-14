@@ -18,9 +18,7 @@ export default async function UsersPage() {
         <div className='max-w-7xl mx-auto px-4 py-8'>
           <div className=' rounded-lg shadow p-6'>
             <h1 className='text-2xl font-bold text-red-600'>Access Denied</h1>
-            <p className='mt-2 text-gray-600'>
-              You do not have permission to view users.
-            </p>
+            <p className='mt-2 text-gray-600'>You do not have permission to view users.</p>
           </div>
         </div>
       </div>

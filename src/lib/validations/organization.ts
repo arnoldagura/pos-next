@@ -6,19 +6,10 @@ import { optionalEmailSchema } from './common';
  */
 
 // Organization status enum
-export const organizationStatusSchema = z.enum([
-  'active',
-  'suspended',
-  'trial',
-  'cancelled',
-]);
+export const organizationStatusSchema = z.enum(['active', 'suspended', 'trial', 'cancelled']);
 
 // Subscription tier enum
-export const subscriptionTierSchema = z.enum([
-  'starter',
-  'professional',
-  'enterprise',
-]);
+export const subscriptionTierSchema = z.enum(['starter', 'professional', 'enterprise']);
 
 // POS settings schema
 export const posSettingsSchema = z.object({
@@ -98,18 +89,12 @@ export const organizationSettingsSchema = z.object({
 
 // Create organization schema
 export const createOrganizationSchema = z.object({
-  name: z
-    .string()
-    .min(2, 'Organization name must be at least 2 characters')
-    .max(100),
+  name: z.string().min(2, 'Organization name must be at least 2 characters').max(100),
   slug: z
     .string()
     .min(2, 'Slug must be at least 2 characters')
     .max(50)
-    .regex(
-      /^[a-z0-9-]+$/,
-      'Slug can only contain lowercase letters, numbers, and hyphens'
-    )
+    .regex(/^[a-z0-9-]+$/, 'Slug can only contain lowercase letters, numbers, and hyphens')
     .refine((slug) => !slug.startsWith('-') && !slug.endsWith('-'), {
       message: 'Slug cannot start or end with a hyphen',
     }),
@@ -117,10 +102,7 @@ export const createOrganizationSchema = z.object({
     .string()
     .min(2)
     .max(50)
-    .regex(
-      /^[a-z0-9-]+$/,
-      'Subdomain can only contain lowercase letters, numbers, and hyphens'
-    )
+    .regex(/^[a-z0-9-]+$/, 'Subdomain can only contain lowercase letters, numbers, and hyphens')
     .optional()
     .or(z.literal('')),
   domain: z.string().url().optional().or(z.literal('')),
@@ -180,8 +162,7 @@ export const assignUserToOrganizationSchema = z.object({
 });
 
 // Update organization settings schema
-export const updateOrganizationSettingsSchema =
-  organizationSettingsSchema.partial();
+export const updateOrganizationSettingsSchema = organizationSettingsSchema.partial();
 
 // Type exports
 export type OrganizationStatus = z.infer<typeof organizationStatusSchema>;
@@ -194,6 +175,4 @@ export type InventorySettings = z.infer<typeof inventorySettingsSchema>;
 export type OrganizationSettings = z.infer<typeof organizationSettingsSchema>;
 export type CreateOrganizationInput = z.infer<typeof createOrganizationSchema>;
 export type UpdateOrganizationInput = z.infer<typeof updateOrganizationSchema>;
-export type AssignUserToOrganizationInput = z.infer<
-  typeof assignUserToOrganizationSchema
->;
+export type AssignUserToOrganizationInput = z.infer<typeof assignUserToOrganizationSchema>;

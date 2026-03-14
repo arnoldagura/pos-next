@@ -43,10 +43,7 @@ async function getCategoriesHandler(req: NextRequest) {
     return NextResponse.json({ categories });
   } catch (error) {
     console.error('Error fetching product categories:', error);
-    return NextResponse.json(
-      { error: 'Failed to fetch product categories' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to fetch product categories' }, { status: 500 });
   }
 }
 
@@ -75,14 +72,16 @@ async function createCategoryHandler(req: NextRequest) {
       const parent = await db
         .select()
         .from(productCategory)
-        .where(and(eq(productCategory.organizationId, tenantId), eq(productCategory.id, validatedData.parentId)))
+        .where(
+          and(
+            eq(productCategory.organizationId, tenantId),
+            eq(productCategory.id, validatedData.parentId)
+          )
+        )
         .limit(1);
 
       if (parent.length === 0) {
-        return NextResponse.json(
-          { error: 'Parent category not found' },
-          { status: 400 }
-        );
+        return NextResponse.json({ error: 'Parent category not found' }, { status: 400 });
       }
     }
 
@@ -108,10 +107,7 @@ async function createCategoryHandler(req: NextRequest) {
       );
     }
 
-    return NextResponse.json(
-      { error: 'Failed to create product category' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to create product category' }, { status: 500 });
   }
 }
 

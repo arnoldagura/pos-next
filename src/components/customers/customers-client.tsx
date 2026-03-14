@@ -72,9 +72,7 @@ export function CustomersClient() {
       {/* Results */}
       <Card>
         <CardHeader>
-          <CardTitle>
-            Customers {data?.customers && `(${data.customers.length})`}
-          </CardTitle>
+          <CardTitle>Customers {data?.customers && `(${data.customers.length})`}</CardTitle>
         </CardHeader>
         <CardContent>
           {isLoading ? (
@@ -99,9 +97,7 @@ export function CustomersClient() {
                 <TableBody>
                   {data.customers.map((customer: Customer) => (
                     <TableRow key={customer.id}>
-                      <TableCell className='font-medium'>
-                        {customer.name}
-                      </TableCell>
+                      <TableCell className='font-medium'>{customer.name}</TableCell>
                       <TableCell>
                         <div className='space-y-1'>
                           {customer.email && (
@@ -129,9 +125,7 @@ export function CustomersClient() {
                         )}
                       </TableCell>
                       <TableCell>
-                        <Badge variant='secondary'>
-                          {customer.loyaltyPoints || 0} pts
-                        </Badge>
+                        <Badge variant='secondary'>{customer.loyaltyPoints || 0} pts</Badge>
                       </TableCell>
                       <TableCell>
                         <Badge
@@ -144,9 +138,7 @@ export function CustomersClient() {
                           {customer.isActive ? 'Active' : 'Inactive'}
                         </Badge>
                       </TableCell>
-                      <TableCell>
-                        {new Date(customer.createdAt).toLocaleDateString()}
-                      </TableCell>
+                      <TableCell>{new Date(customer.createdAt).toLocaleDateString()}</TableCell>
                     </TableRow>
                   ))}
                 </TableBody>

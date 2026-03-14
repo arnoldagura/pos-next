@@ -15,10 +15,7 @@ export const createProductSchema = z.object({
     .string()
     .min(1, 'Slug is required')
     .max(255, 'Slug is too long')
-    .regex(
-      /^[a-z0-9-]+$/,
-      'Slug must contain only lowercase letters, numbers, and hyphens'
-    )
+    .regex(/^[a-z0-9-]+$/, 'Slug must contain only lowercase letters, numbers, and hyphens')
     .optional(),
   description: z.string().optional(),
   categoryId: z.string().optional().nullable(),
@@ -28,11 +25,7 @@ export const createProductSchema = z.object({
 });
 
 export const updateProductSchema = z.object({
-  name: z
-    .string()
-    .min(1, 'Name is required')
-    .max(255, 'Name is too long')
-    .optional(),
+  name: z.string().min(1, 'Name is required').max(255, 'Name is too long').optional(),
   description: z.string().optional().nullable(),
   categoryId: z.string().optional().nullable(),
   image: z.string().optional().nullable(),

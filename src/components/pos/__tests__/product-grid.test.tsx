@@ -8,15 +8,7 @@ import Image from 'next/image';
 global.fetch = vi.fn();
 
 vi.mock('next/image', () => ({
-  default: ({
-    src,
-    alt,
-    ...props
-  }: {
-    src: string;
-    alt: string;
-    [key: string]: unknown;
-  }) => (
+  default: ({ src, alt, ...props }: { src: string; alt: string; [key: string]: unknown }) => (
     <Image
       src={src}
       alt={alt}
@@ -113,37 +105,35 @@ describe('ProductGrid', () => {
       carts: new Map(),
     });
 
-    (global.fetch as unknown as ReturnType<typeof vi.fn>).mockImplementation(
-      (url: string) => {
-        if (url.includes('/api/categories')) {
-          return Promise.resolve({
-            ok: true,
-            json: () => Promise.resolve({ categories: mockCategories }),
-          });
-        }
-        if (url.includes('/api/products')) {
-          return Promise.resolve({
-            ok: true,
-            json: () =>
-              Promise.resolve({
-                products: mockProducts,
-                pagination: { page: 1, limit: 100, total: 2, totalPages: 1 },
-              }),
-          });
-        }
-        if (url.includes('/api/product-inventory')) {
-          return Promise.resolve({
-            ok: true,
-            json: () =>
-              Promise.resolve({
-                inventory: mockInventory,
-                pagination: { page: 1, limit: 1000, total: 2, totalPages: 1 },
-              }),
-          });
-        }
-        return Promise.reject(new Error('Unknown endpoint'));
+    (global.fetch as unknown as ReturnType<typeof vi.fn>).mockImplementation((url: string) => {
+      if (url.includes('/api/categories')) {
+        return Promise.resolve({
+          ok: true,
+          json: () => Promise.resolve({ categories: mockCategories }),
+        });
       }
-    );
+      if (url.includes('/api/products')) {
+        return Promise.resolve({
+          ok: true,
+          json: () =>
+            Promise.resolve({
+              products: mockProducts,
+              pagination: { page: 1, limit: 100, total: 2, totalPages: 1 },
+            }),
+        });
+      }
+      if (url.includes('/api/product-inventory')) {
+        return Promise.resolve({
+          ok: true,
+          json: () =>
+            Promise.resolve({
+              inventory: mockInventory,
+              pagination: { page: 1, limit: 1000, total: 2, totalPages: 1 },
+            }),
+        });
+      }
+      return Promise.reject(new Error('Unknown endpoint'));
+    });
   });
 
   it('renders product grid with products', async () => {
@@ -185,9 +175,7 @@ describe('ProductGrid', () => {
     await user.type(searchInput, 'Latte');
 
     await waitFor(() => {
-      expect(global.fetch).toHaveBeenCalledWith(
-        expect.stringContaining('search=Latte')
-      );
+      expect(global.fetch).toHaveBeenCalledWith(expect.stringContaining('search=Latte'));
     });
   });
 
@@ -203,9 +191,7 @@ describe('ProductGrid', () => {
     await user.click(coffeeTab);
 
     await waitFor(() => {
-      expect(global.fetch).toHaveBeenCalledWith(
-        expect.stringContaining('categoryId=cat-1')
-      );
+      expect(global.fetch).toHaveBeenCalledWith(expect.stringContaining('categoryId=cat-1'));
     });
   });
 
@@ -254,37 +240,35 @@ describe('ProductGrid', () => {
       },
     ];
 
-    (global.fetch as unknown as ReturnType<typeof vi.fn>).mockImplementation(
-      (url: string) => {
-        if (url.includes('/api/product-inventory')) {
-          return Promise.resolve({
-            ok: true,
-            json: () =>
-              Promise.resolve({
-                inventory: outOfStockInventory,
-                pagination: { page: 1, limit: 1000, total: 1, totalPages: 1 },
-              }),
-          });
-        }
-        if (url.includes('/api/categories')) {
-          return Promise.resolve({
-            ok: true,
-            json: () => Promise.resolve({ categories: mockCategories }),
-          });
-        }
-        if (url.includes('/api/products')) {
-          return Promise.resolve({
-            ok: true,
-            json: () =>
-              Promise.resolve({
-                products: [mockProducts[0]],
-                pagination: { page: 1, limit: 100, total: 1, totalPages: 1 },
-              }),
-          });
-        }
-        return Promise.reject(new Error('Unknown endpoint'));
+    (global.fetch as unknown as ReturnType<typeof vi.fn>).mockImplementation((url: string) => {
+      if (url.includes('/api/product-inventory')) {
+        return Promise.resolve({
+          ok: true,
+          json: () =>
+            Promise.resolve({
+              inventory: outOfStockInventory,
+              pagination: { page: 1, limit: 1000, total: 1, totalPages: 1 },
+            }),
+        });
       }
-    );
+      if (url.includes('/api/categories')) {
+        return Promise.resolve({
+          ok: true,
+          json: () => Promise.resolve({ categories: mockCategories }),
+        });
+      }
+      if (url.includes('/api/products')) {
+        return Promise.resolve({
+          ok: true,
+          json: () =>
+            Promise.resolve({
+              products: [mockProducts[0]],
+              pagination: { page: 1, limit: 100, total: 1, totalPages: 1 },
+            }),
+        });
+      }
+      return Promise.reject(new Error('Unknown endpoint'));
+    });
 
     render(<ProductGrid locationId='loc-1' />);
 
@@ -306,37 +290,35 @@ describe('ProductGrid', () => {
       },
     ];
 
-    (global.fetch as unknown as ReturnType<typeof vi.fn>).mockImplementation(
-      (url: string) => {
-        if (url.includes('/api/product-inventory')) {
-          return Promise.resolve({
-            ok: true,
-            json: () =>
-              Promise.resolve({
-                inventory: outOfStockInventory,
-                pagination: { page: 1, limit: 1000, total: 1, totalPages: 1 },
-              }),
-          });
-        }
-        if (url.includes('/api/categories')) {
-          return Promise.resolve({
-            ok: true,
-            json: () => Promise.resolve({ categories: mockCategories }),
-          });
-        }
-        if (url.includes('/api/products')) {
-          return Promise.resolve({
-            ok: true,
-            json: () =>
-              Promise.resolve({
-                products: [mockProducts[0]],
-                pagination: { page: 1, limit: 100, total: 1, totalPages: 1 },
-              }),
-          });
-        }
-        return Promise.reject(new Error('Unknown endpoint'));
+    (global.fetch as unknown as ReturnType<typeof vi.fn>).mockImplementation((url: string) => {
+      if (url.includes('/api/product-inventory')) {
+        return Promise.resolve({
+          ok: true,
+          json: () =>
+            Promise.resolve({
+              inventory: outOfStockInventory,
+              pagination: { page: 1, limit: 1000, total: 1, totalPages: 1 },
+            }),
+        });
       }
-    );
+      if (url.includes('/api/categories')) {
+        return Promise.resolve({
+          ok: true,
+          json: () => Promise.resolve({ categories: mockCategories }),
+        });
+      }
+      if (url.includes('/api/products')) {
+        return Promise.resolve({
+          ok: true,
+          json: () =>
+            Promise.resolve({
+              products: [mockProducts[0]],
+              pagination: { page: 1, limit: 100, total: 1, totalPages: 1 },
+            }),
+        });
+      }
+      return Promise.reject(new Error('Unknown endpoint'));
+    });
 
     render(<ProductGrid locationId='loc-1' />);
 
@@ -352,37 +334,35 @@ describe('ProductGrid', () => {
   });
 
   it('shows empty state when no products found', async () => {
-    (global.fetch as unknown as ReturnType<typeof vi.fn>).mockImplementation(
-      (url: string) => {
-        if (url.includes('/api/products')) {
-          return Promise.resolve({
-            ok: true,
-            json: () =>
-              Promise.resolve({
-                products: [],
-                pagination: { page: 1, limit: 100, total: 0, totalPages: 0 },
-              }),
-          });
-        }
-        if (url.includes('/api/categories')) {
-          return Promise.resolve({
-            ok: true,
-            json: () => Promise.resolve({ categories: mockCategories }),
-          });
-        }
-        if (url.includes('/api/product-inventory')) {
-          return Promise.resolve({
-            ok: true,
-            json: () =>
-              Promise.resolve({
-                inventory: [],
-                pagination: { page: 1, limit: 1000, total: 0, totalPages: 0 },
-              }),
-          });
-        }
-        return Promise.reject(new Error('Unknown endpoint'));
+    (global.fetch as unknown as ReturnType<typeof vi.fn>).mockImplementation((url: string) => {
+      if (url.includes('/api/products')) {
+        return Promise.resolve({
+          ok: true,
+          json: () =>
+            Promise.resolve({
+              products: [],
+              pagination: { page: 1, limit: 100, total: 0, totalPages: 0 },
+            }),
+        });
       }
-    );
+      if (url.includes('/api/categories')) {
+        return Promise.resolve({
+          ok: true,
+          json: () => Promise.resolve({ categories: mockCategories }),
+        });
+      }
+      if (url.includes('/api/product-inventory')) {
+        return Promise.resolve({
+          ok: true,
+          json: () =>
+            Promise.resolve({
+              inventory: [],
+              pagination: { page: 1, limit: 1000, total: 0, totalPages: 0 },
+            }),
+        });
+      }
+      return Promise.reject(new Error('Unknown endpoint'));
+    });
 
     render(<ProductGrid locationId='loc-1' />);
 

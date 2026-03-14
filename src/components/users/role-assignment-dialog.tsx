@@ -41,9 +41,7 @@ export function RoleAssignmentDialog({
 }: RoleAssignmentDialogProps) {
   const [loading, setLoading] = useState(false);
   const [availableRoles, setAvailableRoles] = useState<Role[]>([]);
-  const [selectedRoleIds, setSelectedRoleIds] = useState<string[]>(
-    user.roles.map((r) => r.id)
-  );
+  const [selectedRoleIds, setSelectedRoleIds] = useState<string[]>(user.roles.map((r) => r.id));
 
   useEffect(() => {
     if (open) {
@@ -67,9 +65,7 @@ export function RoleAssignmentDialog({
 
   const toggleRole = (roleId: string) => {
     setSelectedRoleIds((prev) =>
-      prev.includes(roleId)
-        ? prev.filter((id) => id !== roleId)
-        : [...prev, roleId]
+      prev.includes(roleId) ? prev.filter((id) => id !== roleId) : [...prev, roleId]
     );
   };
 
@@ -100,8 +96,7 @@ export function RoleAssignmentDialog({
         <DialogHeader>
           <DialogTitle>Manage User Roles</DialogTitle>
           <DialogDescription>
-            Assign roles to {user.name}. Select or deselect roles to update
-            their permissions.
+            Assign roles to {user.name}. Select or deselect roles to update their permissions.
           </DialogDescription>
         </DialogHeader>
 
@@ -125,14 +120,10 @@ export function RoleAssignmentDialog({
                   <div className='flex-1'>
                     <div className='flex items-center gap-2'>
                       <p className='font-medium capitalize'>{role.name}</p>
-                      {isSelected && (
-                        <Check className='h-4 w-4 text-blue-500' />
-                      )}
+                      {isSelected && <Check className='h-4 w-4 text-blue-500' />}
                     </div>
                     {role.description && (
-                      <p className='text-sm text-gray-600 mt-1'>
-                        {role.description}
-                      </p>
+                      <p className='text-sm text-gray-600 mt-1'>{role.description}</p>
                     )}
                   </div>
                 </div>

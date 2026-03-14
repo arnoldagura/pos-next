@@ -43,9 +43,7 @@ describe('Inventory API - GET /api/product-inventory/low-stock', () => {
       },
     ];
 
-    vi.mocked(inventoryCalculation.getLowStockItems).mockResolvedValue(
-      mockLowStockItems
-    );
+    vi.mocked(inventoryCalculation.getLowStockItems).mockResolvedValue(mockLowStockItems);
 
     const request = new NextRequest(
       'http://localhost/api/product-inventory/low-stock?locationId=loc-1'
@@ -78,9 +76,7 @@ describe('Inventory API - GET /api/product-inventory/low-stock', () => {
   });
 
   it('should require locationId parameter', async () => {
-    const request = new NextRequest(
-      'http://localhost/api/product-inventory/low-stock'
-    );
+    const request = new NextRequest('http://localhost/api/product-inventory/low-stock');
     const response = await getLowStockHandler(request);
     const data = await response.json();
 
@@ -89,9 +85,7 @@ describe('Inventory API - GET /api/product-inventory/low-stock', () => {
   });
 
   it('should handle errors gracefully', async () => {
-    vi.mocked(inventoryCalculation.getLowStockItems).mockRejectedValue(
-      new Error('Database error')
-    );
+    vi.mocked(inventoryCalculation.getLowStockItems).mockRejectedValue(new Error('Database error'));
 
     const request = new NextRequest(
       'http://localhost/api/product-inventory/low-stock?locationId=loc-1'

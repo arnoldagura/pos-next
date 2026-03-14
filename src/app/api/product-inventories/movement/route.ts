@@ -25,10 +25,7 @@ export async function createMovementHandler(req: NextRequest) {
       .limit(1);
 
     if (productInventoryRecord.length === 0) {
-      return NextResponse.json(
-        { error: 'Inventory not found' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'Inventory not found' }, { status: 404 });
     }
 
     const decreaseTypes = ['sale', 'transfer_out', 'waste'];
@@ -51,9 +48,7 @@ export async function createMovementHandler(req: NextRequest) {
       }
     }
 
-    const movementDate = validatedData.date
-      ? new Date(validatedData.date)
-      : new Date();
+    const movementDate = validatedData.date ? new Date(validatedData.date) : new Date();
 
     const newMovement = await db
       .insert(productInventoryMovement)
@@ -85,10 +80,7 @@ export async function createMovementHandler(req: NextRequest) {
       );
     }
 
-    return NextResponse.json(
-      { error: 'Failed to create movement' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to create movement' }, { status: 500 });
   }
 }
 

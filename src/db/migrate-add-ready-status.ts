@@ -10,8 +10,7 @@ async function migrate() {
   console.log('Adding "ready" to order_status enum...');
 
   // Check current enum values
-  const currentValues =
-    await sql`SELECT unnest(enum_range(NULL::order_status))::text as val`;
+  const currentValues = await sql`SELECT unnest(enum_range(NULL::order_status))::text as val`;
   const values = currentValues.map((r) => r.val);
   console.log('Current values:', values);
 
@@ -26,8 +25,7 @@ async function migrate() {
   console.log('Added "ready" to order_status enum.');
 
   // Verify
-  const updated =
-    await sql`SELECT unnest(enum_range(NULL::order_status))::text as val`;
+  const updated = await sql`SELECT unnest(enum_range(NULL::order_status))::text as val`;
   console.log(
     'Updated values:',
     updated.map((r) => r.val)

@@ -10,13 +10,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import {
   DropdownMenu,
@@ -26,14 +20,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import {
-  Plus,
-  MoreVertical,
-  Search,
-  Filter,
-  Calendar,
-  Loader2,
-} from 'lucide-react';
+import { Plus, MoreVertical, Search, Filter, Calendar, Loader2 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 import ProductionOrderFormDialog from './production-order-form-dialog';
@@ -149,14 +136,11 @@ export default function ProductionOrdersClient() {
   const handleSchedule = async (orderId: string) => {
     try {
       setActionLoading(orderId);
-      const response = await fetch(
-        `/api/production-orders/${orderId}/schedule`,
-        {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({}),
-        }
-      );
+      const response = await fetch(`/api/production-orders/${orderId}/schedule`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({}),
+      });
 
       if (!response.ok) {
         const error = await response.json();
@@ -167,9 +151,7 @@ export default function ProductionOrdersClient() {
       fetchOrders();
     } catch (error) {
       console.error('Error scheduling order:', error);
-      toast.error(
-        error instanceof Error ? error.message : 'Failed to schedule order'
-      );
+      toast.error(error instanceof Error ? error.message : 'Failed to schedule order');
     } finally {
       setActionLoading(null);
     }
@@ -193,9 +175,7 @@ export default function ProductionOrdersClient() {
       fetchOrders();
     } catch (error) {
       console.error('Error starting production:', error);
-      toast.error(
-        error instanceof Error ? error.message : 'Failed to start production'
-      );
+      toast.error(error instanceof Error ? error.message : 'Failed to start production');
     } finally {
       setActionLoading(null);
     }
@@ -223,9 +203,7 @@ export default function ProductionOrdersClient() {
       fetchOrders();
     } catch (error) {
       console.error('Error cancelling order:', error);
-      toast.error(
-        error instanceof Error ? error.message : 'Failed to cancel order'
-      );
+      toast.error(error instanceof Error ? error.message : 'Failed to cancel order');
     } finally {
       setActionLoading(null);
     }
@@ -294,9 +272,7 @@ export default function ProductionOrdersClient() {
       ) : filteredOrders.length === 0 ? (
         <Card>
           <CardContent className='flex flex-col items-center justify-center py-12'>
-            <p className='text-muted-foreground mb-4'>
-              No production orders found
-            </p>
+            <p className='text-muted-foreground mb-4'>No production orders found</p>
             <Button onClick={() => setIsFormOpen(true)}>
               <Plus className='h-4 w-4 mr-2' />
               Create First Order
@@ -315,24 +291,14 @@ export default function ProductionOrdersClient() {
                 <CardHeader>
                   <div className='flex items-start justify-between'>
                     <div className='space-y-1 flex-1'>
-                      <CardTitle className='text-lg'>
-                        {order.recipe.name}
-                      </CardTitle>
+                      <CardTitle className='text-lg'>{order.recipe.name}</CardTitle>
                       <CardDescription>
-                        {order.outputProduct?.name ||
-                          order.outputMaterial?.name}
+                        {order.outputProduct?.name || order.outputMaterial?.name}
                       </CardDescription>
                     </div>
                     <DropdownMenu>
-                      <DropdownMenuTrigger
-                        asChild
-                        onClick={(e) => e.stopPropagation()}
-                      >
-                        <Button
-                          variant='ghost'
-                          size='sm'
-                          disabled={actionLoading === order.id}
-                        >
+                      <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
+                        <Button variant='ghost' size='sm' disabled={actionLoading === order.id}>
                           {actionLoading === order.id ? (
                             <Loader2 className='h-4 w-4 animate-spin' />
                           ) : (
@@ -447,9 +413,7 @@ export default function ProductionOrdersClient() {
                     )}
                     {order.status === 'costing_done' && (
                       <div className='flex justify-between pt-2 border-t'>
-                        <span className='text-muted-foreground'>
-                          Total Cost:
-                        </span>
+                        <span className='text-muted-foreground'>Total Cost:</span>
                         <span className='font-bold text-green-600'>
                           ${Number(order.totalCost).toFixed(2)}
                         </span>
@@ -463,11 +427,7 @@ export default function ProductionOrdersClient() {
 
           {totalPages > 1 && (
             <div className='flex justify-center gap-2'>
-              <Button
-                variant='outline'
-                disabled={page === 1}
-                onClick={() => setPage(page - 1)}
-              >
+              <Button variant='outline' disabled={page === 1} onClick={() => setPage(page - 1)}>
                 Previous
               </Button>
               <div className='flex items-center px-4'>

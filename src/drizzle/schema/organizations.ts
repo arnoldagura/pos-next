@@ -1,12 +1,4 @@
-import {
-  pgTable,
-  text,
-  timestamp,
-  integer,
-  jsonb,
-  pgEnum,
-  index,
-} from 'drizzle-orm/pg-core';
+import { pgTable, text, timestamp, integer, jsonb, pgEnum, index } from 'drizzle-orm/pg-core';
 
 // Organization status enum
 export const organizationStatusEnum = pgEnum('organization_status', [
@@ -88,9 +80,7 @@ export const organization = pgTable(
     subdomain: text('subdomain').unique(),
     domain: text('domain').unique(),
     status: organizationStatusEnum('status').default('trial').notNull(),
-    subscriptionTier: subscriptionTierEnum('subscription_tier')
-      .default('starter')
-      .notNull(),
+    subscriptionTier: subscriptionTierEnum('subscription_tier').default('starter').notNull(),
     maxUsers: integer('max_users').default(5).notNull(),
     maxLocations: integer('max_locations').default(1).notNull(),
     settings: jsonb('settings').$type<OrganizationSettings>(),

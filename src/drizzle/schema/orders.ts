@@ -1,13 +1,5 @@
 import { relations } from 'drizzle-orm';
-import {
-  pgTable,
-  text,
-  timestamp,
-  numeric,
-  integer,
-  pgEnum,
-  index,
-} from 'drizzle-orm/pg-core';
+import { pgTable, text, timestamp, numeric, integer, pgEnum, index } from 'drizzle-orm/pg-core';
 import { product } from './products';
 import { location } from './locations';
 import { restaurantTable } from './tables';
@@ -38,11 +30,7 @@ export const paymentStatusEnum = pgEnum('payment_status', [
   'refunded',
 ]);
 
-export const itemStatusEnum = pgEnum('item_status', [
-  'pending',
-  'ready',
-  'served',
-]);
+export const itemStatusEnum = pgEnum('item_status', ['pending', 'ready', 'served']);
 
 export const order = pgTable(
   'order',
@@ -62,16 +50,10 @@ export const order = pgTable(
     customerName: text('customer_name'),
     status: orderStatusEnum('status').default('pending').notNull(),
     paymentMethod: paymentMethodEnum('payment_method'),
-    paymentStatus: paymentStatusEnum('payment_status')
-      .default('pending')
-      .notNull(),
+    paymentStatus: paymentStatusEnum('payment_status').default('pending').notNull(),
     subtotal: numeric('subtotal', { precision: 10, scale: 2 }).notNull(),
-    totalDiscount: numeric('total_discount', { precision: 10, scale: 2 })
-      .default('0')
-      .notNull(),
-    totalTax: numeric('total_tax', { precision: 10, scale: 2 })
-      .default('0')
-      .notNull(),
+    totalDiscount: numeric('total_discount', { precision: 10, scale: 2 }).default('0').notNull(),
+    totalTax: numeric('total_tax', { precision: 10, scale: 2 }).default('0').notNull(),
     total: numeric('total', { precision: 10, scale: 2 }).notNull(),
     amountPaid: numeric('amount_paid', { precision: 10, scale: 2 }),
     changeGiven: numeric('change_given', { precision: 10, scale: 2 }),
@@ -111,15 +93,11 @@ export const orderItem = pgTable(
     productSku: text('product_sku'),
     quantity: integer('quantity').notNull(),
     unitPrice: numeric('unit_price', { precision: 10, scale: 2 }).notNull(),
-    discount: numeric('discount', { precision: 10, scale: 2 })
-      .default('0')
-      .notNull(),
+    discount: numeric('discount', { precision: 10, scale: 2 }).default('0').notNull(),
     discountType: text('discount_type', {
       enum: ['percentage', 'fixed'],
     }).default('fixed'),
-    taxRate: numeric('tax_rate', { precision: 5, scale: 2 })
-      .default('0')
-      .notNull(),
+    taxRate: numeric('tax_rate', { precision: 5, scale: 2 }).default('0').notNull(),
     subtotal: numeric('subtotal', { precision: 10, scale: 2 }).notNull(),
     total: numeric('total', { precision: 10, scale: 2 }).notNull(),
     itemStatus: itemStatusEnum('item_status').default('pending').notNull(),

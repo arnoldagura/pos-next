@@ -60,9 +60,7 @@ describe('Inventory API - GET /api/product-inventory', () => {
       'inv-1': { inventoryId: 'inv-1', currentStock: 50, unitOfMeasure: 'pcs' },
     });
 
-    const request = new NextRequest(
-      'http://localhost/api/product-inventory?page=1&limit=50'
-    );
+    const request = new NextRequest('http://localhost/api/product-inventory?page=1&limit=50');
     const response = await getInventoryHandler(request);
     const data = await response.json();
 
@@ -99,9 +97,7 @@ describe('Inventory API - GET /api/product-inventory', () => {
     vi.mocked(db.select).mockReturnValue(mockDbChain as never);
     vi.mocked(inventoryCalculation.getBulkStockLevels).mockResolvedValue({});
 
-    const request = new NextRequest(
-      'http://localhost/api/product-inventory?locationId=loc-1'
-    );
+    const request = new NextRequest('http://localhost/api/product-inventory?locationId=loc-1');
     const response = await getInventoryHandler(request);
 
     expect(response.status).toBe(200);
@@ -207,9 +203,7 @@ describe('Inventory API - POST /api/product-inventory', () => {
     const data = await response.json();
 
     expect(response.status).toBe(400);
-    expect(data.error).toBe(
-      'Inventory already exists for this product at this location'
-    );
+    expect(data.error).toBe('Inventory already exists for this product at this location');
   });
 
   it('should reject if product does not exist', async () => {

@@ -78,10 +78,7 @@ export async function getMaterialsHandler(req: NextRequest) {
   } catch (error) {
     console.error('Error fetching materials:', error);
 
-    return NextResponse.json(
-      { error: 'Failed to fetch materials' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to fetch materials' }, { status: 500 });
   }
 }
 
@@ -111,10 +108,7 @@ export async function createMaterialHandler(req: NextRequest) {
       );
     }
 
-    return NextResponse.json(
-      { error: 'Failed to create material' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to create material' }, { status: 500 });
   }
 }
 

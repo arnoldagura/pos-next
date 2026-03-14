@@ -19,11 +19,7 @@ interface MovementFiltersProps {
     startDate?: string;
     endDate?: string;
   };
-  onFiltersChange: (filters: {
-    type?: MovementType;
-    startDate?: string;
-    endDate?: string;
-  }) => void;
+  onFiltersChange: (filters: { type?: MovementType; startDate?: string; endDate?: string }) => void;
 }
 
 export function MovementFilters({ filters, onFiltersChange }: MovementFiltersProps) {
@@ -59,19 +55,16 @@ export function MovementFilters({ filters, onFiltersChange }: MovementFiltersPro
   const hasActiveFilters = filters.type || filters.startDate || filters.endDate;
 
   return (
-    <div className="space-y-4">
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div className="space-y-2">
+    <div className='space-y-4'>
+      <div className='grid grid-cols-1 md:grid-cols-3 gap-4'>
+        <div className='space-y-2'>
           <Label>Movement Type</Label>
-          <Select
-            value={filters.type || 'all'}
-            onValueChange={handleTypeChange}
-          >
+          <Select value={filters.type || 'all'} onValueChange={handleTypeChange}>
             <SelectTrigger>
-              <SelectValue placeholder="All Types" />
+              <SelectValue placeholder='All Types' />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">All Types</SelectItem>
+              <SelectItem value='all'>All Types</SelectItem>
               {Object.entries(MOVEMENT_TYPE_LABELS).map(([value, label]) => (
                 <SelectItem key={value} value={value}>
                   {label}
@@ -81,21 +74,21 @@ export function MovementFilters({ filters, onFiltersChange }: MovementFiltersPro
           </Select>
         </div>
 
-        <div className="space-y-2">
-          <Label htmlFor="start-date">Start Date</Label>
+        <div className='space-y-2'>
+          <Label htmlFor='start-date'>Start Date</Label>
           <Input
-            id="start-date"
-            type="date"
+            id='start-date'
+            type='date'
             value={filters.startDate || ''}
             onChange={(e) => handleStartDateChange(e.target.value)}
           />
         </div>
 
-        <div className="space-y-2">
-          <Label htmlFor="end-date">End Date</Label>
+        <div className='space-y-2'>
+          <Label htmlFor='end-date'>End Date</Label>
           <Input
-            id="end-date"
-            type="date"
+            id='end-date'
+            type='date'
             value={filters.endDate || ''}
             onChange={(e) => handleEndDateChange(e.target.value)}
           />
@@ -103,9 +96,9 @@ export function MovementFilters({ filters, onFiltersChange }: MovementFiltersPro
       </div>
 
       {hasActiveFilters && (
-        <div className="flex justify-end">
-          <Button variant="ghost" size="sm" onClick={clearFilters}>
-            <X className="h-4 w-4 mr-2" />
+        <div className='flex justify-end'>
+          <Button variant='ghost' size='sm' onClick={clearFilters}>
+            <X className='h-4 w-4 mr-2' />
             Clear Filters
           </Button>
         </div>

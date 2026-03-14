@@ -15,12 +15,7 @@ async function applyMigration() {
   try {
     console.log('Applying categories migration...');
 
-    const migrationPath = join(
-      process.cwd(),
-      'drizzle',
-      'migration',
-      '0003_damp_zzzax.sql'
-    );
+    const migrationPath = join(process.cwd(), 'drizzle', 'migration', '0003_damp_zzzax.sql');
     const migrationSQL = readFileSync(migrationPath, 'utf-8');
 
     // Split by statement breakpoint and execute each statement

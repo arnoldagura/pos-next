@@ -52,7 +52,10 @@ export async function GET(req: NextRequest) {
             })
             .where(eq(order.id, orderId));
 
-          return NextResponse.json({ status: 'paid', order: { ...orderRecord, paymentStatus: 'paid' } });
+          return NextResponse.json({
+            status: 'paid',
+            order: { ...orderRecord, paymentStatus: 'paid' },
+          });
         }
       } catch (e) {
         console.error('Error checking PayMongo session:', e);
@@ -62,9 +65,6 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ status: orderRecord.paymentStatus, order: orderRecord });
   } catch (error) {
     console.error('Error checking payment status:', error);
-    return NextResponse.json(
-      { error: 'Failed to check payment status' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to check payment status' }, { status: 500 });
   }
 }

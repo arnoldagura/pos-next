@@ -32,9 +32,7 @@ async function InviteContent({ params }: InvitePageProps) {
                   />
                 </svg>
               </div>
-              <h1 className='text-2xl font-bold text-gray-900 mb-2'>
-                Invalid Invitation
-              </h1>
+              <h1 className='text-2xl font-bold text-gray-900 mb-2'>Invalid Invitation</h1>
               <p className='text-red-600 mb-4'>{validation.error}</p>
             </div>
 
@@ -67,10 +65,7 @@ async function InviteContent({ params }: InvitePageProps) {
               </Link>
               <p className='text-center text-sm text-gray-600'>
                 Need help?{' '}
-                <Link
-                  href='/contact'
-                  className='text-blue-600 hover:underline font-medium'
-                >
+                <Link href='/contact' className='text-blue-600 hover:underline font-medium'>
                   Contact support
                 </Link>
               </p>
@@ -103,11 +98,10 @@ async function InviteContent({ params }: InvitePageProps) {
                 />
               </svg>
             </div>
-            <h2 className='text-xl font-bold text-gray-900'>
-              You&apos;ve been invited!
-            </h2>
+            <h2 className='text-xl font-bold text-gray-900'>You&apos;ve been invited!</h2>
             <p className='text-gray-600'>
-              Join <strong className='text-blue-600'>{invitation.organizationName}</strong> as {invitation.roleName}
+              Join <strong className='text-blue-600'>{invitation.organizationName}</strong> as{' '}
+              {invitation.roleName}
             </p>
           </div>
         </div>

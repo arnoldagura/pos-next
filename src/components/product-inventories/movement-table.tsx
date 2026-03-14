@@ -39,7 +39,15 @@ export function MovementTable({ movements }: MovementTableProps) {
       const quantity = parseFloat(movement.quantity);
 
       // Add or subtract based on movement type
-      if (['purchase', 'transfer_in', 'production_output', 'receive_from_material', 'adjustment'].includes(movement.type)) {
+      if (
+        [
+          'purchase',
+          'transfer_in',
+          'production_output',
+          'receive_from_material',
+          'adjustment',
+        ].includes(movement.type)
+      ) {
         balance += quantity;
       } else if (['sale', 'transfer_out', 'waste'].includes(movement.type)) {
         balance -= quantity;
@@ -91,35 +99,31 @@ export function MovementTable({ movements }: MovementTableProps) {
   };
 
   if (movements.length === 0) {
-    return (
-      <div className="text-center py-8 text-muted-foreground">
-        No movements found
-      </div>
-    );
+    return <div className='text-center py-8 text-muted-foreground'>No movements found</div>;
   }
 
   return (
-    <div className="space-y-4">
-      <div className="flex justify-end gap-2">
-        <Button variant="outline" size="sm" onClick={exportToExcel}>
-          <Download className="h-4 w-4 mr-2" />
+    <div className='space-y-4'>
+      <div className='flex justify-end gap-2'>
+        <Button variant='outline' size='sm' onClick={exportToExcel}>
+          <Download className='h-4 w-4 mr-2' />
           Export to Excel
         </Button>
-        <Button variant="outline" size="sm" onClick={printReport}>
-          <Printer className="h-4 w-4 mr-2" />
+        <Button variant='outline' size='sm' onClick={printReport}>
+          <Printer className='h-4 w-4 mr-2' />
           Print Report
         </Button>
       </div>
 
-      <div className="border rounded-lg">
+      <div className='border rounded-lg'>
         <Table>
           <TableHeader>
             <TableRow>
               <TableHead>Date</TableHead>
               <TableHead>Type</TableHead>
-              <TableHead className="text-right">Quantity</TableHead>
-              <TableHead className="text-right">Unit Price</TableHead>
-              <TableHead className="text-right">Running Balance</TableHead>
+              <TableHead className='text-right'>Quantity</TableHead>
+              <TableHead className='text-right'>Unit Price</TableHead>
+              <TableHead className='text-right'>Running Balance</TableHead>
               <TableHead>Reference</TableHead>
               <TableHead>User</TableHead>
               <TableHead>Remarks</TableHead>
@@ -129,42 +133,41 @@ export function MovementTable({ movements }: MovementTableProps) {
             {movementsWithBalance.map((movement) => {
               const referenceLink = getReferenceLink(movement);
               const quantity = parseFloat(movement.quantity);
-              const isIncrease = ['purchase', 'transfer_in', 'production_output', 'receive_from_material', 'adjustment'].includes(movement.type);
+              const isIncrease = [
+                'purchase',
+                'transfer_in',
+                'production_output',
+                'receive_from_material',
+                'adjustment',
+              ].includes(movement.type);
 
               return (
                 <TableRow key={movement.id}>
+                  <TableCell>{new Date(movement.date).toLocaleString()}</TableCell>
                   <TableCell>
-                    {new Date(movement.date).toLocaleString()}
-                  </TableCell>
-                  <TableCell>
-                    <Badge
-                      variant="outline"
-                      className={MOVEMENT_TYPE_COLORS[movement.type]}
-                    >
+                    <Badge variant='outline' className={MOVEMENT_TYPE_COLORS[movement.type]}>
                       {MOVEMENT_TYPE_LABELS[movement.type]}
                     </Badge>
                   </TableCell>
-                  <TableCell className="text-right">
+                  <TableCell className='text-right'>
                     <span className={isIncrease ? 'text-green-600' : 'text-red-600'}>
-                      {isIncrease ? '+' : '-'}{quantity.toFixed(2)}
+                      {isIncrease ? '+' : '-'}
+                      {quantity.toFixed(2)}
                     </span>
                   </TableCell>
-                  <TableCell className="text-right">
+                  <TableCell className='text-right'>
                     {movement.unitPrice ? `$${parseFloat(movement.unitPrice).toFixed(2)}` : '-'}
                   </TableCell>
-                  <TableCell className="text-right font-medium">
+                  <TableCell className='text-right font-medium'>
                     {movement.runningBalance.toFixed(2)}
                   </TableCell>
                   <TableCell>
                     {referenceLink ? (
-                      <Link
-                        href={referenceLink}
-                        className="text-primary hover:underline"
-                      >
+                      <Link href={referenceLink} className='text-primary hover:underline'>
                         {movement.referenceType} - {movement.referenceId}
                       </Link>
                     ) : movement.referenceType ? (
-                      <span className="text-muted-foreground">
+                      <span className='text-muted-foreground'>
                         {movement.referenceType} - {movement.referenceId}
                       </span>
                     ) : (
@@ -172,9 +175,7 @@ export function MovementTable({ movements }: MovementTableProps) {
                     )}
                   </TableCell>
                   <TableCell>{movement.createdBy || 'System'}</TableCell>
-                  <TableCell className="max-w-xs truncate">
-                    {movement.remarks || '-'}
-                  </TableCell>
+                  <TableCell className='max-w-xs truncate'>{movement.remarks || '-'}</TableCell>
                 </TableRow>
               );
             })}

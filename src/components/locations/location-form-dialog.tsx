@@ -110,9 +110,7 @@ export function LocationFormDialog({
     try {
       setLoading(true);
 
-      const url = location
-        ? `/api/locations/${location.id}`
-        : '/api/locations';
+      const url = location ? `/api/locations/${location.id}` : '/api/locations';
       const method = location ? 'PATCH' : 'POST';
 
       const response = await fetch(url, {
@@ -126,18 +124,12 @@ export function LocationFormDialog({
         throw new Error(error.error || 'Failed to save location');
       }
 
-      toast.success(
-        location
-          ? 'Location updated successfully'
-          : 'Location created successfully'
-      );
+      toast.success(location ? 'Location updated successfully' : 'Location created successfully');
       setIsDirty(false);
       onOpenChange(false);
       onSuccess();
     } catch (error) {
-      toast.error(
-        error instanceof Error ? error.message : 'Failed to save location'
-      );
+      toast.error(error instanceof Error ? error.message : 'Failed to save location');
       console.error(error);
     } finally {
       setLoading(false);
@@ -146,9 +138,7 @@ export function LocationFormDialog({
 
   const handleClose = () => {
     if (isDirty) {
-      const confirmed = confirm(
-        'You have unsaved changes. Are you sure you want to close?'
-      );
+      const confirmed = confirm('You have unsaved changes. Are you sure you want to close?');
       if (!confirmed) return;
     }
     onOpenChange(false);
@@ -158,9 +148,7 @@ export function LocationFormDialog({
     <Dialog open={open} onOpenChange={handleClose}>
       <DialogContent className='max-w-2xl max-h-[90vh] overflow-y-auto'>
         <DialogHeader>
-          <DialogTitle>
-            {location ? 'Edit Location' : 'Create Location'}
-          </DialogTitle>
+          <DialogTitle>{location ? 'Edit Location' : 'Create Location'}</DialogTitle>
           <DialogDescription>
             {location
               ? 'Update location information'
@@ -172,155 +160,141 @@ export function LocationFormDialog({
           <form onSubmit={form.handleSubmit(onSubmit)} className='space-y-4'>
             {/* Name */}
             <FormField
-            name='name'
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Location Name *</FormLabel>
-                <FormControl>
-                  <Input placeholder='e.g., Main Warehouse' {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          {/* Address */}
-          <FormField
-            name='address'
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Address *</FormLabel>
-                <FormControl>
-                  <Input placeholder='Street address' {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          {/* City, State, Zip - Grid Layout */}
-          <div className='grid grid-cols-1 md:grid-cols-3 gap-4'>
-            <FormField
-              name='city'
+              name='name'
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>City</FormLabel>
+                  <FormLabel>Location Name *</FormLabel>
                   <FormControl>
-                    <Input placeholder='City' {...field} />
+                    <Input placeholder='e.g., Main Warehouse' {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
 
+            {/* Address */}
             <FormField
-              name='state'
+              name='address'
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>State/Province</FormLabel>
+                  <FormLabel>Address *</FormLabel>
                   <FormControl>
-                    <Input placeholder='State' {...field} />
+                    <Input placeholder='Street address' {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
 
+            {/* City, State, Zip - Grid Layout */}
+            <div className='grid grid-cols-1 md:grid-cols-3 gap-4'>
+              <FormField
+                name='city'
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>City</FormLabel>
+                    <FormControl>
+                      <Input placeholder='City' {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                name='state'
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>State/Province</FormLabel>
+                    <FormControl>
+                      <Input placeholder='State' {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                name='zipCode'
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>ZIP/Postal Code</FormLabel>
+                    <FormControl>
+                      <Input placeholder='ZIP Code' {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+
+            {/* Country */}
             <FormField
-              name='zipCode'
+              name='country'
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>ZIP/Postal Code</FormLabel>
+                  <FormLabel>Country</FormLabel>
                   <FormControl>
-                    <Input placeholder='ZIP Code' {...field} />
+                    <Input placeholder='Country' {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
-          </div>
 
-          {/* Country */}
-          <FormField
-            name='country'
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Country</FormLabel>
-                <FormControl>
-                  <Input placeholder='Country' {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+            {/* Phone and Email - Grid Layout */}
+            <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
+              <FormField
+                name='phone'
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Phone</FormLabel>
+                    <FormControl>
+                      <Input placeholder='+1 (555) 123-4567' {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
-          {/* Phone and Email - Grid Layout */}
-          <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
+              <FormField
+                name='email'
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Email</FormLabel>
+                    <FormControl>
+                      <Input type='email' placeholder='location@example.com' {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+
+            {/* Active Status */}
             <FormField
-              name='phone'
+              name='isActive'
               render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Phone</FormLabel>
+                <FormItem className='flex flex-row items-start space-x-3 space-y-0'>
                   <FormControl>
-                    <Input placeholder='+1 (555) 123-4567' {...field} />
+                    <Checkbox checked={field.value} onCheckedChange={field.onChange} />
                   </FormControl>
-                  <FormMessage />
+                  <div className='space-y-1 leading-none'>
+                    <FormLabel>Active</FormLabel>
+                    <FormDescription>Enable this location for inventory operations</FormDescription>
+                  </div>
                 </FormItem>
               )}
             />
 
-            <FormField
-              name='email'
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Email</FormLabel>
-                  <FormControl>
-                    <Input
-                      type='email'
-                      placeholder='location@example.com'
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          </div>
-
-          {/* Active Status */}
-          <FormField
-            name='isActive'
-            render={({ field }) => (
-              <FormItem className='flex flex-row items-start space-x-3 space-y-0'>
-                <FormControl>
-                  <Checkbox
-                    checked={field.value}
-                    onCheckedChange={field.onChange}
-                  />
-                </FormControl>
-                <div className='space-y-1 leading-none'>
-                  <FormLabel>Active</FormLabel>
-                  <FormDescription>
-                    Enable this location for inventory operations
-                  </FormDescription>
-                </div>
-              </FormItem>
-            )}
-          />
-
-          <DialogFooter>
-            <Button
-              type='button'
-              variant='outline'
-              onClick={handleClose}
-              disabled={loading}
-            >
-              Cancel
-            </Button>
-            <Button type='submit' disabled={loading}>
-              {loading && <Loader2 className='mr-2 h-4 w-4 animate-spin' />}
-              {location ? 'Update' : 'Create'} Location
-            </Button>
+            <DialogFooter>
+              <Button type='button' variant='outline' onClick={handleClose} disabled={loading}>
+                Cancel
+              </Button>
+              <Button type='submit' disabled={loading}>
+                {loading && <Loader2 className='mr-2 h-4 w-4 animate-spin' />}
+                {location ? 'Update' : 'Create'} Location
+              </Button>
             </DialogFooter>
           </form>
         </FormProvider>

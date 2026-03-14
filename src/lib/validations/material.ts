@@ -18,11 +18,7 @@ export const createMaterialSchema = z.object({
 });
 
 export const updateMaterialSchema = z.object({
-  name: z
-    .string()
-    .min(1, 'Name is required')
-    .max(255, 'Name is too long')
-    .optional(),
+  name: z.string().min(1, 'Name is required').max(255, 'Name is too long').optional(),
   description: z.string().optional().nullable(),
   type: materialTypeSchema.optional(),
   categoryId: z.string().optional().nullable(),
@@ -99,17 +95,9 @@ export const receiveMaterialSchema = z.object({
 
 export type CreateMaterialInput = z.infer<typeof createMaterialSchema>;
 export type UpdateMaterialInput = z.infer<typeof updateMaterialSchema>;
-export type CreateMaterialInventoryInput = z.infer<
-  typeof createMaterialInventorySchema
->;
-export type UpdateMaterialInventoryInput = z.infer<
-  typeof updateMaterialInventorySchema
->;
+export type CreateMaterialInventoryInput = z.infer<typeof createMaterialInventorySchema>;
+export type UpdateMaterialInventoryInput = z.infer<typeof updateMaterialInventorySchema>;
 export type MaterialMovementType = z.infer<typeof materialMovementTypeSchema>;
-export type CreateMaterialMovementInput = z.infer<
-  typeof createMaterialMovementSchema
->;
-export type CreateMaterialBatchInput = z.infer<
-  typeof createMaterialBatchSchema
->;
+export type CreateMaterialMovementInput = z.infer<typeof createMaterialMovementSchema>;
+export type CreateMaterialBatchInput = z.infer<typeof createMaterialBatchSchema>;
 export type ReceiveMaterialInput = z.infer<typeof receiveMaterialSchema>;

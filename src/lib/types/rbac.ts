@@ -61,11 +61,7 @@ export const createPermissionSchema = z.object({
 });
 
 export const updatePermissionSchema = z.object({
-  name: z
-    .string()
-    .min(1, 'Name is required')
-    .max(100, 'Name is too long')
-    .optional(),
+  name: z.string().min(1, 'Name is required').max(100, 'Name is too long').optional(),
   description: z.string().optional(),
   resource: z.string().min(1, 'Resource is required').optional(),
   action: z.string().min(1, 'Action is required').optional(),

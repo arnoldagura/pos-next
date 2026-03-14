@@ -22,11 +22,7 @@ interface TableState {
 
   fetchTables: (locationId: string) => Promise<void>;
   selectTable: (table: Table | null) => void;
-  updateTableStatus: (
-    tableId: string,
-    status: TableStatus,
-    orderId?: string
-  ) => Promise<void>;
+  updateTableStatus: (tableId: string, status: TableStatus, orderId?: string) => Promise<void>;
   refreshTable: (tableId: string) => Promise<void>;
   clearSelection: () => void;
 }
@@ -53,8 +49,7 @@ export const useTableStore = create<TableState>((set) => ({
       set({ tables: data.data || [], isLoading: false });
     } catch (error) {
       set({
-        error:
-          error instanceof Error ? error.message : 'Failed to fetch tables',
+        error: error instanceof Error ? error.message : 'Failed to fetch tables',
         isLoading: false,
       });
     }
@@ -64,11 +59,7 @@ export const useTableStore = create<TableState>((set) => ({
     set({ selectedTable: table });
   },
 
-  updateTableStatus: async (
-    tableId: string,
-    status: TableStatus,
-    orderId?: string
-  ) => {
+  updateTableStatus: async (tableId: string, status: TableStatus, orderId?: string) => {
     try {
       const response = await fetch(`/api/tables/${tableId}/status`, {
         method: 'PATCH',
@@ -105,10 +96,7 @@ export const useTableStore = create<TableState>((set) => ({
       }));
     } catch (error) {
       set({
-        error:
-          error instanceof Error
-            ? error.message
-            : 'Failed to update table status',
+        error: error instanceof Error ? error.message : 'Failed to update table status',
       });
       throw error;
     }
@@ -126,8 +114,7 @@ export const useTableStore = create<TableState>((set) => ({
 
       set((state) => ({
         tables: state.tables.map((t) => (t.id === tableId ? table : t)),
-        selectedTable:
-          state.selectedTable?.id === tableId ? table : state.selectedTable,
+        selectedTable: state.selectedTable?.id === tableId ? table : state.selectedTable,
       }));
     } catch (error) {
       console.error('Failed to refresh table:', error);

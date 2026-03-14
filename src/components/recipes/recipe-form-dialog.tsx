@@ -1,12 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -64,12 +59,7 @@ interface RecipeFormDialogProps {
   onSuccess: () => void;
 }
 
-export function RecipeFormDialog({
-  open,
-  onOpenChange,
-  recipe,
-  onSuccess,
-}: RecipeFormDialogProps) {
+export function RecipeFormDialog({ open, onOpenChange, recipe, onSuccess }: RecipeFormDialogProps) {
   const [loading, setLoading] = useState(false);
   const [materials, setMaterials] = useState<Material[]>([]);
   const [products, setProducts] = useState<Product[]>([]);
@@ -77,9 +67,7 @@ export function RecipeFormDialog({
   // Form state
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
-  const [outputType, setOutputType] = useState<'product' | 'material'>(
-    'product'
-  );
+  const [outputType, setOutputType] = useState<'product' | 'material'>('product');
   const [outputProductId, setOutputProductId] = useState('');
   const [outputMaterialId, setOutputMaterialId] = useState('');
   const [outputQuantity, setOutputQuantity] = useState('');
@@ -148,10 +136,7 @@ export function RecipeFormDialog({
   };
 
   const addIngredient = () => {
-    setIngredients([
-      ...ingredients,
-      { materialId: '', quantity: 0, unitOfMeasure: '' },
-    ]);
+    setIngredients([...ingredients, { materialId: '', quantity: 0, unitOfMeasure: '' }]);
   };
 
   const removeIngredient = (index: number) => {
@@ -160,11 +145,7 @@ export function RecipeFormDialog({
     }
   };
 
-  const updateIngredient = (
-    index: number,
-    field: keyof Ingredient,
-    value: string | number
-  ) => {
+  const updateIngredient = (index: number, field: keyof Ingredient, value: string | number) => {
     const updated = [...ingredients];
     updated[index] = { ...updated[index], [field]: value };
     setIngredients(updated);
@@ -219,8 +200,7 @@ export function RecipeFormDialog({
         description: description.trim() || undefined,
         outputType,
         outputProductId: outputType === 'product' ? outputProductId : undefined,
-        outputMaterialId:
-          outputType === 'material' ? outputMaterialId : undefined,
+        outputMaterialId: outputType === 'material' ? outputMaterialId : undefined,
         outputQuantity: parseFloat(outputQuantity),
         unitOfMeasure: outputUnitOfMeasure.trim(),
         ingredients: validIngredients,
@@ -240,15 +220,11 @@ export function RecipeFormDialog({
         throw new Error(error.error || 'Failed to save recipe');
       }
 
-      toast.success(
-        recipe ? 'Recipe updated successfully' : 'Recipe created successfully'
-      );
+      toast.success(recipe ? 'Recipe updated successfully' : 'Recipe created successfully');
       onSuccess();
       onOpenChange(false);
     } catch (error) {
-      toast.error(
-        error instanceof Error ? error.message : 'Failed to save recipe'
-      );
+      toast.error(error instanceof Error ? error.message : 'Failed to save recipe');
       console.error(error);
     } finally {
       setLoading(false);
@@ -259,9 +235,7 @@ export function RecipeFormDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className='max-w-3xl max-h-[90vh] overflow-y-auto'>
         <DialogHeader>
-          <DialogTitle>
-            {recipe ? 'Edit Recipe' : 'Create New Recipe'}
-          </DialogTitle>
+          <DialogTitle>{recipe ? 'Edit Recipe' : 'Create New Recipe'}</DialogTitle>
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className='space-y-6 mt-4'>
@@ -296,9 +270,7 @@ export function RecipeFormDialog({
               <Label htmlFor='outputType'>Output Type *</Label>
               <Select
                 value={outputType}
-                onValueChange={(value: 'product' | 'material') =>
-                  setOutputType(value)
-                }
+                onValueChange={(value: 'product' | 'material') => setOutputType(value)}
               >
                 <SelectTrigger>
                   <SelectValue />
@@ -313,10 +285,7 @@ export function RecipeFormDialog({
             {outputType === 'product' ? (
               <div>
                 <Label htmlFor='outputProductId'>Output Product *</Label>
-                <Select
-                  value={outputProductId}
-                  onValueChange={setOutputProductId}
-                >
+                <Select value={outputProductId} onValueChange={setOutputProductId}>
                   <SelectTrigger>
                     <SelectValue placeholder='Select product' />
                   </SelectTrigger>
@@ -332,10 +301,7 @@ export function RecipeFormDialog({
             ) : (
               <div>
                 <Label htmlFor='outputMaterialId'>Output Material *</Label>
-                <Select
-                  value={outputMaterialId}
-                  onValueChange={setOutputMaterialId}
-                >
+                <Select value={outputMaterialId} onValueChange={setOutputMaterialId}>
                   <SelectTrigger>
                     <SelectValue placeholder='Select material' />
                   </SelectTrigger>
@@ -381,12 +347,7 @@ export function RecipeFormDialog({
           <div className='space-y-4'>
             <div className='flex items-center justify-between'>
               <h3 className='text-lg font-medium'>Ingredients *</h3>
-              <Button
-                type='button'
-                variant='outline'
-                size='sm'
-                onClick={addIngredient}
-              >
+              <Button type='button' variant='outline' size='sm' onClick={addIngredient}>
                 <Plus className='h-4 w-4 mr-2' />
                 Add Ingredient
               </Button>
@@ -399,9 +360,7 @@ export function RecipeFormDialog({
                     <Label>Material *</Label>
                     <Select
                       value={ingredient.materialId}
-                      onValueChange={(value) =>
-                        handleMaterialChange(index, value)
-                      }
+                      onValueChange={(value) => handleMaterialChange(index, value)}
                     >
                       <SelectTrigger>
                         <SelectValue placeholder='Select material' />
@@ -423,11 +382,7 @@ export function RecipeFormDialog({
                       min='0.01'
                       value={ingredient.quantity || ''}
                       onChange={(e) =>
-                        updateIngredient(
-                          index,
-                          'quantity',
-                          parseFloat(e.target.value) || 0
-                        )
+                        updateIngredient(index, 'quantity', parseFloat(e.target.value) || 0)
                       }
                       placeholder='0.00'
                     />
@@ -436,9 +391,7 @@ export function RecipeFormDialog({
                     <Label>Unit *</Label>
                     <Input
                       value={ingredient.unitOfMeasure}
-                      onChange={(e) =>
-                        updateIngredient(index, 'unitOfMeasure', e.target.value)
-                      }
+                      onChange={(e) => updateIngredient(index, 'unitOfMeasure', e.target.value)}
                       placeholder='kg, L'
                     />
                   </div>
@@ -467,11 +420,7 @@ export function RecipeFormDialog({
               Cancel
             </Button>
             <Button type='submit' disabled={loading}>
-              {loading
-                ? 'Saving...'
-                : recipe
-                ? 'Update Recipe'
-                : 'Create Recipe'}
+              {loading ? 'Saving...' : recipe ? 'Update Recipe' : 'Create Recipe'}
             </Button>
           </div>
         </form>

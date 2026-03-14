@@ -8,12 +8,9 @@ const completeSchema = z.object({
 });
 
 // POST /api/production-orders/[id]/complete
-export async function POST(
-  request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
+export async function POST(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
-    const { id} = await params;
+    const { id } = await params;
     const body = await request.json();
 
     const validation = completeSchema.safeParse(body);
@@ -44,9 +41,6 @@ export async function POST(
       return NextResponse.json({ error: error.message }, { status: 400 });
     }
 
-    return NextResponse.json(
-      { error: 'Failed to complete production' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to complete production' }, { status: 500 });
   }
 }

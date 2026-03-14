@@ -28,10 +28,7 @@ export async function POST(req: NextRequest) {
       })
       .from(user)
       .innerJoin(userOrganization, eq(user.id, userOrganization.userId))
-      .innerJoin(
-        organization,
-        eq(userOrganization.organizationId, organization.id)
-      )
+      .innerJoin(organization, eq(userOrganization.organizationId, organization.id))
       .where(and(eq(user.email, email), eq(organization.id, organizationId)))
       .limit(1);
 
@@ -50,9 +47,6 @@ export async function POST(req: NextRequest) {
     });
   } catch (error) {
     console.error('Organization access validation error:', error);
-    return NextResponse.json(
-      { error: 'An error occurred during validation' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'An error occurred during validation' }, { status: 500 });
   }
 }

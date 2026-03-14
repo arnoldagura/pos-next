@@ -12,11 +12,7 @@ export const createSupplierSchema = z.object({
 });
 
 export const updateSupplierSchema = z.object({
-  name: z
-    .string()
-    .min(1, 'Name is required')
-    .max(255, 'Name is too long')
-    .optional(),
+  name: z.string().min(1, 'Name is required').max(255, 'Name is too long').optional(),
   contactPerson: z
     .string()
     .min(1, 'Contact person is required')

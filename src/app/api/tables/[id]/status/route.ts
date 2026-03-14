@@ -49,10 +49,7 @@ async function updateTableStatusHandler(
       );
     }
 
-    return NextResponse.json(
-      { error: 'Failed to update table status' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to update table status' }, { status: 500 });
   }
 }
 

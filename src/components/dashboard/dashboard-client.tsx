@@ -66,14 +66,19 @@ interface DashboardStats {
     quantity: string;
   }>;
   paymentMethods: Array<{
-    paymentMethod: string| null;
+    paymentMethod: string | null;
     total: string;
     count: number;
   }>;
 }
 
 export function DashboardClient() {
-  const { data: stats, isLoading: loading, error, refetch } = useQuery<DashboardStats>({
+  const {
+    data: stats,
+    isLoading: loading,
+    error,
+    refetch,
+  } = useQuery<DashboardStats>({
     queryKey: ['dashboard-stats'],
     queryFn: async () => {
       const response = await fetch('/api/dashboard/stats');
@@ -93,11 +98,11 @@ export function DashboardClient() {
   if (error) {
     const errorMessage = error instanceof Error ? error.message : 'An error occurred';
     return (
-      <div className="flex flex-col items-center justify-center min-h-[400px] gap-4">
-        <div className="text-destructive text-center">
-          <AlertTriangle className="h-12 w-12 mx-auto mb-2" />
-          <p className="font-semibold">Failed to load dashboard</p>
-          <p className="text-sm text-muted-foreground">{errorMessage}</p>
+      <div className='flex flex-col items-center justify-center min-h-[400px] gap-4'>
+        <div className='text-destructive text-center'>
+          <AlertTriangle className='h-12 w-12 mx-auto mb-2' />
+          <p className='font-semibold'>Failed to load dashboard</p>
+          <p className='text-sm text-muted-foreground'>{errorMessage}</p>
         </div>
         <Button onClick={() => refetch()}>Try Again</Button>
       </div>
@@ -109,49 +114,49 @@ export function DashboardClient() {
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <h1 className="text-3xl font-bold">Dashboard</h1>
-        <Button onClick={() => refetch()} variant="outline" size="sm">
-          <RefreshCcw className="h-4 w-4 mr-2" />
+    <div className='space-y-6'>
+      <div className='flex items-center justify-between'>
+        <h1 className='text-3xl font-bold'>Dashboard</h1>
+        <Button onClick={() => refetch()} variant='outline' size='sm'>
+          <RefreshCcw className='h-4 w-4 mr-2' />
           Refresh
         </Button>
       </div>
 
       {/* Sales Stats */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+      <div className='grid gap-4 md:grid-cols-2 lg:grid-cols-4'>
         <StatsCard
           title="Today's Sales"
           value={formatCurrency(parseFloat(stats.sales.today.total))}
           description={`${stats.sales.today.count} orders`}
           icon={DollarSign}
-          iconClassName="text-green-600"
+          iconClassName='text-green-600'
         />
         <StatsCard
-          title="This Week"
+          title='This Week'
           value={formatCurrency(parseFloat(stats.sales.week.total))}
           description={`${stats.sales.week.count} orders`}
           icon={TrendingUp}
-          iconClassName="text-blue-600"
+          iconClassName='text-blue-600'
         />
         <StatsCard
-          title="This Month"
+          title='This Month'
           value={formatCurrency(parseFloat(stats.sales.month.total))}
           description={`${stats.sales.month.count} orders`}
           icon={ShoppingCart}
-          iconClassName="text-purple-600"
+          iconClassName='text-purple-600'
         />
         <StatsCard
-          title="Inventory Value"
+          title='Inventory Value'
           value={formatCurrency(parseFloat(stats.inventory.totalValue))}
           description={`${stats.inventory.totalItems} items in stock`}
           icon={Package}
-          iconClassName="text-orange-600"
+          iconClassName='text-orange-600'
         />
       </div>
 
       {/* Charts Row */}
-      <div className="grid gap-4 md:grid-cols-2">
+      <div className='grid gap-4 md:grid-cols-2'>
         <OrderStatusChart data={stats.orderStatus} />
         <ProductionStatus data={stats.productionStatus} />
       </div>
@@ -163,8 +168,8 @@ export function DashboardClient() {
       {stats.lowStock.length > 0 && (
         <Card>
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <AlertTriangle className="h-5 w-5 text-yellow-600" />
+            <CardTitle className='flex items-center gap-2'>
+              <AlertTriangle className='h-5 w-5 text-yellow-600' />
               Low Stock Alerts ({stats.lowStock.length})
             </CardTitle>
           </CardHeader>
@@ -182,8 +187,8 @@ export function DashboardClient() {
       {/* Recent Orders */}
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <ShoppingCart className="h-5 w-5" />
+          <CardTitle className='flex items-center gap-2'>
+            <ShoppingCart className='h-5 w-5' />
             Recent Orders
           </CardTitle>
         </CardHeader>
@@ -199,23 +204,21 @@ export function DashboardClient() {
             <CardTitle>Revenue by Payment Method (Last 30 Days)</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+            <div className='grid gap-4 md:grid-cols-2 lg:grid-cols-3'>
               {stats.paymentMethods.map((method) => (
                 <div
                   key={method.paymentMethod}
-                  className="flex items-center justify-between p-4 border rounded-lg"
+                  className='flex items-center justify-between p-4 border rounded-lg'
                 >
                   <div>
-                    <p className="text-sm font-medium capitalize">
-                      {method.paymentMethod ? method.paymentMethod.replace('_', ' ') : 'not specified'}
+                    <p className='text-sm font-medium capitalize'>
+                      {method.paymentMethod
+                        ? method.paymentMethod.replace('_', ' ')
+                        : 'not specified'}
                     </p>
-                    <p className="text-xs text-muted-foreground">
-                      {method.count} transactions
-                    </p>
+                    <p className='text-xs text-muted-foreground'>{method.count} transactions</p>
                   </div>
-                  <p className="text-lg font-bold">
-                    {formatCurrency(parseFloat(method.total))}
-                  </p>
+                  <p className='text-lg font-bold'>{formatCurrency(parseFloat(method.total))}</p>
                 </div>
               ))}
             </div>
@@ -228,29 +231,29 @@ export function DashboardClient() {
 
 function DashboardSkeleton() {
   return (
-    <div className="space-y-6">
-      <Skeleton className="h-10 w-48" />
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+    <div className='space-y-6'>
+      <Skeleton className='h-10 w-48' />
+      <div className='grid gap-4 md:grid-cols-2 lg:grid-cols-4'>
         {[...Array(4)].map((_, i) => (
           <Card key={i}>
-            <CardHeader className="space-y-0 pb-2">
-              <Skeleton className="h-4 w-24" />
+            <CardHeader className='space-y-0 pb-2'>
+              <Skeleton className='h-4 w-24' />
             </CardHeader>
             <CardContent>
-              <Skeleton className="h-8 w-32" />
-              <Skeleton className="h-3 w-20 mt-2" />
+              <Skeleton className='h-8 w-32' />
+              <Skeleton className='h-3 w-20 mt-2' />
             </CardContent>
           </Card>
         ))}
       </div>
-      <div className="grid gap-4 md:grid-cols-2">
+      <div className='grid gap-4 md:grid-cols-2'>
         {[...Array(2)].map((_, i) => (
           <Card key={i}>
             <CardHeader>
-              <Skeleton className="h-6 w-48" />
+              <Skeleton className='h-6 w-48' />
             </CardHeader>
             <CardContent>
-              <Skeleton className="h-48 w-full" />
+              <Skeleton className='h-48 w-full' />
             </CardContent>
           </Card>
         ))}

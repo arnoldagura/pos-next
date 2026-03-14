@@ -1,13 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import {
-  Package,
-  AlertTriangle,
-  TrendingUp,
-  DollarSign,
-  Plus,
-} from 'lucide-react';
+import { Package, AlertTriangle, TrendingUp, DollarSign, Plus } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { InventoryTable } from '@/components/product-inventories/inventory-table';
@@ -30,13 +24,12 @@ export default function InventoryPage() {
   const [selectedLocation, setSelectedLocation] = useState<string>('');
   const [searchQuery, setSearchQuery] = useState('');
   const [page] = useState(1);
-  const [selectedInventoryId, setSelectedInventoryId] = useState<string | null>(
-    null
-  );
+  const [selectedInventoryId, setSelectedInventoryId] = useState<string | null>(null);
   const [isAdjustmentOpen, setIsAdjustmentOpen] = useState(false);
   const [isEditSettingsOpen, setIsEditSettingsOpen] = useState(false);
-  const [selectedInventoryForEdit, setSelectedInventoryForEdit] =
-    useState<ProductInventoryItem>({} as ProductInventoryItem);
+  const [selectedInventoryForEdit, setSelectedInventoryForEdit] = useState<ProductInventoryItem>(
+    {} as ProductInventoryItem
+  );
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
 
   const { data: inventoryData, isLoading } = useProductInventory({
@@ -51,11 +44,7 @@ export default function InventoryPage() {
   const lowStockCount = lowStockData?.count || 0;
   const totalValue =
     inventoryData?.inventory.reduce((sum, item) => {
-      return (
-        sum +
-        parseFloat(item.currentQuantity ?? '0') *
-          parseFloat(item.unitPrice ?? '0')
-      );
+      return sum + parseFloat(item.currentQuantity ?? '0') * parseFloat(item.unitPrice ?? '0');
     }, 0) || 0;
   const averageStock =
     totalItems > 0
@@ -97,10 +86,7 @@ export default function InventoryPage() {
             <Plus className='h-4 w-4 mr-2' />
             Add Product to Inventory
           </Button>
-          <LocationSelector
-            value={selectedLocation}
-            onChange={setSelectedLocation}
-          />
+          <LocationSelector value={selectedLocation} onChange={setSelectedLocation} />
         </div>
       </div>
 
@@ -113,26 +99,18 @@ export default function InventoryPage() {
           </CardHeader>
           <CardContent>
             <div className='text-2xl font-bold'>{totalItems}</div>
-            <p className='text-xs text-muted-foreground'>
-              Active inventory items
-            </p>
+            <p className='text-xs text-muted-foreground'>Active inventory items</p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className='flex flex-row items-center justify-between space-y-0 pb-2'>
-            <CardTitle className='text-sm font-medium'>
-              Low Stock Alerts
-            </CardTitle>
+            <CardTitle className='text-sm font-medium'>Low Stock Alerts</CardTitle>
             <AlertTriangle className='h-4 w-4 text-yellow-500' />
           </CardHeader>
           <CardContent>
-            <div className='text-2xl font-bold text-yellow-600'>
-              {lowStockCount}
-            </div>
-            <p className='text-xs text-muted-foreground'>
-              Items below threshold
-            </p>
+            <div className='text-2xl font-bold text-yellow-600'>{lowStockCount}</div>
+            <p className='text-xs text-muted-foreground'>Items below threshold</p>
           </CardContent>
         </Card>
 
@@ -142,36 +120,25 @@ export default function InventoryPage() {
             <DollarSign className='h-4 w-4 text-muted-foreground' />
           </CardHeader>
           <CardContent>
-            <div className='text-2xl font-bold'>
-              ${totalValue.toLocaleString()}
-            </div>
-            <p className='text-xs text-muted-foreground'>
-              Inventory value (estimated)
-            </p>
+            <div className='text-2xl font-bold'>${totalValue.toLocaleString()}</div>
+            <p className='text-xs text-muted-foreground'>Inventory value (estimated)</p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className='flex flex-row items-center justify-between space-y-0 pb-2'>
-            <CardTitle className='text-sm font-medium'>
-              Avg. Stock Level
-            </CardTitle>
+            <CardTitle className='text-sm font-medium'>Avg. Stock Level</CardTitle>
             <TrendingUp className='h-4 w-4 text-muted-foreground' />
           </CardHeader>
           <CardContent>
             <div className='text-2xl font-bold'>{averageStock.toFixed(0)}</div>
-            <p className='text-xs text-muted-foreground'>
-              Average units per item
-            </p>
+            <p className='text-xs text-muted-foreground'>Average units per item</p>
           </CardContent>
         </Card>
       </div>
 
       {/* Filters */}
-      <InventoryFilters
-        searchQuery={searchQuery}
-        onSearchChange={setSearchQuery}
-      />
+      <InventoryFilters searchQuery={searchQuery} onSearchChange={setSearchQuery} />
 
       {/* Inventory Table */}
       <Card>

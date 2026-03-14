@@ -11,10 +11,7 @@ export async function POST(req: NextRequest) {
     const { items, locationId } = body;
 
     if (!items || !Array.isArray(items) || !locationId) {
-      return NextResponse.json(
-        { error: 'Invalid request data' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Invalid request data' }, { status: 400 });
     }
 
     const insufficientStock: Array<{
@@ -71,9 +68,6 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ valid: true });
   } catch (error) {
     console.error('Error validating stock:', error);
-    return NextResponse.json(
-      { error: 'Failed to validate stock' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to validate stock' }, { status: 500 });
   }
 }

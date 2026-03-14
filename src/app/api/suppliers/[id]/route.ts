@@ -14,25 +14,15 @@ async function getSupplierHandler(
   try {
     const { id } = await context.params;
 
-    const [foundSupplier] = await db
-      .select()
-      .from(supplier)
-      .where(eq(supplier.id, id))
-      .limit(1);
+    const [foundSupplier] = await db.select().from(supplier).where(eq(supplier.id, id)).limit(1);
     if (!foundSupplier) {
-      return NextResponse.json(
-        { error: 'Supplier not found' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'Supplier not found' }, { status: 404 });
     }
 
     return NextResponse.json(foundSupplier);
   } catch (error) {
     console.error('Error fetching location:', error);
-    return NextResponse.json(
-      { error: 'Failed to fetch location' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to fetch location' }, { status: 500 });
   }
 }
 
@@ -52,10 +42,7 @@ async function updateSupplierHandler(
       .returning();
 
     if (!updatedSupplier) {
-      return NextResponse.json(
-        { error: 'Supplier not found' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'Supplier not found' }, { status: 404 });
     }
     return NextResponse.json(updatedSupplier);
   } catch (error) {
@@ -70,10 +57,7 @@ async function updateSupplierHandler(
       }
     }
 
-    return NextResponse.json(
-      { error: 'Failed to update location' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to update location' }, { status: 500 });
   }
 }
 
@@ -90,19 +74,13 @@ async function deleteSupplierHandler(
       .returning({ id: supplier.id });
 
     if (!deletedSupplier) {
-      return NextResponse.json(
-        { error: 'Supplier not found' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'Supplier not found' }, { status: 404 });
     }
 
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error('Error deleting location:', error);
-    return NextResponse.json(
-      { error: 'Failed to delete location' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to delete location' }, { status: 500 });
   }
 }
 

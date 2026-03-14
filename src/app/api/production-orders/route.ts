@@ -1,10 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/db/db';
 import { productionOrder } from '@/drizzle/schema';
-import {
-  createFromRecipe,
-  ProductionOrderStatus,
-} from '@/lib/services/production-workflow';
+import { createFromRecipe, ProductionOrderStatus } from '@/lib/services/production-workflow';
 import { eq, desc, and, gte, lte, sql } from 'drizzle-orm';
 import { z } from 'zod';
 
@@ -45,9 +42,7 @@ export async function GET(request: NextRequest) {
     const whereConditions = [];
 
     if (status) {
-      whereConditions.push(
-        eq(productionOrder.status, status as ProductionOrderStatus)
-      );
+      whereConditions.push(eq(productionOrder.status, status as ProductionOrderStatus));
     }
 
     if (locationId) {
@@ -59,15 +54,11 @@ export async function GET(request: NextRequest) {
     }
 
     if (startDate) {
-      whereConditions.push(
-        gte(productionOrder.scheduledDate, new Date(startDate))
-      );
+      whereConditions.push(gte(productionOrder.scheduledDate, new Date(startDate)));
     }
 
     if (endDate) {
-      whereConditions.push(
-        lte(productionOrder.scheduledDate, new Date(endDate))
-      );
+      whereConditions.push(lte(productionOrder.scheduledDate, new Date(endDate)));
     }
 
     const countResult = await db
@@ -141,10 +132,7 @@ export async function GET(request: NextRequest) {
     });
   } catch (error) {
     console.error('Error fetching production orders:', error);
-    return NextResponse.json(
-      { error: 'Failed to fetch production orders' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to fetch production orders' }, { status: 500 });
   }
 }
 
@@ -207,9 +195,6 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: error.message }, { status: 400 });
     }
 
-    return NextResponse.json(
-      { error: 'Failed to create production order' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to create production order' }, { status: 500 });
   }
 }

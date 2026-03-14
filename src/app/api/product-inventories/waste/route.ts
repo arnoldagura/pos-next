@@ -26,10 +26,7 @@ export async function recordWasteHandler(req: NextRequest) {
       .limit(1);
 
     if (productInventoryRecord.length === 0) {
-      return NextResponse.json(
-        { error: 'Product Inventory not found' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'Product Inventory not found' }, { status: 404 });
     }
 
     const validation = await validateStockAvailability(
@@ -49,9 +46,7 @@ export async function recordWasteHandler(req: NextRequest) {
       );
     }
 
-    const currentStockLevel = await getCurrentStock(
-      validatedData.productInventoryId
-    );
+    const currentStockLevel = await getCurrentStock(validatedData.productInventoryId);
     const currentStock = currentStockLevel?.currentStock || 0;
 
     const waste = await db
@@ -70,9 +65,7 @@ export async function recordWasteHandler(req: NextRequest) {
     invalidateInventoryCache(validatedData.productInventoryId);
     invalidateLocationCache(productInventoryRecord[0].locationId);
 
-    const newStockLevel = await getCurrentStock(
-      validatedData.productInventoryId
-    );
+    const newStockLevel = await getCurrentStock(validatedData.productInventoryId);
 
     return NextResponse.json(
       {
@@ -93,10 +86,7 @@ export async function recordWasteHandler(req: NextRequest) {
       );
     }
 
-    return NextResponse.json(
-      { error: 'Failed to record waste' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to record waste' }, { status: 500 });
   }
 }
 

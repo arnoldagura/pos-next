@@ -127,11 +127,13 @@ export function OrdersClient() {
       setSelectedOrder({
         orderNumber: order.orderNumber,
         orderDate: order.createdAt,
-        location: order.locationName ? {
-          name: order.locationName,
-          address: order.locationAddress,
-          phone: order.locationPhone,
-        } : undefined,
+        location: order.locationName
+          ? {
+              name: order.locationName,
+              address: order.locationAddress,
+              phone: order.locationPhone,
+            }
+          : undefined,
         items: items.map((item: OrderItem) => ({
           productName: item.productName,
           productSku: item.productSku,
@@ -184,81 +186,81 @@ export function OrdersClient() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className='space-y-6'>
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Search className="h-5 w-5" />
+          <CardTitle className='flex items-center gap-2'>
+            <Search className='h-5 w-5' />
             Order History & Search
           </CardTitle>
         </CardHeader>
-        <CardContent className="space-y-4">
+        <CardContent className='space-y-4'>
           {/* Search Bar */}
-          <div className="flex gap-2">
-            <div className="flex-1 relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <div className='flex gap-2'>
+            <div className='flex-1 relative'>
+              <Search className='absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground' />
               <Input
-                placeholder="Search by order number, customer name, or ID..."
+                placeholder='Search by order number, customer name, or ID...'
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-9"
+                className='pl-9'
               />
             </div>
-            <Button onClick={() => refetch()} variant="outline" size="icon">
-              <RefreshCcw className="h-4 w-4" />
+            <Button onClick={() => refetch()} variant='outline' size='icon'>
+              <RefreshCcw className='h-4 w-4' />
             </Button>
           </div>
 
           {/* Filters */}
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="status">Status</Label>
+          <div className='grid grid-cols-1 md:grid-cols-4 gap-4'>
+            <div className='space-y-2'>
+              <Label htmlFor='status'>Status</Label>
               <Select value={statusFilter} onValueChange={setStatusFilter}>
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">All Statuses</SelectItem>
-                  <SelectItem value="pending">Pending</SelectItem>
-                  <SelectItem value="processing">Processing</SelectItem>
-                  <SelectItem value="ready">Ready</SelectItem>
-                  <SelectItem value="completed">Completed</SelectItem>
-                  <SelectItem value="cancelled">Cancelled</SelectItem>
+                  <SelectItem value='all'>All Statuses</SelectItem>
+                  <SelectItem value='pending'>Pending</SelectItem>
+                  <SelectItem value='processing'>Processing</SelectItem>
+                  <SelectItem value='ready'>Ready</SelectItem>
+                  <SelectItem value='completed'>Completed</SelectItem>
+                  <SelectItem value='cancelled'>Cancelled</SelectItem>
                 </SelectContent>
               </Select>
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="payment">Payment Status</Label>
+            <div className='space-y-2'>
+              <Label htmlFor='payment'>Payment Status</Label>
               <Select value={paymentFilter} onValueChange={setPaymentFilter}>
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">All Payments</SelectItem>
-                  <SelectItem value="paid">Paid</SelectItem>
-                  <SelectItem value="pending">Pending</SelectItem>
-                  <SelectItem value="partial">Partial</SelectItem>
-                  <SelectItem value="refunded">Refunded</SelectItem>
+                  <SelectItem value='all'>All Payments</SelectItem>
+                  <SelectItem value='paid'>Paid</SelectItem>
+                  <SelectItem value='pending'>Pending</SelectItem>
+                  <SelectItem value='partial'>Partial</SelectItem>
+                  <SelectItem value='refunded'>Refunded</SelectItem>
                 </SelectContent>
               </Select>
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="startDate">Start Date</Label>
+            <div className='space-y-2'>
+              <Label htmlFor='startDate'>Start Date</Label>
               <Input
-                id="startDate"
-                type="date"
+                id='startDate'
+                type='date'
                 value={startDate}
                 onChange={(e) => setStartDate(e.target.value)}
               />
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="endDate">End Date</Label>
+            <div className='space-y-2'>
+              <Label htmlFor='endDate'>End Date</Label>
               <Input
-                id="endDate"
-                type="date"
+                id='endDate'
+                type='date'
                 value={endDate}
                 onChange={(e) => setEndDate(e.target.value)}
               />
@@ -270,19 +272,17 @@ export function OrdersClient() {
       {/* Results */}
       <Card>
         <CardHeader>
-          <CardTitle>
-            Results {filteredOrders && `(${filteredOrders.length})`}
-          </CardTitle>
+          <CardTitle>Results {filteredOrders && `(${filteredOrders.length})`}</CardTitle>
         </CardHeader>
         <CardContent>
           {isLoading ? (
-            <div className="space-y-2">
+            <div className='space-y-2'>
               {[...Array(5)].map((_, i) => (
-                <Skeleton key={i} className="h-16 w-full" />
+                <Skeleton key={i} className='h-16 w-full' />
               ))}
             </div>
           ) : filteredOrders && filteredOrders.length > 0 ? (
-            <div className="overflow-x-auto">
+            <div className='overflow-x-auto'>
               <Table>
                 <TableHeader>
                   <TableRow>
@@ -291,7 +291,7 @@ export function OrdersClient() {
                     <TableHead>Status</TableHead>
                     <TableHead>Payment</TableHead>
                     <TableHead>Method</TableHead>
-                    <TableHead className="text-right">Total</TableHead>
+                    <TableHead className='text-right'>Total</TableHead>
                     <TableHead>Date</TableHead>
                     <TableHead>Actions</TableHead>
                   </TableRow>
@@ -299,32 +299,29 @@ export function OrdersClient() {
                 <TableBody>
                   {filteredOrders.map((order: Order) => (
                     <TableRow key={order.id}>
-                      <TableCell className="font-medium">
-                        {order.orderNumber}
+                      <TableCell className='font-medium'>{order.orderNumber}</TableCell>
+                      <TableCell>
+                        {order.customerName || (
+                          <span className='text-muted-foreground'>Walk-in</span>
+                        )}
                       </TableCell>
                       <TableCell>
-                        {order.customerName || <span className="text-muted-foreground">Walk-in</span>}
-                      </TableCell>
-                      <TableCell>
-                        <Badge
-                          variant="secondary"
-                          className={statusColors[order.status]}
-                        >
+                        <Badge variant='secondary' className={statusColors[order.status]}>
                           {order.status}
                         </Badge>
                       </TableCell>
                       <TableCell>
                         <Badge
-                          variant="secondary"
+                          variant='secondary'
                           className={paymentStatusColors[order.paymentStatus]}
                         >
                           {order.paymentStatus}
                         </Badge>
                       </TableCell>
-                      <TableCell className="capitalize">
+                      <TableCell className='capitalize'>
                         {order.paymentMethod?.replace('_', ' ') || '-'}
                       </TableCell>
-                      <TableCell className="text-right font-medium">
+                      <TableCell className='text-right font-medium'>
                         {formatCurrency(parseFloat(order.total))}
                       </TableCell>
                       <TableCell>
@@ -337,49 +334,59 @@ export function OrdersClient() {
                         })}
                       </TableCell>
                       <TableCell>
-                        <div className="flex items-center gap-1">
+                        <div className='flex items-center gap-1'>
                           <DropdownMenu>
                             <DropdownMenuTrigger asChild>
-                              <Button size="sm" variant="outline">
+                              <Button size='sm' variant='outline'>
                                 {order.status}
                               </Button>
                             </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end">
+                            <DropdownMenuContent align='end'>
                               <DropdownMenuLabel>Change Status</DropdownMenuLabel>
                               <DropdownMenuSeparator />
                               {order.status !== 'pending' && (
-                                <DropdownMenuItem onClick={() => handleUpdateStatus(order.id, 'pending')}>
+                                <DropdownMenuItem
+                                  onClick={() => handleUpdateStatus(order.id, 'pending')}
+                                >
                                   Pending
                                 </DropdownMenuItem>
                               )}
                               {order.status !== 'processing' && (
-                                <DropdownMenuItem onClick={() => handleUpdateStatus(order.id, 'processing')}>
+                                <DropdownMenuItem
+                                  onClick={() => handleUpdateStatus(order.id, 'processing')}
+                                >
                                   Processing
                                 </DropdownMenuItem>
                               )}
                               {order.status !== 'ready' && (
-                                <DropdownMenuItem onClick={() => handleUpdateStatus(order.id, 'ready')}>
+                                <DropdownMenuItem
+                                  onClick={() => handleUpdateStatus(order.id, 'ready')}
+                                >
                                   Ready
                                 </DropdownMenuItem>
                               )}
                               {order.status !== 'completed' && (
-                                <DropdownMenuItem onClick={() => handleUpdateStatus(order.id, 'completed')}>
+                                <DropdownMenuItem
+                                  onClick={() => handleUpdateStatus(order.id, 'completed')}
+                                >
                                   Completed
                                 </DropdownMenuItem>
                               )}
                               {order.status !== 'cancelled' && (
-                                <DropdownMenuItem onClick={() => handleUpdateStatus(order.id, 'cancelled')}>
+                                <DropdownMenuItem
+                                  onClick={() => handleUpdateStatus(order.id, 'cancelled')}
+                                >
                                   Cancelled
                                 </DropdownMenuItem>
                               )}
                             </DropdownMenuContent>
                           </DropdownMenu>
                           <Button
-                            size="sm"
-                            variant="ghost"
+                            size='sm'
+                            variant='ghost'
                             onClick={() => handleViewReceipt(order.id)}
                           >
-                            <Receipt className="h-4 w-4 mr-1" />
+                            <Receipt className='h-4 w-4 mr-1' />
                             Receipt
                           </Button>
                         </div>
@@ -390,10 +397,10 @@ export function OrdersClient() {
               </Table>
             </div>
           ) : (
-            <div className="text-center py-12 text-muted-foreground">
-              <Filter className="h-12 w-12 mx-auto mb-4 opacity-50" />
+            <div className='text-center py-12 text-muted-foreground'>
+              <Filter className='h-12 w-12 mx-auto mb-4 opacity-50' />
               <p>No orders found</p>
-              <p className="text-sm">Try adjusting your search or filters</p>
+              <p className='text-sm'>Try adjusting your search or filters</p>
             </div>
           )}
         </CardContent>

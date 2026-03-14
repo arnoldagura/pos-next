@@ -1,15 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import {
-  Plus,
-  Pencil,
-  Trash2,
-  Shield,
-  Users,
-  Key,
-  AlertCircle,
-} from 'lucide-react';
+import { Plus, Pencil, Trash2, Shield, Users, Key, AlertCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import {
@@ -20,13 +12,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -174,14 +160,10 @@ export function RolesTable() {
                         </span>
                       </TableCell>
                       <TableCell className='text-center'>
-                        <Badge variant='secondary'>
-                          {role._count?.users || 0}
-                        </Badge>
+                        <Badge variant='secondary'>{role._count?.users || 0}</Badge>
                       </TableCell>
                       <TableCell className='text-center'>
-                        <Badge variant='outline'>
-                          {role._count?.permissions || 0}
-                        </Badge>
+                        <Badge variant='outline'>{role._count?.permissions || 0}</Badge>
                       </TableCell>
                       <TableCell>
                         {role.isGlobal ? (
@@ -205,11 +187,7 @@ export function RolesTable() {
                             size='sm'
                             onClick={() => setRoleToDelete(role)}
                             disabled={role.isGlobal}
-                            title={
-                              role.isGlobal
-                                ? 'Cannot delete global role'
-                                : 'Delete role'
-                            }
+                            title={role.isGlobal ? 'Cannot delete global role' : 'Delete role'}
                           >
                             <Trash2
                               className={`h-4 w-4 ${
@@ -238,10 +216,7 @@ export function RolesTable() {
         }}
       />
 
-      <AlertDialog
-        open={!!roleToDelete}
-        onOpenChange={(open) => !open && setRoleToDelete(null)}
-      >
+      <AlertDialog open={!!roleToDelete} onOpenChange={(open) => !open && setRoleToDelete(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle className='flex items-center gap-2'>
@@ -249,13 +224,13 @@ export function RolesTable() {
               Delete Role
             </AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to delete the role &quot;{roleToDelete?.name}&quot;?
-              This action cannot be undone.
+              Are you sure you want to delete the role &quot;{roleToDelete?.name}&quot;? This action
+              cannot be undone.
               {roleToDelete?._count?.users && roleToDelete._count.users > 0 && (
                 <div className='mt-2 p-2 bg-yellow-50 border border-yellow-200 rounded'>
                   <p className='text-yellow-800 text-sm'>
-                    Warning: This role is assigned to {roleToDelete._count.users}{' '}
-                    user(s). They will lose these permissions.
+                    Warning: This role is assigned to {roleToDelete._count.users} user(s). They will
+                    lose these permissions.
                   </p>
                 </div>
               )}
@@ -263,10 +238,7 @@ export function RolesTable() {
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={handleDelete}
-              className='bg-red-500 hover:bg-red-600'
-            >
+            <AlertDialogAction onClick={handleDelete} className='bg-red-500 hover:bg-red-600'>
               Delete Role
             </AlertDialogAction>
           </AlertDialogFooter>

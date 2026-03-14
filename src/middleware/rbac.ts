@@ -102,10 +102,7 @@ type ProtectionOptions =
       audit?: boolean;
     }
   | {
-      check: (
-        userId: string,
-        organizationId: string | null
-      ) => Promise<boolean>;
+      check: (userId: string, organizationId: string | null) => Promise<boolean>;
       audit?: boolean;
     };
 
@@ -129,9 +126,7 @@ interface AuthorizationAuditLog {
 /**
  * Log authorization attempt (implement your logging solution here)
  */
-async function logAuthorizationAttempt(
-  log: AuthorizationAuditLog
-): Promise<void> {
+async function logAuthorizationAttempt(log: AuthorizationAuditLog): Promise<void> {
   // TODO: Implement your logging solution
   // Examples:
   // - Write to database audit_log table
@@ -265,11 +260,7 @@ export function protectRoute<T>(
     // Check permissions based on options
     if ('roles' in options) {
       // Role-based check (no caching for roles)
-      hasAccess = await hasAnyRoleInTenant(
-        session.user.id,
-        options.roles,
-        tenantId
-      );
+      hasAccess = await hasAnyRoleInTenant(session.user.id, options.roles, tenantId);
 
       // Audit log
       if (options.audit !== false && !hasAccess) {
@@ -313,12 +304,7 @@ export function protectRoute<T>(
           );
         }
       } else {
-        hasAccess = await canInTenant(
-          session.user.id,
-          options.resource,
-          options.action,
-          tenantId
-        );
+        hasAccess = await canInTenant(session.user.id, options.resource, options.action, tenantId);
       }
 
       // Audit log

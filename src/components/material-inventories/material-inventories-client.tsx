@@ -11,13 +11,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import {
   DropdownMenu,
@@ -63,8 +57,7 @@ export default function MaterialInventoriesClient() {
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [isAddBatchOpen, setIsAddBatchOpen] = useState(false);
   const [isEditSettingsOpen, setIsEditSettingsOpen] = useState(false);
-  const [selectedInventory, setSelectedInventory] =
-    useState<MaterialInventory | null>(null);
+  const [selectedInventory, setSelectedInventory] = useState<MaterialInventory | null>(null);
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [viewMode, setViewMode] = useState<'cards' | 'table'>('cards');
@@ -158,8 +151,7 @@ export default function MaterialInventoriesClient() {
                   </div>
                 </CardTitle>
                 <CardDescription>
-                  {MATERIAL_TYPES[inventory.material.type] ||
-                    inventory.material.type}
+                  {MATERIAL_TYPES[inventory.material.type] || inventory.material.type}
                   {inventory.material.category && (
                     <span> • {inventory.material.category.name}</span>
                   )}
@@ -178,14 +170,10 @@ export default function MaterialInventoriesClient() {
                     <PackagePlus className='h-4 w-4 mr-2' />
                     Add Batch
                   </DropdownMenuItem>
-                  <DropdownMenuItem
-                    onClick={() => handleViewMovements(inventory)}
-                  >
+                  <DropdownMenuItem onClick={() => handleViewMovements(inventory)}>
                     View Movements
                   </DropdownMenuItem>
-                  <DropdownMenuItem
-                    onClick={() => handleEditSettings(inventory)}
-                  >
+                  <DropdownMenuItem onClick={() => handleEditSettings(inventory)}>
                     Edit Settings
                   </DropdownMenuItem>
                 </DropdownMenuContent>
@@ -197,8 +185,7 @@ export default function MaterialInventoriesClient() {
               <div className='flex justify-between items-center'>
                 <span className='text-muted-foreground'>Current Stock:</span>
                 <span className='font-bold text-lg'>
-                  {parseFloat(inventory.currentQuantity).toFixed(2)}{' '}
-                  {inventory.unitOfMeasure}
+                  {parseFloat(inventory.currentQuantity).toFixed(2)} {inventory.unitOfMeasure}
                 </span>
               </div>
               {isLowStock(inventory) && (
@@ -210,8 +197,7 @@ export default function MaterialInventoriesClient() {
               <div className='flex justify-between'>
                 <span className='text-muted-foreground'>Alert Threshold:</span>
                 <span>
-                  {parseFloat(inventory.alertThreshold).toFixed(2)}{' '}
-                  {inventory.unitOfMeasure}
+                  {parseFloat(inventory.alertThreshold).toFixed(2)} {inventory.unitOfMeasure}
                 </span>
               </div>
               <div className='flex justify-between'>
@@ -231,9 +217,7 @@ export default function MaterialInventoriesClient() {
               {inventory.cost && (
                 <div className='flex justify-between pt-2 border-t'>
                   <span className='text-muted-foreground'>Default Cost:</span>
-                  <span className='font-medium'>
-                    ${parseFloat(inventory.cost).toFixed(2)}
-                  </span>
+                  <span className='font-medium'>${parseFloat(inventory.cost).toFixed(2)}</span>
                 </div>
               )}
             </div>
@@ -277,18 +261,14 @@ export default function MaterialInventoriesClient() {
               </TableCell>
               <TableCell>{inventory.sku || '-'}</TableCell>
               <TableCell>
-                <Badge variant='outline'>
-                  {MATERIAL_TYPES[inventory.material.type]}
-                </Badge>
+                <Badge variant='outline'>{MATERIAL_TYPES[inventory.material.type]}</Badge>
               </TableCell>
               <TableCell>{inventory.location.name}</TableCell>
               <TableCell className='text-right'>
-                {parseFloat(inventory.currentQuantity).toFixed(2)}{' '}
-                {inventory.unitOfMeasure}
+                {parseFloat(inventory.currentQuantity).toFixed(2)} {inventory.unitOfMeasure}
               </TableCell>
               <TableCell className='text-right'>
-                {parseFloat(inventory.alertThreshold).toFixed(2)}{' '}
-                {inventory.unitOfMeasure}
+                {parseFloat(inventory.alertThreshold).toFixed(2)} {inventory.unitOfMeasure}
               </TableCell>
               <TableCell>
                 {isLowStock(inventory) ? (
@@ -297,10 +277,7 @@ export default function MaterialInventoriesClient() {
                     Low Stock
                   </Badge>
                 ) : (
-                  <Badge
-                    variant='outline'
-                    className='bg-green-50 dark:bg-green-500'
-                  >
+                  <Badge variant='outline' className='bg-green-50 dark:bg-green-500'>
                     In Stock
                   </Badge>
                 )}
@@ -319,14 +296,10 @@ export default function MaterialInventoriesClient() {
                       <PackagePlus className='h-4 w-4 mr-2' />
                       Add Batch
                     </DropdownMenuItem>
-                    <DropdownMenuItem
-                      onClick={() => handleViewMovements(inventory)}
-                    >
+                    <DropdownMenuItem onClick={() => handleViewMovements(inventory)}>
                       View Movements
                     </DropdownMenuItem>
-                    <DropdownMenuItem
-                      onClick={() => handleEditSettings(inventory)}
-                    >
+                    <DropdownMenuItem onClick={() => handleEditSettings(inventory)}>
                       Edit Settings
                     </DropdownMenuItem>
                   </DropdownMenuContent>
@@ -367,10 +340,7 @@ export default function MaterialInventoriesClient() {
           </SelectContent>
         </Select>
 
-        <Select
-          value={viewMode}
-          onValueChange={(v) => setViewMode(v as ViewMode)}
-        >
+        <Select value={viewMode} onValueChange={(v) => setViewMode(v as ViewMode)}>
           <SelectTrigger className='w-full sm:w-[120px]'>
             <SelectValue />
           </SelectTrigger>
@@ -407,9 +377,7 @@ export default function MaterialInventoriesClient() {
         <Card>
           <CardContent className='flex flex-col items-center justify-center py-12'>
             <Package className='h-12 w-12 text-muted-foreground mb-4' />
-            <p className='text-muted-foreground mb-4'>
-              No material inventories found
-            </p>
+            <p className='text-muted-foreground mb-4'>No material inventories found</p>
             <Button onClick={() => setIsFormOpen(true)}>
               <Plus className='h-4 w-4 mr-2' />
               Add First Material
@@ -422,11 +390,7 @@ export default function MaterialInventoriesClient() {
 
           {totalPages > 1 && (
             <div className='flex justify-center gap-2'>
-              <Button
-                variant='outline'
-                disabled={page === 1}
-                onClick={() => setPage(page - 1)}
-              >
+              <Button variant='outline' disabled={page === 1} onClick={() => setPage(page - 1)}>
                 Previous
               </Button>
               <div className='flex items-center px-4'>

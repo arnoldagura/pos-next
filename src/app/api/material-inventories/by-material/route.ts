@@ -11,10 +11,7 @@ export async function GET(request: NextRequest) {
     const locationId = searchParams.get('locationId');
 
     if (!materialId) {
-      return NextResponse.json(
-        { error: 'materialId is required' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'materialId is required' }, { status: 400 });
     }
 
     const whereConditions = [eq(materialInventory.materialId, materialId)];
@@ -44,9 +41,6 @@ export async function GET(request: NextRequest) {
     return NextResponse.json(inventories);
   } catch (error) {
     console.error('Error fetching material inventories:', error);
-    return NextResponse.json(
-      { error: 'Failed to fetch material inventories' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to fetch material inventories' }, { status: 500 });
   }
 }

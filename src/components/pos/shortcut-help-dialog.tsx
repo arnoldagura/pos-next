@@ -15,10 +15,7 @@ interface ShortcutHelpDialogProps {
   onOpenChange: (open: boolean) => void;
 }
 
-export function ShortcutHelpDialog({
-  open,
-  onOpenChange,
-}: ShortcutHelpDialogProps) {
+export function ShortcutHelpDialog({ open, onOpenChange }: ShortcutHelpDialogProps) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className='max-w-md'>
@@ -27,9 +24,7 @@ export function ShortcutHelpDialog({
             <Keyboard className='h-5 w-5' />
             Keyboard Shortcuts
           </DialogTitle>
-          <DialogDescription>
-            Quick actions for faster POS operation
-          </DialogDescription>
+          <DialogDescription>Quick actions for faster POS operation</DialogDescription>
         </DialogHeader>
 
         <div className='space-y-1'>

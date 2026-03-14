@@ -20,21 +20,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import {
-  Loader2,
-  Package,
-  DollarSign,
-  TrendingUp,
-  Archive,
-} from 'lucide-react';
+import { Loader2, Package, DollarSign, TrendingUp, Archive } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import type { DiscountType } from '@/lib/types';
 
-type BulkOperationType =
-  | 'adjust_price'
-  | 'adjust_stock'
-  | 'change_status'
-  | 'update_threshold';
+type BulkOperationType = 'adjust_price' | 'adjust_stock' | 'change_status' | 'update_threshold';
 
 interface BulkOperationsDialogProps {
   open: boolean;
@@ -52,8 +42,7 @@ export function BulkOperationsDialog({
   const [operation, setOperation] = useState<BulkOperationType>('adjust_price');
   const [loading, setLoading] = useState(false);
   const [value, setValue] = useState('');
-  const [adjustmentType, setAdjustmentType] =
-    useState<DiscountType>('percentage');
+  const [adjustmentType, setAdjustmentType] = useState<DiscountType>('percentage');
   const [remarks, setRemarks] = useState('');
 
   const handleSubmit = async () => {
@@ -89,11 +78,7 @@ export function BulkOperationsDialog({
       setRemarks('');
     } catch (error) {
       console.error('Bulk operation error:', error);
-      alert(
-        error instanceof Error
-          ? error.message
-          : 'Failed to perform bulk operation'
-      );
+      alert(error instanceof Error ? error.message : 'Failed to perform bulk operation');
     } finally {
       setLoading(false);
     }
@@ -112,10 +97,7 @@ export function BulkOperationsDialog({
         <div className='space-y-4 py-4'>
           <div className='space-y-2'>
             <Label>Operation Type</Label>
-            <Select
-              value={operation}
-              onValueChange={(v) => setOperation(v as BulkOperationType)}
-            >
+            <Select value={operation} onValueChange={(v) => setOperation(v as BulkOperationType)}>
               <SelectTrigger>
                 <SelectValue />
               </SelectTrigger>
@@ -166,18 +148,10 @@ export function BulkOperationsDialog({
                 </Select>
               </div>
               <div className='space-y-2'>
-                <Label>
-                  {adjustmentType === 'percentage'
-                    ? 'Percentage Change'
-                    : 'Amount'}
-                </Label>
+                <Label>{adjustmentType === 'percentage' ? 'Percentage Change' : 'Amount'}</Label>
                 <Input
                   type='number'
-                  placeholder={
-                    adjustmentType === 'percentage'
-                      ? 'e.g., 10 for +10%'
-                      : 'e.g., 5.00'
-                  }
+                  placeholder={adjustmentType === 'percentage' ? 'e.g., 10 for +10%' : 'e.g., 5.00'}
                   value={value}
                   onChange={(e) => setValue(e.target.value)}
                   step={adjustmentType === 'percentage' ? '1' : '0.01'}
@@ -228,14 +202,10 @@ export function BulkOperationsDialog({
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value='active'>
-                    <Badge className='bg-green-100 text-green-800'>
-                      Active
-                    </Badge>
+                    <Badge className='bg-green-100 text-green-800'>Active</Badge>
                   </SelectItem>
                   <SelectItem value='inactive'>
-                    <Badge className='bg-gray-100 text-gray-800'>
-                      Inactive
-                    </Badge>
+                    <Badge className='bg-gray-100 text-gray-800'>Inactive</Badge>
                   </SelectItem>
                 </SelectContent>
               </Select>
@@ -254,11 +224,7 @@ export function BulkOperationsDialog({
         </div>
 
         <DialogFooter>
-          <Button
-            variant='outline'
-            onClick={() => onOpenChange(false)}
-            disabled={loading}
-          >
+          <Button variant='outline' onClick={() => onOpenChange(false)} disabled={loading}>
             Cancel
           </Button>
           <Button onClick={handleSubmit} disabled={loading}>

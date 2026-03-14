@@ -18,12 +18,7 @@ describe('MovementFilters', () => {
   };
 
   it('should render all filter controls', () => {
-    render(
-      <MovementFilters
-        filters={defaultFilters}
-        onFiltersChange={mockOnFiltersChange}
-      />
-    );
+    render(<MovementFilters filters={defaultFilters} onFiltersChange={mockOnFiltersChange} />);
 
     expect(screen.getByText('Movement Type')).toBeInTheDocument();
     expect(screen.getByText('Start Date')).toBeInTheDocument();
@@ -31,35 +26,20 @@ describe('MovementFilters', () => {
   });
 
   it('should display default "All Types" when no type filter is set', () => {
-    render(
-      <MovementFilters
-        filters={defaultFilters}
-        onFiltersChange={mockOnFiltersChange}
-      />
-    );
+    render(<MovementFilters filters={defaultFilters} onFiltersChange={mockOnFiltersChange} />);
 
     expect(screen.getByText('All Types')).toBeInTheDocument();
   });
 
   it('should render movement type selector', () => {
-    render(
-      <MovementFilters
-        filters={defaultFilters}
-        onFiltersChange={mockOnFiltersChange}
-      />
-    );
+    render(<MovementFilters filters={defaultFilters} onFiltersChange={mockOnFiltersChange} />);
 
     const selectTrigger = screen.getByRole('combobox');
     expect(selectTrigger).toBeInTheDocument();
   });
 
   it('should render date input fields', () => {
-    render(
-      <MovementFilters
-        filters={defaultFilters}
-        onFiltersChange={mockOnFiltersChange}
-      />
-    );
+    render(<MovementFilters filters={defaultFilters} onFiltersChange={mockOnFiltersChange} />);
 
     const startDateInput = screen.getByLabelText('Start Date');
     const endDateInput = screen.getByLabelText('End Date');
@@ -77,23 +57,13 @@ describe('MovementFilters', () => {
       endDate: '2024-01-31',
     };
 
-    render(
-      <MovementFilters
-        filters={activeFilters}
-        onFiltersChange={mockOnFiltersChange}
-      />
-    );
+    render(<MovementFilters filters={activeFilters} onFiltersChange={mockOnFiltersChange} />);
 
     expect(screen.getByText('Clear Filters')).toBeInTheDocument();
   });
 
   it('should not display clear filters button when no filters are active', () => {
-    render(
-      <MovementFilters
-        filters={defaultFilters}
-        onFiltersChange={mockOnFiltersChange}
-      />
-    );
+    render(<MovementFilters filters={defaultFilters} onFiltersChange={mockOnFiltersChange} />);
 
     expect(screen.queryByText('Clear Filters')).not.toBeInTheDocument();
   });
@@ -106,12 +76,7 @@ describe('MovementFilters', () => {
       endDate: '2024-01-31',
     };
 
-    render(
-      <MovementFilters
-        filters={activeFilters}
-        onFiltersChange={mockOnFiltersChange}
-      />
-    );
+    render(<MovementFilters filters={activeFilters} onFiltersChange={mockOnFiltersChange} />);
 
     const clearButton = screen.getByText('Clear Filters');
     await user.click(clearButton);
@@ -130,12 +95,7 @@ describe('MovementFilters', () => {
       endDate: undefined,
     };
 
-    render(
-      <MovementFilters
-        filters={filters}
-        onFiltersChange={mockOnFiltersChange}
-      />
-    );
+    render(<MovementFilters filters={filters} onFiltersChange={mockOnFiltersChange} />);
 
     expect(screen.getByText('Clear Filters')).toBeInTheDocument();
   });
@@ -147,12 +107,7 @@ describe('MovementFilters', () => {
       endDate: undefined,
     };
 
-    render(
-      <MovementFilters
-        filters={filters}
-        onFiltersChange={mockOnFiltersChange}
-      />
-    );
+    render(<MovementFilters filters={filters} onFiltersChange={mockOnFiltersChange} />);
 
     expect(screen.getByText('Clear Filters')).toBeInTheDocument();
   });
@@ -164,12 +119,7 @@ describe('MovementFilters', () => {
       endDate: '2024-01-31',
     };
 
-    render(
-      <MovementFilters
-        filters={filters}
-        onFiltersChange={mockOnFiltersChange}
-      />
-    );
+    render(<MovementFilters filters={filters} onFiltersChange={mockOnFiltersChange} />);
 
     const startDateInput = screen.getByLabelText('Start Date') as HTMLInputElement;
     const endDateInput = screen.getByLabelText('End Date') as HTMLInputElement;

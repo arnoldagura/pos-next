@@ -11,10 +11,7 @@ interface PrintReceiptOptions {
 /**
  * Print receipt using browser print dialog
  */
-export function printReceipt(
-  receiptHtml: string,
-  options: PrintReceiptOptions = {}
-): void {
+export function printReceipt(receiptHtml: string, options: PrintReceiptOptions = {}): void {
   const { autoPrint = true, paperWidth = 80 } = options;
 
   const printWindow = window.open('', '_blank', 'width=400,height=600');

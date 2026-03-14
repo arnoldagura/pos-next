@@ -1,9 +1,12 @@
 import { Suspense } from 'react';
 import dynamic from 'next/dynamic';
 
-const POSClient = dynamic(() => import('@/components/pos/pos-client').then(mod => ({ default: mod.POSClient })), {
-  loading: () => <POSLoadingSkeleton />
-});
+const POSClient = dynamic(
+  () => import('@/components/pos/pos-client').then((mod) => ({ default: mod.POSClient })),
+  {
+    loading: () => <POSLoadingSkeleton />,
+  }
+);
 
 function POSLoadingSkeleton() {
   return (

@@ -50,14 +50,9 @@ function SortableMaterialCategory({
   onEdit,
   onDelete,
 }: SortableMaterialCategoryProps) {
-  const {
-    attributes,
-    listeners,
-    setNodeRef,
-    transform,
-    transition,
-    isDragging,
-  } = useSortable({ id: category.id });
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
+    id: category.id,
+  });
 
   const style = {
     transform: CSS.Transform.toString(transform),
@@ -108,9 +103,7 @@ function SortableMaterialCategory({
               </Badge>
             </div>
             {category.description && (
-              <p className='text-sm text-gray-600 mt-1'>
-                {category.description}
-              </p>
+              <p className='text-sm text-gray-600 mt-1'>{category.description}</p>
             )}
             <p className='text-xs text-gray-500 mt-1'>
               Slug: {category.slug} • Order: {category.displayOrder}
@@ -156,12 +149,8 @@ export function MaterialCategoriesClient() {
   const [categories, setCategories] = useState<MaterialCategory[]>([]);
   const [loading, setLoading] = useState(true);
   const [showDialog, setShowDialog] = useState(false);
-  const [selectedCategory, setSelectedCategory] = useState<
-    MaterialCategory | undefined
-  >(undefined);
-  const [expandedCategories, setExpandedCategories] = useState<Set<string>>(
-    new Set()
-  );
+  const [selectedCategory, setSelectedCategory] = useState<MaterialCategory | undefined>(undefined);
+  const [expandedCategories, setExpandedCategories] = useState<Set<string>>(new Set());
 
   const sensors = useSensors(
     useSensor(PointerSensor),
@@ -286,9 +275,7 @@ export function MaterialCategoriesClient() {
 
   const handleDelete = async (category: MaterialCategory) => {
     if (category.children && category.children.length > 0) {
-      toast.error(
-        'Cannot delete category with subcategories. Delete or move them first.'
-      );
+      toast.error('Cannot delete category with subcategories. Delete or move them first.');
       return;
     }
 
@@ -310,9 +297,7 @@ export function MaterialCategoriesClient() {
       toast.success('Material category deleted successfully');
       fetchCategories();
     } catch (error) {
-      toast.error(
-        error instanceof Error ? error.message : 'Failed to delete category'
-      );
+      toast.error(error instanceof Error ? error.message : 'Failed to delete category');
       console.error(error);
     }
   };

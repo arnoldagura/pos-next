@@ -5,10 +5,7 @@ import { eq, and } from 'drizzle-orm';
 import { NextRequest, NextResponse } from 'next/server';
 
 // POST /api/recipes/[id]/duplicate - Duplicate a recipe
-export async function POST(
-  req: NextRequest,
-  context: { params: Promise<{ id: string }> }
-) {
+export async function POST(req: NextRequest, context: { params: Promise<{ id: string }> }) {
   try {
     const tenantId = await requireTenantId();
     const { id } = await context.params;
@@ -23,9 +20,7 @@ export async function POST(
       return NextResponse.json({ error: 'Recipe not found' }, { status: 404 });
     }
 
-    const newRecipeId = `recipe_${Date.now()}_${Math.random()
-      .toString(36)
-      .substring(2, 9)}`;
+    const newRecipeId = `recipe_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
 
     await db.transaction(async (tx) => {
       await tx.insert(productionRecipe).values({
@@ -45,19 +40,15 @@ export async function POST(
       });
 
       if (originalRecipe.ingredients && originalRecipe.ingredients.length > 0) {
-        const ingredientValues = originalRecipe.ingredients.map(
-          (ingredient) => ({
-            id: `recipe_ing_${Date.now()}_${Math.random()
-              .toString(36)
-              .substring(2, 9)}`,
-            recipeId: newRecipeId,
-            materialId: ingredient.materialId,
-            quantity: ingredient.quantity,
-            unitOfMeasure: ingredient.unitOfMeasure,
-            createdAt: new Date(),
-            updatedAt: new Date(),
-          })
-        );
+        const ingredientValues = originalRecipe.ingredients.map((ingredient) => ({
+          id: `recipe_ing_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`,
+          recipeId: newRecipeId,
+          materialId: ingredient.materialId,
+          quantity: ingredient.quantity,
+          unitOfMeasure: ingredient.unitOfMeasure,
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        }));
 
         await tx.insert(productionRecipeIngredient).values(ingredientValues);
       }
@@ -79,9 +70,6 @@ export async function POST(
     return NextResponse.json(duplicatedRecipe, { status: 201 });
   } catch (error) {
     console.error('Error duplicating recipe:', error);
-    return NextResponse.json(
-      { error: 'Failed to duplicate recipe' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to duplicate recipe' }, { status: 500 });
   }
 }

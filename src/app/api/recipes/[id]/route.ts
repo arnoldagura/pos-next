@@ -10,10 +10,7 @@ const updateRecipeSchema = z.object({
   outputType: z.enum(['product', 'material']).optional(),
   outputProductId: z.string().optional(),
   outputMaterialId: z.string().optional(),
-  outputQuantity: z
-    .number()
-    .positive('Output quantity must be positive')
-    .optional(),
+  outputQuantity: z.number().positive('Output quantity must be positive').optional(),
   unitOfMeasure: z.string().min(1, 'Unit of measure is required').optional(),
   ingredients: z
     .array(
@@ -29,10 +26,7 @@ const updateRecipeSchema = z.object({
 });
 
 // GET /api/recipes/[id] - Get single recipe
-export async function GET(
-  req: NextRequest,
-  context: { params: Promise<{ id: string }> }
-) {
+export async function GET(req: NextRequest, context: { params: Promise<{ id: string }> }) {
   try {
     const { id } = await context.params;
     const recipe = await db.query.productionRecipe.findFirst({
@@ -55,18 +49,12 @@ export async function GET(
     return NextResponse.json(recipe);
   } catch (error) {
     console.error('Error fetching recipe:', error);
-    return NextResponse.json(
-      { error: 'Failed to fetch recipe' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to fetch recipe' }, { status: 500 });
   }
 }
 
 // PUT /api/recipes/[id] - Update recipe
-export async function PUT(
-  req: NextRequest,
-  context: { params: Promise<{ id: string }> }
-) {
+export async function PUT(req: NextRequest, context: { params: Promise<{ id: string }> }) {
   try {
     const { id } = await context.params;
     const body = await req.json();
@@ -80,20 +68,14 @@ export async function PUT(
       return NextResponse.json({ error: 'Recipe not found' }, { status: 404 });
     }
 
-    if (
-      validatedData.outputType === 'product' &&
-      !validatedData.outputProductId
-    ) {
+    if (validatedData.outputType === 'product' && !validatedData.outputProductId) {
       return NextResponse.json(
         { error: 'Output product is required when output type is product' },
         { status: 400 }
       );
     }
 
-    if (
-      validatedData.outputType === 'material' &&
-      !validatedData.outputMaterialId
-    ) {
+    if (validatedData.outputType === 'material' && !validatedData.outputMaterialId) {
       return NextResponse.json(
         { error: 'Output material is required when output type is material' },
         { status: 400 }
@@ -108,42 +90,32 @@ export async function PUT(
       if (validatedData.name) updateData.name = validatedData.name;
       if (validatedData.description !== undefined)
         updateData.description = validatedData.description;
-      if (validatedData.outputType)
-        updateData.outputType = validatedData.outputType;
+      if (validatedData.outputType) updateData.outputType = validatedData.outputType;
       if (validatedData.outputProductId !== undefined)
         updateData.outputProductId = validatedData.outputProductId;
       if (validatedData.outputMaterialId !== undefined)
         updateData.outputMaterialId = validatedData.outputMaterialId;
       if (validatedData.outputQuantity)
         updateData.outputQuantity = validatedData.outputQuantity.toString();
-      if (validatedData.unitOfMeasure)
-        updateData.unitOfMeasure = validatedData.unitOfMeasure;
-      if (validatedData.updatedBy)
-        updateData.updatedBy = validatedData.updatedBy;
+      if (validatedData.unitOfMeasure) updateData.unitOfMeasure = validatedData.unitOfMeasure;
+      if (validatedData.updatedBy) updateData.updatedBy = validatedData.updatedBy;
 
-      await tx
-        .update(productionRecipe)
-        .set(updateData)
-        .where(eq(productionRecipe.id, id));
+      await tx.update(productionRecipe).set(updateData).where(eq(productionRecipe.id, id));
 
       if (validatedData.ingredients) {
         await tx
           .delete(productionRecipeIngredient)
           .where(eq(productionRecipeIngredient.recipeId, id));
 
-        const ingredientValues = validatedData.ingredients.map(
-          (ingredient) => ({
-            id: `recipe_ing_${Date.now()}_${Math.random()
-              .toString(36)
-              .substring(2, 9)}`,
-            recipeId: id,
-            materialId: ingredient.materialId,
-            quantity: ingredient.quantity.toString(),
-            unitOfMeasure: ingredient.unitOfMeasure,
-            createdAt: new Date(),
-            updatedAt: new Date(),
-          })
-        );
+        const ingredientValues = validatedData.ingredients.map((ingredient) => ({
+          id: `recipe_ing_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`,
+          recipeId: id,
+          materialId: ingredient.materialId,
+          quantity: ingredient.quantity.toString(),
+          unitOfMeasure: ingredient.unitOfMeasure,
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        }));
 
         await tx.insert(productionRecipeIngredient).values(ingredientValues);
       }
@@ -173,18 +145,12 @@ export async function PUT(
       );
     }
 
-    return NextResponse.json(
-      { error: 'Failed to update recipe' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to update recipe' }, { status: 500 });
   }
 }
 
 // DELETE /api/recipes/[id] - Deactivate recipe (soft delete)
-export async function DELETE(
-  req: NextRequest,
-  context: { params: Promise<{ id: string }> }
-) {
+export async function DELETE(req: NextRequest, context: { params: Promise<{ id: string }> }) {
   try {
     const { id } = await context.params;
     const existingRecipe = await db.query.productionRecipe.findFirst({
@@ -207,9 +173,6 @@ export async function DELETE(
     return NextResponse.json({ message: 'Recipe deactivated successfully' });
   } catch (error) {
     console.error('Error deactivating recipe:', error);
-    return NextResponse.json(
-      { error: 'Failed to deactivate recipe' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to deactivate recipe' }, { status: 500 });
   }
 }

@@ -21,7 +21,9 @@ export function SidebarProvider({ children }: { children: React.ReactNode }) {
   const toggleCollapsed = () => setCollapsed((prev) => !prev);
 
   return (
-    <SidebarContext.Provider value={{ mobileOpen, setMobileOpen, toggleMobile, collapsed, setCollapsed, toggleCollapsed }}>
+    <SidebarContext.Provider
+      value={{ mobileOpen, setMobileOpen, toggleMobile, collapsed, setCollapsed, toggleCollapsed }}
+    >
       {children}
     </SidebarContext.Provider>
   );

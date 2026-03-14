@@ -26,18 +26,16 @@ export function ExpiringMaterials({ materials }: ExpiringMaterialsProps) {
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <Clock className="h-5 w-5" />
+        <CardTitle className='flex items-center gap-2'>
+          <Clock className='h-5 w-5' />
           Expiring Materials (Next 30 Days)
         </CardTitle>
       </CardHeader>
       <CardContent>
         {materials.length === 0 ? (
-          <div className="text-center py-8 text-muted-foreground">
-            No materials expiring soon
-          </div>
+          <div className='text-center py-8 text-muted-foreground'>No materials expiring soon</div>
         ) : (
-          <div className="space-y-2 max-h-[400px] overflow-y-auto">
+          <div className='space-y-2 max-h-[400px] overflow-y-auto'>
             {materials.map((material) => {
               const daysLeft = getDaysUntilExpiry(material.expiryDate);
               const isCritical = daysLeft <= 7;
@@ -47,33 +45,22 @@ export function ExpiringMaterials({ materials }: ExpiringMaterialsProps) {
                 <Alert
                   key={material.id}
                   variant={isCritical ? 'destructive' : 'default'}
-                  className={
-                    isWarning ? 'border-yellow-500' : isCritical ? '' : 'border-blue-500'
-                  }
+                  className={isWarning ? 'border-yellow-500' : isCritical ? '' : 'border-blue-500'}
                 >
-                  <AlertTriangle className="h-4 w-4" />
-                  <AlertDescription className="ml-2">
-                    <div className="flex items-center justify-between">
-                      <div className="flex-1">
-                        <div className="font-medium">
-                          Batch: {material.batchNumber}
-                        </div>
-                        <div className="text-sm text-muted-foreground">
+                  <AlertTriangle className='h-4 w-4' />
+                  <AlertDescription className='ml-2'>
+                    <div className='flex items-center justify-between'>
+                      <div className='flex-1'>
+                        <div className='font-medium'>Batch: {material.batchNumber}</div>
+                        <div className='text-sm text-muted-foreground'>
                           Quantity: {parseFloat(material.quantity)} units
                         </div>
-                        <div className="text-sm text-muted-foreground">
-                          Expires:{' '}
-                          {new Date(material.expiryDate).toLocaleDateString()}
+                        <div className='text-sm text-muted-foreground'>
+                          Expires: {new Date(material.expiryDate).toLocaleDateString()}
                         </div>
                       </div>
                       <Badge
-                        variant={
-                          isCritical
-                            ? 'destructive'
-                            : isWarning
-                              ? 'outline'
-                              : 'secondary'
-                        }
+                        variant={isCritical ? 'destructive' : isWarning ? 'outline' : 'secondary'}
                         className={
                           isWarning
                             ? 'border-yellow-500 text-yellow-700'

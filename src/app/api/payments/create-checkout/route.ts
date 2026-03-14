@@ -29,10 +29,7 @@ export async function POST(req: NextRequest) {
     await requireTenantId();
 
     if (!isPayMongoConfigured()) {
-      return NextResponse.json(
-        { error: 'Payment gateway not configured' },
-        { status: 503 }
-      );
+      return NextResponse.json({ error: 'Payment gateway not configured' }, { status: 503 });
     }
 
     const body = await req.json();

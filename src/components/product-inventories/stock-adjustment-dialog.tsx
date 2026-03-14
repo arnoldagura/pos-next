@@ -91,9 +91,7 @@ export function StockAdjustmentDialog({
       <DialogContent>
         <DialogHeader>
           <DialogTitle>Adjust Stock</DialogTitle>
-          <DialogDescription>
-            Make manual adjustments to inventory levels
-          </DialogDescription>
+          <DialogDescription>Make manual adjustments to inventory levels</DialogDescription>
         </DialogHeader>
 
         <Form form={form} onSubmit={onSubmit} className='space-y-4'>
@@ -103,10 +101,7 @@ export function StockAdjustmentDialog({
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Adjustment Type</FormLabel>
-                <Select
-                  onValueChange={field.onChange}
-                  defaultValue={field.value}
-                >
+                <Select onValueChange={field.onChange} defaultValue={field.value}>
                   <FormControl>
                     <SelectTrigger>
                       <SelectValue placeholder='Select adjustment type' />
@@ -117,9 +112,7 @@ export function StockAdjustmentDialog({
                     <SelectItem value='subtract'>Subtract Stock</SelectItem>
                   </SelectContent>
                 </Select>
-                <FormDescription>
-                  Choose whether to add or remove stock
-                </FormDescription>
+                <FormDescription>Choose whether to add or remove stock</FormDescription>
                 <FormMessage />
               </FormItem>
             )}
@@ -153,9 +146,7 @@ export function StockAdjustmentDialog({
                 <FormControl>
                   <Textarea placeholder='Reason for adjustment...' {...field} />
                 </FormControl>
-                <FormDescription>
-                  Provide a reason for this stock adjustment
-                </FormDescription>
+                <FormDescription>Provide a reason for this stock adjustment</FormDescription>
                 <FormMessage />
               </FormItem>
             )}

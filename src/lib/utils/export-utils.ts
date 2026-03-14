@@ -21,10 +21,7 @@ export function exportToCSV<T extends Record<string, string | number | null>>(
         .map((header) => {
           const value = row[header];
           // Escape values containing commas or quotes
-          if (
-            typeof value === 'string' &&
-            (value.includes(',') || value.includes('"'))
-          ) {
+          if (typeof value === 'string' && (value.includes(',') || value.includes('"'))) {
             return `"${value.replace(/"/g, '""')}"`;
           }
           return value ?? '';
@@ -117,10 +114,7 @@ function downloadFile(content: string, filename: string, mimeType: string): void
 /**
  * Format date for export filenames
  */
-export function getExportFilename(
-  prefix: string,
-  extension: string = 'csv'
-): string {
+export function getExportFilename(prefix: string, extension: string = 'csv'): string {
   const date = new Date();
   const dateStr = date.toISOString().split('T')[0];
   const timeStr = date.toTimeString().split(' ')[0].replace(/:/g, '-');
@@ -130,10 +124,7 @@ export function getExportFilename(
 /**
  * Export JSON data
  */
-export function exportToJSON<T>(
-  data: T,
-  filename: string = 'export.json'
-): void {
+export function exportToJSON<T>(data: T, filename: string = 'export.json'): void {
   const jsonContent = JSON.stringify(data, null, 2);
   downloadFile(jsonContent, filename, 'application/json');
 }

@@ -32,15 +32,13 @@ export function OrderStatusChart({ data }: OrderStatusChartProps) {
     return (
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <ShoppingCart className="h-5 w-5" />
+          <CardTitle className='flex items-center gap-2'>
+            <ShoppingCart className='h-5 w-5' />
             Order Status Distribution
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="text-center py-8 text-muted-foreground">
-            No orders yet
-          </div>
+          <div className='text-center py-8 text-muted-foreground'>No orders yet</div>
         </CardContent>
       </Card>
     );
@@ -49,14 +47,14 @@ export function OrderStatusChart({ data }: OrderStatusChartProps) {
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <ShoppingCart className="h-5 w-5" />
+        <CardTitle className='flex items-center gap-2'>
+          <ShoppingCart className='h-5 w-5' />
           Order Status Distribution
         </CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="space-y-4">
-          <div className="flex h-4 rounded-full overflow-hidden">
+        <div className='space-y-4'>
+          <div className='flex h-4 rounded-full overflow-hidden'>
             {data.map((item) => {
               const percentage = (item.count / total) * 100;
               return (
@@ -69,30 +67,25 @@ export function OrderStatusChart({ data }: OrderStatusChartProps) {
               );
             })}
           </div>
-          <div className="grid grid-cols-2 gap-3">
+          <div className='grid grid-cols-2 gap-3'>
             {data.map((item) => {
               const percentage = (item.count / total) * 100;
               return (
                 <div
                   key={item.status}
-                  className="flex items-center justify-between p-2 rounded-lg border"
+                  className='flex items-center justify-between p-2 rounded-lg border'
                 >
-                  <div className="flex items-center gap-2">
+                  <div className='flex items-center gap-2'>
                     <div
                       className={`w-3 h-3 rounded-full ${statusColors[item.status] || 'bg-gray-500'}`}
                     />
-                    <Badge
-                      variant="secondary"
-                      className={statusBadgeColors[item.status]}
-                    >
+                    <Badge variant='secondary' className={statusBadgeColors[item.status]}>
                       {item.status}
                     </Badge>
                   </div>
-                  <div className="text-right">
-                    <div className="font-semibold">{item.count}</div>
-                    <div className="text-xs text-muted-foreground">
-                      {percentage.toFixed(1)}%
-                    </div>
+                  <div className='text-right'>
+                    <div className='font-semibold'>{item.count}</div>
+                    <div className='text-xs text-muted-foreground'>{percentage.toFixed(1)}%</div>
                   </div>
                 </div>
               );

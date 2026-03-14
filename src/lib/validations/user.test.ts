@@ -1,9 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import {
-  registerUserSchema,
-  loginUserSchema,
-  createUserSchema,
-} from './user';
+import { registerUserSchema, loginUserSchema, createUserSchema } from './user';
 
 describe('User Validation Schemas', () => {
   describe('registerUserSchema', () => {

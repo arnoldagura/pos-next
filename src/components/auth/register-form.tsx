@@ -99,13 +99,9 @@ export function RegisterForm({ organizationId, organizationName }: RegisterFormP
             />
           </svg>
         </div>
-        <h1 className='text-2xl sm:text-3xl font-bold text-gray-900'>
-          Create an account
-        </h1>
+        <h1 className='text-2xl sm:text-3xl font-bold text-gray-900'>Create an account</h1>
         <p className='text-gray-600 text-sm sm:text-base'>
-          {organizationName
-            ? `Join ${organizationName}`
-            : 'Sign up to get started'}
+          {organizationName ? `Join ${organizationName}` : 'Sign up to get started'}
         </p>
       </div>
 
@@ -145,11 +141,7 @@ export function RegisterForm({ organizationId, organizationName }: RegisterFormP
 
           return (
             <>
-              <FormFieldWrapper
-                label='Name'
-                error={errors.name?.message}
-                required
-              >
+              <FormFieldWrapper label='Name' error={errors.name?.message} required>
                 <div className='relative'>
                   <div className='absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none'>
                     <svg
@@ -176,11 +168,7 @@ export function RegisterForm({ organizationId, organizationName }: RegisterFormP
                 </div>
               </FormFieldWrapper>
 
-              <FormFieldWrapper
-                label='Email'
-                error={errors.email?.message}
-                required
-              >
+              <FormFieldWrapper label='Email' error={errors.email?.message} required>
                 <div className='relative'>
                   <div className='absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none'>
                     <svg
@@ -208,27 +196,27 @@ export function RegisterForm({ organizationId, organizationName }: RegisterFormP
               </FormFieldWrapper>
 
               <FormFieldWrapper
-                label="Password"
+                label='Password'
                 error={errors.password?.message}
-                description="Must be at least 8 characters with uppercase, lowercase, and number"
+                description='Must be at least 8 characters with uppercase, lowercase, and number'
                 required
               >
                 <PasswordInput
                   {...register('password')}
-                  placeholder="••••••••"
-                  autoComplete="new-password"
+                  placeholder='••••••••'
+                  autoComplete='new-password'
                 />
               </FormFieldWrapper>
 
               <FormFieldWrapper
-                label="Confirm Password"
+                label='Confirm Password'
                 error={errors.confirmPassword?.message}
                 required
               >
                 <PasswordInput
                   {...register('confirmPassword')}
-                  placeholder="••••••••"
-                  autoComplete="new-password"
+                  placeholder='••••••••'
+                  autoComplete='new-password'
                 />
               </FormFieldWrapper>
 
@@ -236,9 +224,7 @@ export function RegisterForm({ organizationId, organizationName }: RegisterFormP
                 type='submit'
                 disabled={isSubmitting}
                 className='w-full px-4 py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:bg-gray-400 disabled:cursor-not-allowed transition-all duration-200 transform hover:scale-[1.02] active:scale-[0.98] shadow-md'
-                aria-label={
-                  isSubmitting ? 'Creating account' : 'Create your account'
-                }
+                aria-label={isSubmitting ? 'Creating account' : 'Create your account'}
               >
                 {isSubmitting ? (
                   <span className='flex items-center justify-center'>
@@ -277,9 +263,7 @@ export function RegisterForm({ organizationId, organizationName }: RegisterFormP
           <div className='w-full border-t border-gray-300' />
         </div>
         <div className='relative flex justify-center text-sm'>
-          <span className='px-2 bg-white text-gray-500'>
-            Already have an account?
-          </span>
+          <span className='px-2 bg-white text-gray-500'>Already have an account?</span>
         </div>
       </div>
 

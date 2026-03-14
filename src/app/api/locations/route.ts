@@ -35,17 +35,12 @@ async function getLocationsHandler(req: NextRequest) {
       if (searchCondition) conditions.push(searchCondition);
     }
 
-    const locations = await query.where(
-      and(...conditions)
-    );
+    const locations = await query.where(and(...conditions));
 
     return NextResponse.json({ locations });
   } catch (error) {
     console.error('Error fetching locations:', error);
-    return NextResponse.json(
-      { error: 'Failed to fetch locations' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to fetch locations' }, { status: 500 });
   }
 }
 
@@ -75,10 +70,7 @@ async function createLocationHandler(req: NextRequest) {
       );
     }
 
-    return NextResponse.json(
-      { error: 'Failed to create location' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to create location' }, { status: 500 });
   }
 }
 

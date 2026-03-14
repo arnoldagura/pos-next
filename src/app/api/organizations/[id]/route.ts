@@ -24,10 +24,7 @@ async function getOrganizationHandler(
     });
 
     if (!org) {
-      return NextResponse.json(
-        { error: 'Organization not found' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'Organization not found' }, { status: 404 });
     }
 
     // Get user count
@@ -42,10 +39,7 @@ async function getOrganizationHandler(
     });
   } catch (error) {
     console.error('Error fetching organization:', error);
-    return NextResponse.json(
-      { error: 'Failed to fetch organization' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to fetch organization' }, { status: 500 });
   }
 }
 
@@ -72,10 +66,7 @@ async function updateOrganizationHandler(
     });
 
     if (!existingOrg) {
-      return NextResponse.json(
-        { error: 'Organization not found' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'Organization not found' }, { status: 404 });
     }
 
     // Check for slug conflicts if slug is being updated
@@ -85,27 +76,18 @@ async function updateOrganizationHandler(
       });
 
       if (slugConflict) {
-        return NextResponse.json(
-          { error: 'Organization slug already exists' },
-          { status: 400 }
-        );
+        return NextResponse.json({ error: 'Organization slug already exists' }, { status: 400 });
       }
     }
 
     // Check for subdomain conflicts if subdomain is being updated
-    if (
-      validatedData.subdomain &&
-      validatedData.subdomain !== existingOrg.subdomain
-    ) {
+    if (validatedData.subdomain && validatedData.subdomain !== existingOrg.subdomain) {
       const subdomainConflict = await db.query.organization.findFirst({
         where: eq(organization.subdomain, validatedData.subdomain),
       });
 
       if (subdomainConflict) {
-        return NextResponse.json(
-          { error: 'Subdomain already exists' },
-          { status: 400 }
-        );
+        return NextResponse.json({ error: 'Subdomain already exists' }, { status: 400 });
       }
     }
 
@@ -116,10 +98,7 @@ async function updateOrganizationHandler(
       });
 
       if (domainConflict) {
-        return NextResponse.json(
-          { error: 'Domain already exists' },
-          { status: 400 }
-        );
+        return NextResponse.json({ error: 'Domain already exists' }, { status: 400 });
       }
     }
 
@@ -152,10 +131,7 @@ async function updateOrganizationHandler(
       );
     }
 
-    return NextResponse.json(
-      { error: 'Failed to update organization' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to update organization' }, { status: 500 });
   }
 }
 
@@ -180,10 +156,7 @@ async function deleteOrganizationHandler(
     });
 
     if (!existingOrg) {
-      return NextResponse.json(
-        { error: 'Organization not found' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'Organization not found' }, { status: 404 });
     }
 
     // Soft delete by setting deletedAt timestamp
@@ -201,10 +174,7 @@ async function deleteOrganizationHandler(
     });
   } catch (error) {
     console.error('Error deleting organization:', error);
-    return NextResponse.json(
-      { error: 'Failed to delete organization' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to delete organization' }, { status: 500 });
   }
 }
 

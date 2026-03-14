@@ -1,9 +1,5 @@
 import { db } from '@/db/db';
-import {
-  materialInventory,
-  materialInventoryMovement,
-  materialBatch,
-} from '@/drizzle/schema';
+import { materialInventory, materialInventoryMovement, materialBatch } from '@/drizzle/schema';
 import { eq, inArray, sql } from 'drizzle-orm';
 
 export interface MaterialStockLevel {
@@ -43,13 +39,8 @@ export async function getMaterialCurrentStock(
       materialInventory,
       eq(materialInventoryMovement.materialInventoryId, materialInventory.id)
     )
-    .where(
-      eq(materialInventoryMovement.materialInventoryId, materialInventoryId)
-    )
-    .groupBy(
-      materialInventoryMovement.materialInventoryId,
-      materialInventory.unitOfMeasure
-    );
+    .where(eq(materialInventoryMovement.materialInventoryId, materialInventoryId))
+    .groupBy(materialInventoryMovement.materialInventoryId, materialInventory.unitOfMeasure);
 
   if (result.length === 0) return null;
 
@@ -89,16 +80,8 @@ export async function getBulkMaterialStockLevels(
       materialInventory,
       eq(materialInventoryMovement.materialInventoryId, materialInventory.id)
     )
-    .where(
-      inArray(
-        materialInventoryMovement.materialInventoryId,
-        materialInventoryIds
-      )
-    )
-    .groupBy(
-      materialInventoryMovement.materialInventoryId,
-      materialInventory.unitOfMeasure
-    );
+    .where(inArray(materialInventoryMovement.materialInventoryId, materialInventoryIds))
+    .groupBy(materialInventoryMovement.materialInventoryId, materialInventory.unitOfMeasure);
 
   const bulkLevels: BulkMaterialStockLevels = {};
 
@@ -113,9 +96,7 @@ export async function getBulkMaterialStockLevels(
   return bulkLevels;
 }
 
-export async function getMaterialBatchesTotalStock(
-  materialInventoryId: string
-): Promise<number> {
+export async function getMaterialBatchesTotalStock(materialInventoryId: string): Promise<number> {
   const result = await db
     .select({
       totalStock: sql<number>`COALESCE(SUM(CAST(${materialBatch.quantity} AS DECIMAL)), 0)`,

@@ -7,9 +7,15 @@ import { Suspense } from 'react';
 import dynamic from 'next/dynamic';
 import DashboardSkeleton from './loading';
 
-const DashboardClient = dynamic(() => import('@/components/dashboard/dashboard-client').then(mod => ({ default: mod.DashboardClient })), {
-  loading: () => <DashboardSkeleton />
-});
+const DashboardClient = dynamic(
+  () =>
+    import('@/components/dashboard/dashboard-client').then((mod) => ({
+      default: mod.DashboardClient,
+    })),
+  {
+    loading: () => <DashboardSkeleton />,
+  }
+);
 
 export default async function DashboardPage() {
   const user = await getCurrentUser();
@@ -87,12 +93,9 @@ export default async function DashboardPage() {
                 />
               </svg>
             </div>
-            <h1 className='text-2xl font-bold text-gray-900'>
-              No Organization Access
-            </h1>
+            <h1 className='text-2xl font-bold text-gray-900'>No Organization Access</h1>
             <p className='text-gray-600'>
-              You are not assigned to any organization. Please contact your
-              administrator.
+              You are not assigned to any organization. Please contact your administrator.
             </p>
           </div>
         </div>

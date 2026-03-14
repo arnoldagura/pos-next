@@ -42,10 +42,7 @@ export const materialCategoryFormSchema = z.object({
     .string()
     .min(1, 'Slug is required')
     .max(100, 'Slug is too long')
-    .regex(
-      /^[a-z0-9-]+$/,
-      'Slug must contain only lowercase letters, numbers, and hyphens'
-    )
+    .regex(/^[a-z0-9-]+$/, 'Slug must contain only lowercase letters, numbers, and hyphens')
     .optional(),
   description: z.string().optional(),
   parentId: z.string().optional(),
@@ -149,13 +146,10 @@ export function MaterialCategoryFormDialog({
 
       const payload = {
         ...data,
-        parentId:
-          data.parentId && data.parentId !== 'none' ? data.parentId : null,
+        parentId: data.parentId && data.parentId !== 'none' ? data.parentId : null,
       };
 
-      const url = category
-        ? `/api/material-categories/${category.id}`
-        : '/api/material-categories';
+      const url = category ? `/api/material-categories/${category.id}` : '/api/material-categories';
       const method = category ? 'PATCH' : 'POST';
 
       const response = await fetch(url, {
@@ -178,9 +172,7 @@ export function MaterialCategoryFormDialog({
       onOpenChange(false);
       onSuccess();
     } catch (error) {
-      toast.error(
-        error instanceof Error ? error.message : 'Failed to save category'
-      );
+      toast.error(error instanceof Error ? error.message : 'Failed to save category');
       console.error(error);
     } finally {
       setLoading(false);
@@ -189,9 +181,7 @@ export function MaterialCategoryFormDialog({
 
   const handleClose = () => {
     if (isDirty) {
-      const confirmed = confirm(
-        'You have unsaved changes. Are you sure you want to close?'
-      );
+      const confirmed = confirm('You have unsaved changes. Are you sure you want to close?');
       if (!confirmed) return;
     }
     onOpenChange(false);
@@ -246,9 +236,7 @@ export function MaterialCategoryFormDialog({
                     <Shuffle className='h-4 w-4' />
                   </Button>
                 </div>
-                <FormDescription>
-                  URL-friendly identifier (auto-generated if empty)
-                </FormDescription>
+                <FormDescription>URL-friendly identifier (auto-generated if empty)</FormDescription>
                 <FormMessage />
               </FormItem>
             )}
@@ -267,9 +255,7 @@ export function MaterialCategoryFormDialog({
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
-                    <SelectItem value='none'>
-                      None (top-level category)
-                    </SelectItem>
+                    <SelectItem value='none'>None (top-level category)</SelectItem>
                     {categories.map((cat) => (
                       <SelectItem key={cat.id} value={cat.id}>
                         {cat.name}
@@ -277,9 +263,7 @@ export function MaterialCategoryFormDialog({
                     ))}
                   </SelectContent>
                 </Select>
-                <FormDescription>
-                  Create a subcategory by selecting a parent
-                </FormDescription>
+                <FormDescription>Create a subcategory by selecting a parent</FormDescription>
                 <FormMessage />
               </FormItem>
             )}
@@ -296,9 +280,7 @@ export function MaterialCategoryFormDialog({
                     type='number'
                     placeholder='0'
                     {...field}
-                    onChange={(e) =>
-                      field.onChange(parseInt(e.target.value) || 0)
-                    }
+                    onChange={(e) => field.onChange(parseInt(e.target.value) || 0)}
                   />
                 </FormControl>
                 <FormDescription>Lower numbers appear first</FormDescription>
@@ -331,28 +313,18 @@ export function MaterialCategoryFormDialog({
             render={({ field }) => (
               <FormItem className='flex flex-row items-start space-x-3 space-y-0'>
                 <FormControl>
-                  <Checkbox
-                    checked={field.value}
-                    onCheckedChange={field.onChange}
-                  />
+                  <Checkbox checked={field.value} onCheckedChange={field.onChange} />
                 </FormControl>
                 <div className='space-y-1 leading-none'>
                   <FormLabel>Active</FormLabel>
-                  <FormDescription>
-                    Show this category in material selection
-                  </FormDescription>
+                  <FormDescription>Show this category in material selection</FormDescription>
                 </div>
               </FormItem>
             )}
           />
 
           <DialogFooter>
-            <Button
-              type='button'
-              variant='outline'
-              onClick={handleClose}
-              disabled={loading}
-            >
+            <Button type='button' variant='outline' onClick={handleClose} disabled={loading}>
               Cancel
             </Button>
             <Button type='submit' disabled={loading}>

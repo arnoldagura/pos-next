@@ -28,7 +28,7 @@ export function POSClient() {
   const [isClient, setIsClient] = useState(false);
 
   const cart = useCartStore((state) => state.getActiveCart());
-  const itemCount = isClient ? (cart?.items.length || 0) : 0;
+  const itemCount = isClient ? cart?.items.length || 0 : 0;
 
   useEffect(() => {
     setIsClient(true);
@@ -40,9 +40,7 @@ export function POSClient() {
     const handleKeyDown = (e: KeyboardEvent) => {
       const target = e.target as HTMLElement;
       const isInput =
-        target.tagName === 'INPUT' ||
-        target.tagName === 'TEXTAREA' ||
-        target.isContentEditable;
+        target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable;
 
       if (e.key === '?' && !isInput) {
         e.preventDefault();
@@ -77,10 +75,7 @@ export function POSClient() {
 
             <div className='flex items-center gap-2'>
               <MapPin className='h-4 w-4 text-gray-500' />
-              <Select
-                value={selectedLocation}
-                onValueChange={setSelectedLocation}
-              >
+              <Select value={selectedLocation} onValueChange={setSelectedLocation}>
                 <SelectTrigger className='w-[200px]'>
                   <SelectValue placeholder='Select location' />
                 </SelectTrigger>
@@ -135,10 +130,7 @@ export function POSClient() {
             onClick={() => setShowCart(false)}
           />
           <div className='fixed right-0 top-0 bottom-0 w-96 max-w-full  z-50 lg:hidden shadow-xl'>
-            <CartSidebar
-              onClose={() => setShowCart(false)}
-              locationId={selectedLocation}
-            />
+            <CartSidebar onClose={() => setShowCart(false)} locationId={selectedLocation} />
           </div>
         </>
       )}

@@ -1,8 +1,4 @@
-import {
-  AdjustmentData,
-  LowStockItem,
-  ProductInventoryResponse,
-} from '@/lib/types';
+import { AdjustmentData, LowStockItem, ProductInventoryResponse } from '@/lib/types';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 
@@ -16,15 +12,12 @@ export function useProductInventory(params?: {
     queryKey: ['inventory', params],
     queryFn: async () => {
       const searchParams = new URLSearchParams();
-      if (params?.locationId)
-        searchParams.append('locationId', params.locationId);
+      if (params?.locationId) searchParams.append('locationId', params.locationId);
       if (params?.productId) searchParams.append('productId', params.productId);
       if (params?.page) searchParams.append('page', params.page.toString());
       if (params?.limit) searchParams.append('limit', params.limit.toString());
 
-      const response = await fetch(
-        `/api/product-inventories?${searchParams.toString()}`
-      );
+      const response = await fetch(`/api/product-inventories?${searchParams.toString()}`);
       if (!response.ok) throw new Error('Failed to fetch inventory');
       return response.json();
     },
@@ -36,9 +29,7 @@ export function useLowStockItems(locationId?: string) {
     queryKey: ['inventory', 'low-stock', locationId],
     queryFn: async () => {
       if (!locationId) return { items: [], count: 0 };
-      const response = await fetch(
-        `/api/product-inventories/low-stock?locationId=${locationId}`
-      );
+      const response = await fetch(`/api/product-inventories/low-stock?locationId=${locationId}`);
       if (!response.ok) throw new Error('Failed to fetch low stock items');
       return response.json();
     },
@@ -111,11 +102,7 @@ export function useUpdateInventorySettings() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (data: {
-      id: string;
-      alertThreshold?: number;
-      unitOfMeasure?: string;
-    }) => {
+    mutationFn: async (data: { id: string; alertThreshold?: number; unitOfMeasure?: string }) => {
       const response = await fetch(`/api/product-inventory/${data.id}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },

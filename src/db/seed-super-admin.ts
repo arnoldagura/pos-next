@@ -27,11 +27,7 @@ async function seedSuperAdmin() {
     const password = process.env.SUPER_ADMIN_PASSWORD || 'Admin@123';
 
     // Check if user already exists
-    const existingUser = await db
-      .select()
-      .from(user)
-      .where(eq(user.email, email))
-      .limit(1);
+    const existingUser = await db.select().from(user).where(eq(user.email, email)).limit(1);
 
     let userId: string;
 
@@ -85,9 +81,7 @@ async function seedSuperAdmin() {
       console.log(`ℹ User already has roles assigned`);
 
       // Check if it's specifically the super_admin role
-      const hasSuperAdmin = existingRole.some(
-        (ur) => ur.roleId === superAdminRole.id
-      );
+      const hasSuperAdmin = existingRole.some((ur) => ur.roleId === superAdminRole.id);
 
       if (hasSuperAdmin) {
         console.log(`✓ User already has super_admin role\n`);

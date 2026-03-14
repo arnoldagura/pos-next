@@ -166,9 +166,7 @@ describe('Inventory API - GET /api/product-inventory/movements', () => {
       throw new Error('Database error');
     });
 
-    const request = new NextRequest(
-      'http://localhost/api/product-inventory/movements'
-    );
+    const request = new NextRequest('http://localhost/api/product-inventory/movements');
     const response = await getMovementsHandler(request);
     const data = await response.json();
 

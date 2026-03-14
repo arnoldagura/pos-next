@@ -3,14 +3,7 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 
 type Theme = 'light' | 'dark' | 'system';
-type ColorScheme =
-  | 'default'
-  | 'blue'
-  | 'green'
-  | 'purple'
-  | 'orange'
-  | 'red'
-  | 'pink';
+type ColorScheme = 'default' | 'blue' | 'green' | 'purple' | 'orange' | 'red' | 'pink';
 
 const SCHEME_CLASSES: ColorScheme[] = [
   'default',
@@ -44,9 +37,7 @@ const ThemeContext = createContext<ThemeContextType>(dummyContext);
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const [theme, setThemeState] = useState<Theme>(getInitialTheme);
-  const [colorScheme, setColorSchemeState] = useState<ColorScheme>(
-    getInitialColorScheme
-  );
+  const [colorScheme, setColorSchemeState] = useState<ColorScheme>(getInitialColorScheme);
 
   function getInitialTheme(): Theme {
     if (typeof window === 'undefined') {
@@ -62,9 +53,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
       return 'default';
     }
 
-    const savedColorScheme = localStorage.getItem(
-      'colorScheme'
-    ) as ColorScheme | null;
+    const savedColorScheme = localStorage.getItem('colorScheme') as ColorScheme | null;
     return savedColorScheme || 'default';
   }
 
@@ -72,8 +61,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     const root = window.document.documentElement;
     root.classList.remove('light', 'dark');
 
-    const systemTheme = window.matchMedia('(prefers-color-scheme: dark)')
-      .matches
+    const systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches
       ? 'dark'
       : 'light';
 
@@ -100,11 +88,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     setColorScheme: setColorSchemeState,
   };
 
-  return (
-    <ThemeContext.Provider value={contextValue}>
-      {children}
-    </ThemeContext.Provider>
-  );
+  return <ThemeContext.Provider value={contextValue}>{children}</ThemeContext.Provider>;
 }
 
 export function useTheme() {

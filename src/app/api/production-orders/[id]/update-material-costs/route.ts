@@ -14,10 +14,7 @@ const materialCostUpdateSchema = z.object({
   ),
 });
 
-export async function POST(
-  request: NextRequest,
-  context: { params: Promise<{ id: string }> }
-) {
+export async function POST(request: NextRequest, context: { params: Promise<{ id: string }> }) {
   try {
     const { id: orderId } = await context.params;
     const body = await request.json();
@@ -38,10 +35,7 @@ export async function POST(
     });
 
     if (!order) {
-      return NextResponse.json(
-        { error: 'Production order not found' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'Production order not found' }, { status: 404 });
     }
 
     if (order.status !== 'completed') {
@@ -68,10 +62,7 @@ export async function POST(
           );
       }
 
-      const totalMaterialCost = materials.reduce(
-        (sum, m) => sum + m.totalCost,
-        0
-      );
+      const totalMaterialCost = materials.reduce((sum, m) => sum + m.totalCost, 0);
 
       await tx
         .update(productionOrder)
@@ -90,9 +81,6 @@ export async function POST(
       return NextResponse.json({ error: error.message }, { status: 400 });
     }
 
-    return NextResponse.json(
-      { error: 'Failed to update material costs' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to update material costs' }, { status: 500 });
   }
 }

@@ -50,10 +50,7 @@ type ExpiryAlertsDialogProps = {
   onOpenChange: (open: boolean) => void;
 };
 
-export function ExpiryAlertsDialog({
-  open,
-  onOpenChange,
-}: ExpiryAlertsDialogProps) {
+export function ExpiryAlertsDialog({ open, onOpenChange }: ExpiryAlertsDialogProps) {
   const [loading, setLoading] = useState(true);
   const [expiringBatches, setExpiringBatches] = useState<ExpiringBatch[]>([]);
   const [daysFilter, setDaysFilter] = useState('30');
@@ -123,9 +120,7 @@ export function ExpiryAlertsDialog({
         <div className='space-y-4'>
           <div className='flex items-center justify-between'>
             <div className='flex items-center gap-2'>
-              <span className='text-sm font-medium'>
-                Show items expiring within:
-              </span>
+              <span className='text-sm font-medium'>Show items expiring within:</span>
               <Select value={daysFilter} onValueChange={setDaysFilter}>
                 <SelectTrigger className='w-[150px]'>
                   <SelectValue />
@@ -142,8 +137,8 @@ export function ExpiryAlertsDialog({
 
             {expiringBatches.length > 0 && (
               <div className='text-sm text-gray-600'>
-                <span className='font-medium'>{expiringBatches.length}</span>{' '}
-                batch{expiringBatches.length !== 1 ? 'es' : ''} expiring
+                <span className='font-medium'>{expiringBatches.length}</span> batch
+                {expiringBatches.length !== 1 ? 'es' : ''} expiring
               </div>
             )}
           </div>
@@ -155,9 +150,7 @@ export function ExpiryAlertsDialog({
           ) : expiringBatches.length === 0 ? (
             <div className='flex flex-col items-center justify-center py-12 text-center'>
               <Package className='h-12 w-12 text-gray-300 mb-3' />
-              <p className='text-gray-500 font-medium'>
-                No materials expiring soon
-              </p>
+              <p className='text-gray-500 font-medium'>No materials expiring soon</p>
               <p className='text-sm text-gray-400 mt-1'>
                 All materials are within safe expiry dates
               </p>
@@ -173,32 +166,23 @@ export function ExpiryAlertsDialog({
                     <TableHead>Location</TableHead>
                     <TableHead>Quantity</TableHead>
                     <TableHead>Expiry Date</TableHead>
-                    <TableHead className='text-right'>
-                      Days Until Expiry
-                    </TableHead>
+                    <TableHead className='text-right'>Days Until Expiry</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {expiringBatches.map((batch) => (
                     <TableRow key={batch.batchId}>
-                      <TableCell>
-                        {getUrgencyBadge(batch.daysUntilExpiry)}
-                      </TableCell>
+                      <TableCell>{getUrgencyBadge(batch.daysUntilExpiry)}</TableCell>
                       <TableCell>
                         <div className='font-medium'>{batch.materialName}</div>
                         {batch.materialSku && (
-                          <div className='text-xs text-gray-500'>
-                            SKU: {batch.materialSku}
-                          </div>
+                          <div className='text-xs text-gray-500'>SKU: {batch.materialSku}</div>
                         )}
                       </TableCell>
-                      <TableCell className='font-mono text-sm'>
-                        {batch.batchNumber}
-                      </TableCell>
+                      <TableCell className='font-mono text-sm'>{batch.batchNumber}</TableCell>
                       <TableCell>{batch.locationName}</TableCell>
                       <TableCell>
-                        {parseFloat(batch.quantity).toFixed(2)}{' '}
-                        {batch.unitOfMeasure || 'units'}
+                        {parseFloat(batch.quantity).toFixed(2)} {batch.unitOfMeasure || 'units'}
                       </TableCell>
                       <TableCell>
                         <div className='flex items-center gap-1'>
@@ -212,8 +196,8 @@ export function ExpiryAlertsDialog({
                             batch.daysUntilExpiry <= 7
                               ? 'text-red-600'
                               : batch.daysUntilExpiry <= 14
-                              ? 'text-orange-600'
-                              : 'text-gray-700'
+                                ? 'text-orange-600'
+                                : 'text-gray-700'
                           }`}
                         >
                           {batch.daysUntilExpiry} day

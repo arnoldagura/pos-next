@@ -1,9 +1,5 @@
 import { db } from '@/db/db';
-import {
-  materialInventoryMovement,
-  materialInventory,
-  materialBatch,
-} from '@/drizzle/schema';
+import { materialInventoryMovement, materialInventory, materialBatch } from '@/drizzle/schema';
 import { ACTIONS, RESOURCES } from '@/lib/rbac';
 import { receiveMaterialSchema } from '@/lib/validations/material';
 import { protectRoute } from '@/middleware/rbac';
@@ -24,19 +20,14 @@ export async function receiveMaterialHandler(req: NextRequest) {
       .limit(1);
 
     if (inventoryExists.length === 0) {
-      return NextResponse.json(
-        { error: 'Material inventory not found' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'Material inventory not found' }, { status: 404 });
     }
 
     const result = await db.transaction(async (tx) => {
       const batchId = randomUUID();
       const movementId = randomUUID();
 
-      const expiryDate = validatedData.expiryDate
-        ? new Date(validatedData.expiryDate)
-        : null;
+      const expiryDate = validatedData.expiryDate ? new Date(validatedData.expiryDate) : null;
 
       const [newBatch] = await tx
         .insert(materialBatch)
@@ -81,10 +72,7 @@ export async function receiveMaterialHandler(req: NextRequest) {
       );
     }
 
-    return NextResponse.json(
-      { error: 'Failed to receive material' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to receive material' }, { status: 500 });
   }
 }
 

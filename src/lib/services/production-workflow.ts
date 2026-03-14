@@ -11,10 +11,7 @@ import {
 import { requireTenantId } from '@/lib/tenant-context';
 import { eq, and, desc, isNotNull } from 'drizzle-orm';
 import { getMaterialCurrentStock } from './material-inventory-calculation';
-import {
-  calculateFullCost,
-  calculateSuggestedPrice,
-} from './production-costing';
+import { calculateFullCost, calculateSuggestedPrice } from './production-costing';
 
 // Types
 export type ProductionOrderStatus =
@@ -79,10 +76,7 @@ export interface FinalizeCostsInput {
 }
 
 // State machine transitions
-const VALID_TRANSITIONS: Record<
-  ProductionOrderStatus,
-  ProductionOrderStatus[]
-> = {
+const VALID_TRANSITIONS: Record<ProductionOrderStatus, ProductionOrderStatus[]> = {
   draft: ['scheduled', 'cancelled'],
   scheduled: ['in_progress', 'cancelled'],
   in_progress: ['completed', 'cancelled'],
@@ -115,9 +109,7 @@ export function validateStateTransition(
 }
 
 // Create production order from recipe
-export async function createFromRecipe(
-  input: CreateProductionOrderInput
-): Promise<string> {
+export async function createFromRecipe(input: CreateProductionOrderInput): Promise<string> {
   const tenantId = await requireTenantId();
   const {
     recipeId,
@@ -150,9 +142,7 @@ export async function createFromRecipe(
   const scalingFactor = plannedQuantity / Number(recipe.outputQuantity);
 
   // Generate order ID
-  const orderId = `prod_order_${Date.now()}_${Math.random()
-    .toString(36)
-    .substring(2, 9)}`;
+  const orderId = `prod_order_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
 
   await db.transaction(async (tx) => {
     let outputProductInventoryId = null;
@@ -170,10 +160,7 @@ export async function createFromRecipe(
           );
         }
         // Verify it matches the product and location
-        if (
-          prodInv.productId !== recipe.outputProductId ||
-          prodInv.locationId !== locationId
-        ) {
+        if (prodInv.productId !== recipe.outputProductId || prodInv.locationId !== locationId) {
           throw new ProductionWorkflowError(
             `Product inventory ${manualProductInventoryId} does not match product ${recipe.outputProductId} at location ${locationId}.`
           );
@@ -206,10 +193,7 @@ export async function createFromRecipe(
           );
         }
         // Verify it matches the material and location
-        if (
-          matInv.materialId !== recipe.outputMaterialId ||
-          matInv.locationId !== locationId
-        ) {
+        if (matInv.materialId !== recipe.outputMaterialId || matInv.locationId !== locationId) {
           throw new ProductionWorkflowError(
             `Material inventory ${manualMaterialInventoryId} does not match material ${recipe.outputMaterialId} at location ${locationId}.`
           );
@@ -256,11 +240,7 @@ export async function createFromRecipe(
     const ingredientsToUse = customIngredients || [];
 
     // If no custom ingredients, scale recipe ingredients
-    if (
-      !customIngredients &&
-      recipe.ingredients &&
-      recipe.ingredients.length > 0
-    ) {
+    if (!customIngredients && recipe.ingredients && recipe.ingredients.length > 0) {
       for (const ingredient of recipe.ingredients) {
         const scaledQuantity = Number(ingredient.quantity) * scalingFactor;
         ingredientsToUse.push({
@@ -290,10 +270,7 @@ export async function createFromRecipe(
           }
 
           // Verify it matches the material and location
-          if (
-            matInv.materialId !== ingredient.materialId ||
-            matInv.locationId !== locationId
-          ) {
+          if (matInv.materialId !== ingredient.materialId || matInv.locationId !== locationId) {
             throw new ProductionWorkflowError(
               `Material inventory ${ingredient.materialInventoryId} does not match material ${ingredient.materialId} at location ${locationId}.`
             );
@@ -315,18 +292,14 @@ export async function createFromRecipe(
         }
 
         productionMaterialsData.push({
-          id: `prod_mat_${Date.now()}_${Math.random()
-            .toString(36)
-            .substring(2, 9)}`,
+          id: `prod_mat_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`,
           productionOrderId: orderId,
           materialId: ingredient.materialId,
           materialInventoryId: matInv.id,
           plannedQuantity: ingredient.quantity.toFixed(2),
           unitOfMeasure: ingredient.unitOfMeasure,
           unitCost: ingredient.cost ? ingredient.cost.toFixed(2) : null,
-          totalCost: ingredient.cost
-            ? (ingredient.cost * ingredient.quantity).toFixed(2)
-            : null,
+          totalCost: ingredient.cost ? (ingredient.cost * ingredient.quantity).toFixed(2) : null,
           createdAt: new Date(),
           updatedAt: new Date(),
         });
@@ -339,9 +312,7 @@ export async function createFromRecipe(
   return orderId;
 }
 
-export async function checkMaterialAvailability(
-  orderId: string
-): Promise<MaterialAvailability[]> {
+export async function checkMaterialAvailability(orderId: string): Promise<MaterialAvailability[]> {
   const order = await db.query.productionOrder.findFirst({
     where: eq(productionOrder.id, orderId),
     with: {
@@ -395,10 +366,7 @@ export async function checkMaterialAvailability(
   return availabilityChecks;
 }
 
-export async function schedule(
-  orderId: string,
-  scheduledDate?: Date
-): Promise<void> {
+export async function schedule(orderId: string, scheduledDate?: Date): Promise<void> {
   const order = await db.query.productionOrder.findFirst({
     where: eq(productionOrder.id, orderId),
   });
@@ -416,9 +384,7 @@ export async function schedule(
     const materialList = insufficientMaterials
       .map((m) => `${m.materialId} (need: ${m.required}, have: ${m.available})`)
       .join(', ');
-    throw new ProductionWorkflowError(
-      `Insufficient materials for production: ${materialList}`
-    );
+    throw new ProductionWorkflowError(`Insufficient materials for production: ${materialList}`);
   }
 
   await db
@@ -431,9 +397,7 @@ export async function schedule(
     .where(eq(productionOrder.id, orderId));
 }
 
-export async function startProduction(
-  input: StartProductionInput
-): Promise<void> {
+export async function startProduction(input: StartProductionInput): Promise<void> {
   const { orderId, startedBy } = input;
 
   const order = await db.query.productionOrder.findFirst({
@@ -453,9 +417,7 @@ export async function startProduction(
   const insufficientMaterials = availability.filter((m) => !m.sufficient);
 
   if (insufficientMaterials.length > 0) {
-    throw new ProductionWorkflowError(
-      'Insufficient materials to start production'
-    );
+    throw new ProductionWorkflowError('Insufficient materials to start production');
   }
 
   await db.transaction(async (tx) => {
@@ -475,17 +437,13 @@ export async function startProduction(
       let unitCost = Number(matInv.cost || 0);
 
       if (unitCost === 0) {
-        const latestPurchase =
-          await tx.query.materialInventoryMovement.findFirst({
-            where: and(
-              eq(
-                materialInventoryMovement.materialInventoryId,
-                material.materialInventoryId
-              ),
-              isNotNull(materialInventoryMovement.unitPrice)
-            ),
-            orderBy: [desc(materialInventoryMovement.date)],
-          });
+        const latestPurchase = await tx.query.materialInventoryMovement.findFirst({
+          where: and(
+            eq(materialInventoryMovement.materialInventoryId, material.materialInventoryId),
+            isNotNull(materialInventoryMovement.unitPrice)
+          ),
+          orderBy: [desc(materialInventoryMovement.date)],
+        });
 
         if (latestPurchase?.unitPrice) {
           unitCost = Number(latestPurchase.unitPrice);
@@ -495,9 +453,7 @@ export async function startProduction(
       const totalCost = unitCost * quantity;
       totalMaterialCost += totalCost;
 
-      const movementId = `mat_mov_${Date.now()}_${Math.random()
-        .toString(36)
-        .substring(2, 9)}`;
+      const movementId = `mat_mov_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
       await tx.insert(materialInventoryMovement).values({
         id: movementId,
         materialInventoryId: material.materialInventoryId,
@@ -536,9 +492,7 @@ export async function startProduction(
   });
 }
 
-export async function completeProduction(
-  input: CompleteProductionInput
-): Promise<void> {
+export async function completeProduction(input: CompleteProductionInput): Promise<void> {
   const { orderId, actualQuantity, completedBy } = input;
 
   const order = await db.query.productionOrder.findFirst({
@@ -553,9 +507,7 @@ export async function completeProduction(
 
   await db.transaction(async (tx) => {
     if (order.outputType === 'product' && order.outputProductInventoryId) {
-      const invMovementId = `inv_mov_${Date.now()}_${Math.random()
-        .toString(36)
-        .substring(2, 9)}`;
+      const invMovementId = `inv_mov_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
       await tx.insert(productInventoryMovement).values({
         id: invMovementId,
         productInventoryId: order.outputProductInventoryId,
@@ -568,13 +520,8 @@ export async function completeProduction(
         createdBy: completedBy || null,
         createdAt: new Date(),
       });
-    } else if (
-      order.outputType === 'material' &&
-      order.outputMaterialInventoryId
-    ) {
-      const matMovementId = `mat_mov_${Date.now()}_${Math.random()
-        .toString(36)
-        .substring(2, 9)}`;
+    } else if (order.outputType === 'material' && order.outputMaterialInventoryId) {
+      const matMovementId = `mat_mov_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
       await tx.insert(materialInventoryMovement).values({
         id: matMovementId,
         materialInventoryId: order.outputMaterialInventoryId,
@@ -602,9 +549,7 @@ export async function completeProduction(
   });
 }
 
-export async function finalizeCosts(
-  input: FinalizeCostsInput
-): Promise<ProductionCosts> {
+export async function finalizeCosts(input: FinalizeCostsInput): Promise<ProductionCosts> {
   const { orderId, laborCost = 0, overheadCost = 0, finalizedBy } = input;
 
   const order = await db.query.productionOrder.findFirst({
@@ -615,16 +560,9 @@ export async function finalizeCosts(
     throw new ProductionWorkflowError(`Production order ${orderId} not found`);
   }
 
-  validateStateTransition(
-    order.status as ProductionOrderStatus,
-    'costing_done'
-  );
+  validateStateTransition(order.status as ProductionOrderStatus, 'costing_done');
 
-  const costBreakdown = await calculateFullCost(
-    orderId,
-    laborCost,
-    overheadCost
-  );
+  const costBreakdown = await calculateFullCost(orderId, laborCost, overheadCost);
   const priceResult = await calculateSuggestedPrice(orderId, 30); // 30% profit margin
 
   await db
@@ -651,10 +589,7 @@ export async function finalizeCosts(
   };
 }
 
-export async function cancel(
-  orderId: string,
-  cancelledBy?: string
-): Promise<void> {
+export async function cancel(orderId: string, cancelledBy?: string): Promise<void> {
   const order = await db.query.productionOrder.findFirst({
     where: eq(productionOrder.id, orderId),
     with: {
@@ -673,9 +608,7 @@ export async function cancel(
       for (const material of order.materials || []) {
         if (material.actualQuantity) {
           // Material already has the materialInventoryId
-          const movementId = `mat_mov_${Date.now()}_${Math.random()
-            .toString(36)
-            .substring(2, 9)}`;
+          const movementId = `mat_mov_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
           await tx.insert(materialInventoryMovement).values({
             id: movementId,
             materialInventoryId: material.materialInventoryId,

@@ -61,10 +61,7 @@ export interface MovementsMaterialInventory {
   currentQuantity: string;
 }
 
-export type BatchDialogMaterialInventory = Pick<
-  MaterialInventory,
-  'id' | 'unitOfMeasure'
-> & {
+export type BatchDialogMaterialInventory = Pick<MaterialInventory, 'id' | 'unitOfMeasure'> & {
   material: Pick<MaterialInventory['material'], 'name'>;
   location: Pick<MaterialInventory['location'], 'name'> & { id?: string };
 };

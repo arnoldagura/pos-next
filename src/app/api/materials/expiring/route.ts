@@ -1,10 +1,5 @@
 import { db } from '@/db/db';
-import {
-  materialBatch,
-  materialInventory,
-  material,
-  location,
-} from '@/drizzle/schema';
+import { materialBatch, materialInventory, material, location } from '@/drizzle/schema';
 import { ACTIONS, RESOURCES } from '@/lib/rbac';
 import { protectRoute } from '@/middleware/rbac';
 import { eq, and, lte, gte, isNotNull, sql } from 'drizzle-orm';
@@ -53,10 +48,7 @@ export async function getExpiringMaterialsHandler(req: NextRequest) {
         `,
       })
       .from(materialBatch)
-      .innerJoin(
-        materialInventory,
-        eq(materialBatch.materialInventoryId, materialInventory.id)
-      )
+      .innerJoin(materialInventory, eq(materialBatch.materialInventoryId, materialInventory.id))
       .innerJoin(material, eq(materialInventory.materialId, material.id))
       .innerJoin(location, eq(materialInventory.locationId, location.id))
       .where(and(...conditions))
@@ -73,10 +65,7 @@ export async function getExpiringMaterialsHandler(req: NextRequest) {
   } catch (error) {
     console.error('Error fetching expiring materials:', error);
 
-    return NextResponse.json(
-      { error: 'Failed to fetch expiring materials' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to fetch expiring materials' }, { status: 500 });
   }
 }
 

@@ -46,17 +46,14 @@ export function useMovements(params?: UseMovementsParams) {
     queryKey: ['movements', params],
     queryFn: async () => {
       const searchParams = new URLSearchParams();
-      if (params?.inventoryId)
-        searchParams.append('inventoryId', params.inventoryId);
+      if (params?.inventoryId) searchParams.append('inventoryId', params.inventoryId);
       if (params?.type) searchParams.append('type', params.type);
       if (params?.startDate) searchParams.append('startDate', params.startDate);
       if (params?.endDate) searchParams.append('endDate', params.endDate);
       if (params?.page) searchParams.append('page', params.page.toString());
       if (params?.limit) searchParams.append('limit', params.limit.toString());
 
-      const response = await fetch(
-        `/api/product-inventories/movements?${searchParams.toString()}`
-      );
+      const response = await fetch(`/api/product-inventories/movements?${searchParams.toString()}`);
       if (!response.ok) throw new Error('Failed to fetch movements');
       return response.json();
     },

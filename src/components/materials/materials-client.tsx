@@ -1,15 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import {
-  Search,
-  Plus,
-  Pencil,
-  Trash2,
-  Download,
-  PackagePlus,
-  AlertTriangle,
-} from 'lucide-react';
+import { Search, Plus, Pencil, Trash2, Download, PackagePlus, AlertTriangle } from 'lucide-react';
 import {
   Table,
   TableBody,
@@ -52,9 +44,7 @@ export function MaterialsClient() {
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [showMaterialDialog, setShowMaterialDialog] = useState(false);
-  const [selectedMaterial, setSelectedMaterial] = useState<
-    Material | undefined
-  >(undefined);
+  const [selectedMaterial, setSelectedMaterial] = useState<Material | undefined>(undefined);
   const [showStockReceiptDialog, setShowStockReceiptDialog] = useState(false);
   const [showExpiryAlertsDialog, setShowExpiryAlertsDialog] = useState(false);
 
@@ -79,10 +69,8 @@ export function MaterialsClient() {
 
       if (search) params.append('search', search);
       if (typeFilter && typeFilter !== 'all') params.append('type', typeFilter);
-      if (categoryFilter && categoryFilter !== 'all')
-        params.append('categoryId', categoryFilter);
-      if (statusFilter && statusFilter !== 'all')
-        params.append('status', statusFilter);
+      if (categoryFilter && categoryFilter !== 'all') params.append('categoryId', categoryFilter);
+      if (statusFilter && statusFilter !== 'all') params.append('status', statusFilter);
 
       const response = await fetch(`/api/materials?${params}`);
       if (!response.ok) throw new Error('Failed to fetch materials');
@@ -147,10 +135,8 @@ export function MaterialsClient() {
       const params = new URLSearchParams({ limit: '10000' });
       if (search) params.append('search', search);
       if (typeFilter && typeFilter !== 'all') params.append('type', typeFilter);
-      if (categoryFilter && categoryFilter !== 'all')
-        params.append('categoryId', categoryFilter);
-      if (statusFilter && statusFilter !== 'all')
-        params.append('status', statusFilter);
+      if (categoryFilter && categoryFilter !== 'all') params.append('categoryId', categoryFilter);
+      if (statusFilter && statusFilter !== 'all') params.append('status', statusFilter);
 
       const response = await fetch(`/api/materials?${params}`);
       if (!response.ok) throw new Error('Failed to fetch materials');
@@ -158,15 +144,7 @@ export function MaterialsClient() {
       const data = await response.json();
       const exportData = data.materials || [];
 
-      const headers = [
-        'Name',
-        'SKU',
-        'Type',
-        'Category',
-        'Supplier',
-        'UOM',
-        'Status',
-      ];
+      const headers = ['Name', 'SKU', 'Type', 'Category', 'Supplier', 'UOM', 'Status'];
       const rows = exportData.map((m: Material) => [
         m.name,
         m.sku || '',
@@ -178,9 +156,7 @@ export function MaterialsClient() {
 
       const csv = [
         headers.join(','),
-        ...rows.map((row: string[]) =>
-          row.map((cell) => `"${cell}"`).join(',')
-        ),
+        ...rows.map((row: string[]) => row.map((cell) => `"${cell}"`).join(',')),
       ].join('\n');
 
       const blob = new Blob([csv], { type: 'text/csv' });
@@ -257,10 +233,7 @@ export function MaterialsClient() {
 
       {/* Action Buttons */}
       <div className='flex flex-wrap gap-2'>
-        <Button
-          onClick={() => setShowExpiryAlertsDialog(true)}
-          variant='outline'
-        >
+        <Button onClick={() => setShowExpiryAlertsDialog(true)} variant='outline'>
           <AlertTriangle className='h-4 w-4 mr-2' />
           Expiry Alerts
         </Button>
@@ -270,10 +243,7 @@ export function MaterialsClient() {
           Export
         </Button>
 
-        <Button
-          onClick={() => setShowStockReceiptDialog(true)}
-          variant='outline'
-        >
+        <Button onClick={() => setShowStockReceiptDialog(true)} variant='outline'>
           <PackagePlus className='h-4 w-4 mr-2' />
           Receive Stock
         </Button>
@@ -316,27 +286,16 @@ export function MaterialsClient() {
                 ) : (
                   materials.map((material) => (
                     <TableRow key={material.id}>
-                      <TableCell className='font-medium'>
-                        {material.name}
+                      <TableCell className='font-medium'>{material.name}</TableCell>
+                      <TableCell>
+                        <Badge variant='outline'>{MATERIAL_TYPES[material.type]}</Badge>
                       </TableCell>
                       <TableCell>
-                        <Badge variant='outline'>
-                          {MATERIAL_TYPES[material.type]}
-                        </Badge>
+                        {categories.find((c) => c.id === material.categoryId)?.name || '-'}
                       </TableCell>
                       <TableCell>
-                        {categories.find((c) => c.id === material.categoryId)
-                          ?.name || '-'}
-                      </TableCell>
-                      <TableCell>
-                        <button
-                          onClick={() =>
-                            handleToggleStatus(material.id, material.status)
-                          }
-                        >
-                          <Badge
-                            variant={material.status ? 'default' : 'secondary'}
-                          >
+                        <button onClick={() => handleToggleStatus(material.id, material.status)}>
+                          <Badge variant={material.status ? 'default' : 'secondary'}>
                             {material.status ? 'Active' : 'Inactive'}
                           </Badge>
                         </button>
@@ -420,10 +379,7 @@ export function MaterialsClient() {
         onSuccess={fetchMaterials}
       />
 
-      <ExpiryAlertsDialog
-        open={showExpiryAlertsDialog}
-        onOpenChange={setShowExpiryAlertsDialog}
-      />
+      <ExpiryAlertsDialog open={showExpiryAlertsDialog} onOpenChange={setShowExpiryAlertsDialog} />
     </div>
   );
 }

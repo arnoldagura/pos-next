@@ -32,10 +32,7 @@ async function getOrganizationUsersHandler(
     });
 
     if (!org) {
-      return NextResponse.json(
-        { error: 'Organization not found' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'Organization not found' }, { status: 404 });
     }
 
     // Get users in this organization
@@ -78,10 +75,7 @@ async function getOrganizationUsersHandler(
     });
   } catch (error) {
     console.error('Error fetching organization users:', error);
-    return NextResponse.json(
-      { error: 'Failed to fetch organization users' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to fetch organization users' }, { status: 500 });
   }
 }
 
@@ -108,10 +102,7 @@ async function addUserToOrganizationHandler(
     });
 
     if (!org) {
-      return NextResponse.json(
-        { error: 'Organization not found' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'Organization not found' }, { status: 404 });
     }
 
     // Check if user exists
@@ -179,10 +170,7 @@ async function addUserToOrganizationHandler(
       );
     }
 
-    return NextResponse.json(
-      { error: 'Failed to add user to organization' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to add user to organization' }, { status: 500 });
   }
 }
 
@@ -204,10 +192,7 @@ async function removeUserFromOrganizationHandler(
     const userId = searchParams.get('userId');
 
     if (!userId) {
-      return NextResponse.json(
-        { error: 'User ID is required' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'User ID is required' }, { status: 400 });
     }
 
     // Check if assignment exists
@@ -229,10 +214,7 @@ async function removeUserFromOrganizationHandler(
     await db
       .delete(userOrganization)
       .where(
-        and(
-          eq(userOrganization.userId, userId),
-          eq(userOrganization.organizationId, params.id)
-        )
+        and(eq(userOrganization.userId, userId), eq(userOrganization.organizationId, params.id))
       );
 
     return NextResponse.json({
@@ -240,10 +222,7 @@ async function removeUserFromOrganizationHandler(
     });
   } catch (error) {
     console.error('Error removing user from organization:', error);
-    return NextResponse.json(
-      { error: 'Failed to remove user from organization' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to remove user from organization' }, { status: 500 });
   }
 }
 

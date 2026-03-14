@@ -89,9 +89,7 @@ class InventoryCache {
   }
 
   invalidatePattern(pattern: string): void {
-    const keys = Array.from(this.cache.keys()).filter((k) =>
-      k.startsWith(pattern)
-    );
+    const keys = Array.from(this.cache.keys()).filter((k) => k.startsWith(pattern));
     keys.forEach((k) => this.cache.delete(k));
   }
 
@@ -106,9 +104,7 @@ const cache = new InventoryCache();
  * Calculate current stock level for an inventory item
  * Stock is derived from all movements (purchases add, sales subtract, etc.)
  */
-export async function getCurrentStock(
-  inventoryId: string
-): Promise<StockLevel | null> {
+export async function getCurrentStock(inventoryId: string): Promise<StockLevel | null> {
   const cacheKey = `stock:${inventoryId}`;
   const cached = cache.get<StockLevel>(cacheKey);
   if (cached) return cached;
@@ -138,10 +134,7 @@ export async function getCurrentStock(
       eq(productInventoryMovement.productInventoryId, productInventory.id)
     )
     .where(eq(productInventoryMovement.productInventoryId, inventoryId))
-    .groupBy(
-      productInventoryMovement.productInventoryId,
-      productInventory.unitOfMeasure
-    );
+    .groupBy(productInventoryMovement.productInventoryId, productInventory.unitOfMeasure);
 
   if (result.length === 0) return null;
 
@@ -159,10 +152,7 @@ export async function getCurrentStock(
  * Calculate stock level at a specific date
  * Only includes movements up to and including the specified date
  */
-export async function getStockAtDate(
-  inventoryId: string,
-  date: Date
-): Promise<StockAtDate | null> {
+export async function getStockAtDate(inventoryId: string, date: Date): Promise<StockAtDate | null> {
   const result = await db
     .select({
       inventoryId: productInventoryMovement.productInventoryId,
@@ -193,10 +183,7 @@ export async function getStockAtDate(
         lte(productInventoryMovement.date, date)
       )
     )
-    .groupBy(
-      productInventoryMovement.productInventoryId,
-      productInventory.unitOfMeasure
-    );
+    .groupBy(productInventoryMovement.productInventoryId, productInventory.unitOfMeasure);
 
   if (result.length === 0) return null;
 
@@ -267,10 +254,7 @@ export async function getWeightedAverageCost(
  * Calculate FIFO (First In, First Out) cost for a specific quantity
  * Returns the cost breakdown using oldest inventory first
  */
-export async function getFIFOCost(
-  inventoryId: string,
-  quantity: number
-): Promise<FIFOCost | null> {
+export async function getFIFOCost(inventoryId: string, quantity: number): Promise<FIFOCost | null> {
   // Get all purchase movements ordered by date (oldest first)
   const movements = await db
     .select({
@@ -354,9 +338,7 @@ export async function validateStockAvailability(
  * Get stock levels for multiple inventory items in bulk
  * More efficient than calling getCurrentStock multiple times
  */
-export async function getBulkStockLevels(
-  inventoryIds: string[]
-): Promise<BulkStockLevels> {
+export async function getBulkStockLevels(inventoryIds: string[]): Promise<BulkStockLevels> {
   if (inventoryIds.length === 0) return {};
 
   const results = await db
@@ -384,10 +366,7 @@ export async function getBulkStockLevels(
       eq(productInventoryMovement.productInventoryId, productInventory.id)
     )
     .where(inArray(productInventoryMovement.productInventoryId, inventoryIds))
-    .groupBy(
-      productInventoryMovement.productInventoryId,
-      productInventory.unitOfMeasure
-    );
+    .groupBy(productInventoryMovement.productInventoryId, productInventory.unitOfMeasure);
 
   const bulkLevels: BulkStockLevels = {};
 
@@ -405,9 +384,7 @@ export async function getBulkStockLevels(
 /**
  * Get all items at a location that are below their alert threshold
  */
-export async function getLowStockItems(
-  locationId: string
-): Promise<LowStockItem[]> {
+export async function getLowStockItems(locationId: string): Promise<LowStockItem[]> {
   const cacheKey = `lowstock:${locationId}`;
   const cached = cache.get<LowStockItem[]>(cacheKey);
   if (cached) return cached;

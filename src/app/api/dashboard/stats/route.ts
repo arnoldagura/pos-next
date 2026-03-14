@@ -75,7 +75,12 @@ export async function GET(req: NextRequest) {
         count: sql<number>`COUNT(*)`,
       })
       .from(order)
-      .where(and(eq(order.organizationId, tenantId), locationId ? eq(order.locationId, locationId) : undefined))
+      .where(
+        and(
+          eq(order.organizationId, tenantId),
+          locationId ? eq(order.locationId, locationId) : undefined
+        )
+      )
       .groupBy(order.status);
 
     // Low Stock Products
@@ -113,7 +118,12 @@ export async function GET(req: NextRequest) {
         completedAt: order.completedAt,
       })
       .from(order)
-      .where(and(eq(order.organizationId, tenantId), locationId ? eq(order.locationId, locationId) : undefined))
+      .where(
+        and(
+          eq(order.organizationId, tenantId),
+          locationId ? eq(order.locationId, locationId) : undefined
+        )
+      )
       .orderBy(desc(order.createdAt))
       .limit(10);
 
@@ -150,7 +160,10 @@ export async function GET(req: NextRequest) {
       })
       .from(productionOrder)
       .where(
-        and(eq(productionOrder.organizationId, tenantId), locationId ? eq(productionOrder.locationId, locationId) : undefined)
+        and(
+          eq(productionOrder.organizationId, tenantId),
+          locationId ? eq(productionOrder.locationId, locationId) : undefined
+        )
       )
       .groupBy(productionOrder.status);
 
@@ -182,10 +195,7 @@ export async function GET(req: NextRequest) {
         quantity: materialBatch.quantity,
       })
       .from(materialBatch)
-      .innerJoin(
-        materialInventory,
-        eq(materialBatch.materialInventoryId, materialInventory.id)
-      )
+      .innerJoin(materialInventory, eq(materialBatch.materialInventoryId, materialInventory.id))
       .where(
         and(
           lte(materialBatch.expiryDate, thirtyDaysLater),
@@ -274,10 +284,7 @@ export async function GET(req: NextRequest) {
     console.error('Error fetching dashboard stats:', error);
     return NextResponse.json(
       {
-        error:
-          error instanceof Error
-            ? error.message
-            : 'Failed to fetch dashboard statistics',
+        error: error instanceof Error ? error.message : 'Failed to fetch dashboard statistics',
       },
       { status: 500 }
     );

@@ -1,10 +1,5 @@
 import { db } from '@/db/db';
-import {
-  productInventory,
-  productInventoryMovement,
-  product,
-  location,
-} from '@/drizzle/schema';
+import { productInventory, productInventoryMovement, product, location } from '@/drizzle/schema';
 import { ACTIONS, RESOURCES } from '@/lib/rbac';
 import { RouteContext, createDefaultRouteContext } from '@/lib/types';
 import { updateInventorySchema } from '@/lib/validations/product';
@@ -48,10 +43,7 @@ export async function getInventoryByIdHandler(
       .limit(1);
 
     if (inventoryRecord.length === 0) {
-      return NextResponse.json(
-        { error: 'Inventory not found' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'Inventory not found' }, { status: 404 });
     }
 
     const stockLevel = await getCurrentStock(id);
@@ -71,10 +63,7 @@ export async function getInventoryByIdHandler(
   } catch (error) {
     console.error('Error fetching inventory:', error);
 
-    return NextResponse.json(
-      { error: 'Failed to fetch inventory' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to fetch inventory' }, { status: 500 });
   }
 }
 
@@ -96,25 +85,16 @@ export async function updateInventoryHandler(
       .then((rows) => rows[0] || null);
 
     if (existingInventory === null) {
-      return NextResponse.json(
-        { error: 'Product Inventory not found' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'Product Inventory not found' }, { status: 404 });
     }
     if (existingInventory.product === null)
       return NextResponse.json({ error: 'Product not found' }, { status: 404 });
 
     if (validatedData.variantName && !validatedData.slug) {
-      validatedData.slug = generateSlug(
-        existingInventory.product?.name,
-        validatedData.variantName
-      );
+      validatedData.slug = generateSlug(existingInventory.product?.name, validatedData.variantName);
     }
 
-    if (
-      validatedData.slug &&
-      validatedData.slug !== existingInventory.product_inventory.slug
-    ) {
+    if (validatedData.slug && validatedData.slug !== existingInventory.product_inventory.slug) {
       const existingProduct = await db
         .select()
         .from(productInventory)
@@ -129,10 +109,7 @@ export async function updateInventoryHandler(
       }
     }
 
-    if (
-      validatedData.sku &&
-      validatedData.sku !== existingInventory.product_inventory.sku
-    ) {
+    if (validatedData.sku && validatedData.sku !== existingInventory.product_inventory.sku) {
       const existingSku = await db
         .select()
         .from(productInventory)
@@ -205,10 +182,7 @@ export async function updateInventoryHandler(
       );
     }
 
-    return NextResponse.json(
-      { error: 'Failed to update inventory' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to update inventory' }, { status: 500 });
   }
 }
 
@@ -226,10 +200,7 @@ export async function deleteInventoryHandler(
       .limit(1);
 
     if (existingInventory.length === 0) {
-      return NextResponse.json(
-        { error: 'Inventory not found' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'Inventory not found' }, { status: 404 });
     }
 
     await db.delete(productInventory).where(eq(productInventory.id, id));
@@ -238,10 +209,7 @@ export async function deleteInventoryHandler(
   } catch (error) {
     console.error('Error deleting inventory:', error);
 
-    return NextResponse.json(
-      { error: 'Failed to delete inventory' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to delete inventory' }, { status: 500 });
   }
 }
 

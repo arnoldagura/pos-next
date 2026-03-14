@@ -1,11 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/db/db';
-import {
-  role,
-  rolePermission,
-  userRole,
-  userOrganization,
-} from '@/drizzle/schema';
+import { role, rolePermission, userRole, userOrganization } from '@/drizzle/schema';
 import { protectRoute } from '@/middleware/rbac';
 import { RESOURCES, ACTIONS } from '@/lib/rbac';
 import { createRoleSchema } from '@/lib/types/rbac';
@@ -32,9 +27,7 @@ async function getRolesHandler() {
       .where(
         or(
           eq(role.isGlobal, true),
-          tenantId
-            ? eq(role.organizationId, tenantId)
-            : isNull(role.organizationId)
+          tenantId ? eq(role.organizationId, tenantId) : isNull(role.organizationId)
         )
       );
 
@@ -59,8 +52,7 @@ async function getRolesHandler() {
           .from(userRole)
           .where(eq(userRole.roleId, r.id));
 
-        const totalUserCount =
-          (orgUserCount?.count || 0) + (directUserCount?.count || 0);
+        const totalUserCount = (orgUserCount?.count || 0) + (directUserCount?.count || 0);
 
         return {
           ...r,
@@ -75,10 +67,7 @@ async function getRolesHandler() {
     return NextResponse.json({ roles: rolesWithCounts });
   } catch (error) {
     console.error('Error fetching roles:', error);
-    return NextResponse.json(
-      { error: 'Failed to fetch roles' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to fetch roles' }, { status: 500 });
   }
 }
 
@@ -94,9 +83,7 @@ async function createRoleHandler(req: NextRequest) {
       .where(
         and(
           eq(role.name, validatedData.name),
-          tenantId
-            ? eq(role.organizationId, tenantId)
-            : isNull(role.organizationId)
+          tenantId ? eq(role.organizationId, tenantId) : isNull(role.organizationId)
         )
       )
       .limit(1);
@@ -121,12 +108,10 @@ async function createRoleHandler(req: NextRequest) {
       .returning();
 
     if (validatedData.permissionIds && validatedData.permissionIds.length > 0) {
-      const permissionAssignments = validatedData.permissionIds.map(
-        (permId) => ({
-          roleId,
-          permissionId: permId,
-        })
-      );
+      const permissionAssignments = validatedData.permissionIds.map((permId) => ({
+        roleId,
+        permissionId: permId,
+      }));
 
       await db.insert(rolePermission).values(permissionAssignments);
     }
@@ -142,10 +127,7 @@ async function createRoleHandler(req: NextRequest) {
       );
     }
 
-    return NextResponse.json(
-      { error: 'Failed to create role' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to create role' }, { status: 500 });
   }
 }
 

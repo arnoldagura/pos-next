@@ -5,10 +5,7 @@ import { z } from 'zod';
  */
 
 // Email validation
-export const emailSchema = z
-  .string()
-  .min(1, 'Email is required')
-  .email('Invalid email address');
+export const emailSchema = z.string().min(1, 'Email is required').email('Invalid email address');
 
 // Password validation
 export const passwordSchema = z
@@ -32,17 +29,18 @@ export const nameSchema = z
   .regex(/^[a-zA-Z\s'-]+$/, 'Name can only contain letters, spaces, hyphens, and apostrophes');
 
 // URL validation
-export const urlSchema = z
-  .string()
-  .url('Invalid URL format')
-  .optional()
-  .or(z.literal(''));
+export const urlSchema = z.string().url('Invalid URL format').optional().or(z.literal(''));
 
 // Positive number validation
 export const positiveNumberSchema = z
   .number()
   .positive('Must be a positive number')
-  .or(z.string().regex(/^\d+(\.\d+)?$/).transform(Number));
+  .or(
+    z
+      .string()
+      .regex(/^\d+(\.\d+)?$/)
+      .transform(Number)
+  );
 
 // Integer validation
 export const integerSchema = z
@@ -56,26 +54,20 @@ export const priceSchema = z
   .nonnegative('Price cannot be negative')
   .multipleOf(0.01, 'Price can only have up to 2 decimal places')
   .or(
-    z.string()
+    z
+      .string()
       .regex(/^\d+(\.\d{1,2})?$/, 'Invalid price format')
       .transform(Number)
   );
 
 // Date validation (future dates only)
-export const futureDateSchema = z
-  .date()
-  .min(new Date(), 'Date must be in the future');
+export const futureDateSchema = z.date().min(new Date(), 'Date must be in the future');
 
 // Date validation (past dates only)
-export const pastDateSchema = z
-  .date()
-  .max(new Date(), 'Date must be in the past');
+export const pastDateSchema = z.date().max(new Date(), 'Date must be in the past');
 
 // File validation
-export const fileSchema = (
-  maxSizeMB: number = 5,
-  allowedTypes?: string[]
-) => {
+export const fileSchema = (maxSizeMB: number = 5, allowedTypes?: string[]) => {
   return z
     .instanceof(File)
     .refine(
@@ -97,11 +89,13 @@ export const optionalEmailSchema = z
 
 // Confirm password validation helper
 export function confirmPasswordSchema(passwordField: string = 'password') {
-  return z.object({
-    [passwordField]: passwordSchema,
-    confirmPassword: z.string(),
-  }).refine((data) => data[passwordField] === data.confirmPassword, {
-    message: "Passwords don't match",
-    path: ['confirmPassword'],
-  });
+  return z
+    .object({
+      [passwordField]: passwordSchema,
+      confirmPassword: z.string(),
+    })
+    .refine((data) => data[passwordField] === data.confirmPassword, {
+      message: "Passwords don't match",
+      path: ['confirmPassword'],
+    });
 }

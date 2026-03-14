@@ -30,11 +30,7 @@ async function makeSuperAdmin() {
     console.log(`\nSearching for user: ${email}...`);
 
     // Find user by email
-    const [foundUser] = await db
-      .select()
-      .from(user)
-      .where(eq(user.email, email))
-      .limit(1);
+    const [foundUser] = await db.select().from(user).where(eq(user.email, email)).limit(1);
 
     if (!foundUser) {
       console.error(`\n❌ Error: User not found with email: ${email}\n`);

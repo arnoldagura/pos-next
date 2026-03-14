@@ -151,7 +151,7 @@ export function KitchenClient() {
       }
       const res = await fetch(`/api/orders/kitchen?${params}`);
       if (!res.ok) throw new Error('Failed to fetch kitchen orders');
-      const data = await res.json() as { orders: KitchenOrder[] };
+      const data = (await res.json()) as { orders: KitchenOrder[] };
       setOrders(data.orders || []);
       setIsLoading(false);
     } catch (error) {
@@ -168,15 +168,11 @@ export function KitchenClient() {
       // Supabase Realtime: instant updates when orders/items change
       const channel = supabase
         .channel('kitchen')
-        .on(
-          'postgres_changes',
-          { event: '*', schema: 'public', table: 'order' },
-          () => fetchOrders()
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'order' }, () =>
+          fetchOrders()
         )
-        .on(
-          'postgres_changes',
-          { event: '*', schema: 'public', table: 'order_item' },
-          () => fetchOrders()
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'order_item' }, () =>
+          fetchOrders()
         )
         .subscribe();
 
@@ -203,13 +199,7 @@ export function KitchenClient() {
 
   // Status update mutation
   const updateStatus = useMutation({
-    mutationFn: async ({
-      orderId,
-      status,
-    }: {
-      orderId: string;
-      status: string;
-    }) => {
+    mutationFn: async ({ orderId, status }: { orderId: string; status: string }) => {
       const res = await fetch(`/api/orders/${orderId}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
@@ -279,11 +269,7 @@ export function KitchenClient() {
             onClick={() => setSoundEnabled(!soundEnabled)}
             title={soundEnabled ? 'Mute notifications' : 'Unmute notifications'}
           >
-            {soundEnabled ? (
-              <Volume2 className='h-4 w-4' />
-            ) : (
-              <VolumeX className='h-4 w-4' />
-            )}
+            {soundEnabled ? <Volume2 className='h-4 w-4' /> : <VolumeX className='h-4 w-4' />}
           </Button>
           <Button variant='ghost' size='sm' onClick={() => refetch()}>
             <RefreshCw className='h-4 w-4' />
@@ -364,7 +350,10 @@ function KitchenColumn({
     <div className='flex flex-col border-r last:border-r-0 overflow-hidden'>
       {/* Column header */}
       <div
-        className={cn('px-4 py-3 text-white font-semibold flex items-center justify-between', config.headerColor)}
+        className={cn(
+          'px-4 py-3 text-white font-semibold flex items-center justify-between',
+          config.headerColor
+        )}
       >
         <span className='text-lg'>{config.label}</span>
         <Badge variant='secondary' className='text-sm'>
@@ -418,8 +407,7 @@ function OrderCard({
   const NextIcon = config.nextIcon;
   const elapsed = getElapsedTime(order.createdAt);
   const isUrgent =
-    order.status === 'pending' &&
-    now - new Date(order.createdAt).getTime() > 10 * 60000;
+    order.status === 'pending' && now - new Date(order.createdAt).getTime() > 10 * 60000;
 
   const handleDragStart = (e: React.DragEvent<HTMLDivElement>) => {
     e.dataTransfer.effectAllowed = 'move';
@@ -428,7 +416,8 @@ function OrderCard({
 
   const handleItemStatusToggle = async (itemId: string, currentStatus: string) => {
     // Toggle: pending → ready → served → pending
-    const nextStatus = currentStatus === 'pending' ? 'ready' : currentStatus === 'ready' ? 'served' : 'pending';
+    const nextStatus =
+      currentStatus === 'pending' ? 'ready' : currentStatus === 'ready' ? 'served' : 'pending';
 
     try {
       const res = await fetch(`/api/order-items/${itemId}`, {
@@ -461,9 +450,7 @@ function OrderCard({
         <span className='font-bold text-base text-foreground'>{order.orderNumber}</span>
         <div className='flex items-center gap-1 text-muted-foreground'>
           <Clock className='h-3.5 w-3.5' />
-          <span className={cn('text-sm font-medium', isUrgent && 'text-red-500')}>
-            {elapsed}
-          </span>
+          <span className={cn('text-sm font-medium', isUrgent && 'text-red-500')}>{elapsed}</span>
         </div>
       </div>
 
@@ -491,20 +478,14 @@ function OrderCard({
               {item.itemStatus === 'pending' && (
                 <Circle className='h-4 w-4 text-muted-foreground group-hover:text-foreground' />
               )}
-              {item.itemStatus === 'ready' && (
-                <Check className='h-4 w-4 text-yellow-500' />
-              )}
-              {item.itemStatus === 'served' && (
-                <CheckCircle2 className='h-4 w-4 text-green-500' />
-              )}
+              {item.itemStatus === 'ready' && <Check className='h-4 w-4 text-yellow-500' />}
+              {item.itemStatus === 'served' && <CheckCircle2 className='h-4 w-4 text-green-500' />}
             </div>
             <div className='flex-1'>
-              <span className='font-medium text-foreground'>{item.quantity}x {item.productName}</span>
-              {item.notes && (
-                <p className='text-xs text-muted-foreground italic'>
-                  {item.notes}
-                </p>
-              )}
+              <span className='font-medium text-foreground'>
+                {item.quantity}x {item.productName}
+              </span>
+              {item.notes && <p className='text-xs text-muted-foreground italic'>{item.notes}</p>}
             </div>
             <div className='flex-shrink-0 text-xs font-medium text-muted-foreground capitalize'>
               {item.itemStatus}

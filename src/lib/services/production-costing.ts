@@ -1,9 +1,5 @@
 import { db } from '@/db/db';
-import {
-  productionOrder,
-  productionRecipe,
-  materialInventory,
-} from '@/drizzle/schema';
+import { productionOrder, productionRecipe, materialInventory } from '@/drizzle/schema';
 import { eq, and } from 'drizzle-orm';
 
 export interface MaterialCostBreakdown {
@@ -98,12 +94,8 @@ export async function calculateMaterialCost(
   let totalCost = 0;
 
   for (const prodMaterial of order.materials || []) {
-    const quantity = Number(
-      prodMaterial.actualQuantity || prodMaterial.plannedQuantity
-    );
-    const unitCost = Number(
-      prodMaterial.unitCost || prodMaterial.materialInventory?.cost || 0
-    );
+    const quantity = Number(prodMaterial.actualQuantity || prodMaterial.plannedQuantity);
+    const unitCost = Number(prodMaterial.unitCost || prodMaterial.materialInventory?.cost || 0);
     const materialTotalCost = quantity * unitCost;
 
     breakdown.push({
@@ -147,13 +139,11 @@ export async function calculateFullCost(
 
   const materialCostResult = await calculateMaterialCost(orderId);
 
-  const finalLaborCost =
-    laborCost !== undefined ? laborCost : Number(order.laborCost || 0);
+  const finalLaborCost = laborCost !== undefined ? laborCost : Number(order.laborCost || 0);
   const finalOverheadCost =
     overheadCost !== undefined ? overheadCost : Number(order.overheadCost || 0);
 
-  const totalCost =
-    materialCostResult.totalCost + finalLaborCost + finalOverheadCost;
+  const totalCost = materialCostResult.totalCost + finalLaborCost + finalOverheadCost;
   const quantity = Number(order.actualQuantity || order.plannedQuantity);
   const unitCost = quantity > 0 ? totalCost / quantity : 0;
 
@@ -278,8 +268,7 @@ export async function estimateProductionCost(
     totalMaterialCost += totalCost;
   }
 
-  const estimatedTotalCost =
-    totalMaterialCost + laborCostEstimate + overheadCostEstimate;
+  const estimatedTotalCost = totalMaterialCost + laborCostEstimate + overheadCostEstimate;
   const estimatedUnitCost = quantity > 0 ? estimatedTotalCost / quantity : 0;
 
   return {
@@ -315,9 +304,7 @@ export async function batchCostAnalysis(
   }
 
   if (quantities.some((q) => q <= 0)) {
-    throw new ProductionCostingError(
-      'All quantities must be greater than zero'
-    );
+    throw new ProductionCostingError('All quantities must be greater than zero');
   }
 
   const sortedQuantities = [...quantities].sort((a, b) => a - b);
@@ -326,9 +313,7 @@ export async function batchCostAnalysis(
 
   for (const quantity of sortedQuantities) {
     const laborCost = laborCostCalculator ? laborCostCalculator(quantity) : 0;
-    const overheadCost = overheadCostCalculator
-      ? overheadCostCalculator(quantity)
-      : 0;
+    const overheadCost = overheadCostCalculator ? overheadCostCalculator(quantity) : 0;
 
     const estimate = await estimateProductionCost(
       recipeId,

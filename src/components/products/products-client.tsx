@@ -55,16 +55,12 @@ export function ProductsClient() {
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
-  const [selectedProducts, setSelectedProducts] = useState<Set<string>>(
-    new Set()
-  );
+  const [selectedProducts, setSelectedProducts] = useState<Set<string>>(new Set());
   const [sortField, setSortField] = useState<SortField>('createdAt');
   const [sortOrder, setSortOrder] = useState<SortOrder>('desc');
 
   const [showProductDialog, setShowProductDialog] = useState(false);
-  const [selectedProduct, setSelectedProduct] = useState<Product | undefined>(
-    undefined
-  );
+  const [selectedProduct, setSelectedProduct] = useState<Product | undefined>(undefined);
 
   const fetchCategories = async () => {
     try {
@@ -86,10 +82,8 @@ export function ProductsClient() {
       });
 
       if (search) params.append('search', search);
-      if (categoryFilter && categoryFilter !== 'all')
-        params.append('categoryId', categoryFilter);
-      if (statusFilter && statusFilter !== 'all')
-        params.append('status', statusFilter);
+      if (categoryFilter && categoryFilter !== 'all') params.append('categoryId', categoryFilter);
+      if (statusFilter && statusFilter !== 'all') params.append('status', statusFilter);
 
       const response = await fetch(`/api/products?${params}`);
       if (!response.ok) throw new Error('Failed to fetch products');
@@ -108,11 +102,7 @@ export function ProductsClient() {
     }
   };
 
-  const sortProducts = (
-    prods: Product[],
-    field: SortField,
-    order: SortOrder
-  ) => {
+  const sortProducts = (prods: Product[], field: SortField, order: SortOrder) => {
     return [...prods].sort((a, b) => {
       let aVal: string | number = a[field];
       let bVal: string | number = b[field];
@@ -179,9 +169,7 @@ export function ProductsClient() {
     setSelectedProducts(newSelected);
   };
 
-  const handleBulkAction = async (
-    action: 'activate' | 'deactivate' | 'delete'
-  ) => {
+  const handleBulkAction = async (action: 'activate' | 'deactivate' | 'delete') => {
     if (selectedProducts.size === 0) {
       toast.error('No products selected');
       return;
@@ -206,9 +194,7 @@ export function ProductsClient() {
       });
 
       await Promise.all(promises);
-      toast.success(
-        `Successfully ${action}d ${selectedProducts.size} product(s)`
-      );
+      toast.success(`Successfully ${action}d ${selectedProducts.size} product(s)`);
       setSelectedProducts(new Set());
       fetchProducts();
     } catch (error) {
@@ -240,10 +226,8 @@ export function ProductsClient() {
       // Fetch all products without pagination
       const params = new URLSearchParams({ limit: '10000' });
       if (search) params.append('search', search);
-      if (categoryFilter && categoryFilter !== 'all')
-        params.append('categoryId', categoryFilter);
-      if (statusFilter && statusFilter !== 'all')
-        params.append('status', statusFilter);
+      if (categoryFilter && categoryFilter !== 'all') params.append('categoryId', categoryFilter);
+      if (statusFilter && statusFilter !== 'all') params.append('status', statusFilter);
 
       const response = await fetch(`/api/products?${params}`);
       if (!response.ok) throw new Error('Failed to fetch products');
@@ -260,9 +244,7 @@ export function ProductsClient() {
 
       const csv = [
         headers.join(','),
-        ...rows.map((row: string[]) =>
-          row.map((cell) => `"${cell}"`).join(',')
-        ),
+        ...rows.map((row: string[]) => row.map((cell) => `"${cell}"`).join(',')),
       ].join('\n');
 
       // Download
@@ -323,11 +305,7 @@ export function ProductsClient() {
           </SelectContent>
         </Select>
 
-        <Button
-          onClick={handleExportToExcel}
-          variant='outline'
-          className='w-full sm:w-auto'
-        >
+        <Button onClick={handleExportToExcel} variant='outline' className='w-full sm:w-auto'>
           <Download className='h-4 w-4 mr-2' />
           Export
         </Button>
@@ -347,21 +325,11 @@ export function ProductsClient() {
       {/* Bulk Actions */}
       {selectedProducts.size > 0 && (
         <div className='flex items-center gap-2 p-3 bg-blue-50 rounded-lg border border-blue-200'>
-          <span className='text-sm font-medium'>
-            {selectedProducts.size} selected
-          </span>
-          <Button
-            size='sm'
-            variant='outline'
-            onClick={() => handleBulkAction('activate')}
-          >
+          <span className='text-sm font-medium'>{selectedProducts.size} selected</span>
+          <Button size='sm' variant='outline' onClick={() => handleBulkAction('activate')}>
             Activate
           </Button>
-          <Button
-            size='sm'
-            variant='outline'
-            onClick={() => handleBulkAction('deactivate')}
-          >
+          <Button size='sm' variant='outline' onClick={() => handleBulkAction('deactivate')}>
             Deactivate
           </Button>
           <Button
@@ -372,11 +340,7 @@ export function ProductsClient() {
           >
             Delete
           </Button>
-          <Button
-            size='sm'
-            variant='ghost'
-            onClick={() => setSelectedProducts(new Set())}
-          >
+          <Button size='sm' variant='ghost' onClick={() => setSelectedProducts(new Set())}>
             Clear
           </Button>
         </div>
@@ -394,10 +358,7 @@ export function ProductsClient() {
                 <TableRow>
                   <TableHead className='w-[50px]'>
                     <Checkbox
-                      checked={
-                        products.length > 0 &&
-                        selectedProducts.size === products.length
-                      }
+                      checked={products.length > 0 && selectedProducts.size === products.length}
                       onCheckedChange={toggleSelectAll}
                     />
                   </TableHead>
@@ -438,9 +399,7 @@ export function ProductsClient() {
                       <TableCell>
                         <Checkbox
                           checked={selectedProducts.has(product.id)}
-                          onCheckedChange={() =>
-                            toggleSelectProduct(product.id)
-                          }
+                          onCheckedChange={() => toggleSelectProduct(product.id)}
                         />
                       </TableCell>
                       <TableCell>
@@ -458,22 +417,13 @@ export function ProductsClient() {
                           </div>
                         )}
                       </TableCell>
-                      <TableCell className='font-medium'>
-                        {product.name}
+                      <TableCell className='font-medium'>{product.name}</TableCell>
+                      <TableCell>
+                        {categories.find((c) => c.id === product.categoryId)?.name || '-'}
                       </TableCell>
                       <TableCell>
-                        {categories.find((c) => c.id === product.categoryId)
-                          ?.name || '-'}
-                      </TableCell>
-                      <TableCell>
-                        <button
-                          onClick={() =>
-                            handleToggleStatus(product.id, product.status)
-                          }
-                        >
-                          <Badge
-                            variant={product.status ? 'default' : 'secondary'}
-                          >
+                        <button onClick={() => handleToggleStatus(product.id, product.status)}>
+                          <Badge variant={product.status ? 'default' : 'secondary'}>
                             {product.status ? 'Active' : 'Inactive'}
                           </Badge>
                         </button>
@@ -501,11 +451,7 @@ export function ProductsClient() {
                             <DropdownMenuItem
                               className='text-red-600'
                               onClick={() => {
-                                if (
-                                  confirm(
-                                    'Are you sure you want to delete this product?'
-                                  )
-                                ) {
+                                if (confirm('Are you sure you want to delete this product?')) {
                                   fetch(`/api/products/${product.id}`, {
                                     method: 'DELETE',
                                   })
@@ -513,9 +459,7 @@ export function ProductsClient() {
                                       toast.success('Product deleted');
                                       fetchProducts();
                                     })
-                                    .catch(() =>
-                                      toast.error('Failed to delete product')
-                                    );
+                                    .catch(() => toast.error('Failed to delete product'));
                                 }
                               }}
                             >

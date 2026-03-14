@@ -19,11 +19,7 @@ async function RegisterContent({ searchParams }: RegisterPageProps) {
           <div className='mb-6 p-4 bg-blue-50 border-l-4 border-blue-500 rounded-r-lg shadow-sm'>
             <div className='flex items-center'>
               <div className='shrink-0'>
-                <svg
-                  className='h-5 w-5 text-blue-500'
-                  fill='currentColor'
-                  viewBox='0 0 20 20'
-                >
+                <svg className='h-5 w-5 text-blue-500' fill='currentColor' viewBox='0 0 20 20'>
                   <path
                     fillRule='evenodd'
                     d='M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z'
@@ -33,8 +29,7 @@ async function RegisterContent({ searchParams }: RegisterPageProps) {
               </div>
               <div className='ml-3'>
                 <p className='text-sm font-medium text-blue-800'>
-                  You are registering for{' '}
-                  <strong>{tenantInfo.organization.name}</strong>
+                  You are registering for <strong>{tenantInfo.organization.name}</strong>
                 </p>
               </div>
             </div>

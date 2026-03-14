@@ -101,9 +101,7 @@ const navGroups: NavGroup[] = [
   {
     title: 'Admin',
     superAdminOnly: true,
-    items: [
-      { title: 'Organizations', href: '/admin/organizations', icon: Building2 },
-    ],
+    items: [{ title: 'Organizations', href: '/admin/organizations', icon: Building2 }],
   },
 ];
 
@@ -137,10 +135,7 @@ export function Sidebar() {
           {/* Header with Logo and Toggle */}
           <div className='flex items-center justify-between h-16 px-4 border-b border-sidebar-border'>
             {!collapsed && (
-              <Link
-                href='/'
-                className='text-xl font-bold text-sidebar-foreground'
-              >
+              <Link href='/' className='text-xl font-bold text-sidebar-foreground'>
                 POS Next
               </Link>
             )}
@@ -160,15 +155,17 @@ export function Sidebar() {
           </div>
 
           {/* Tenant Selector for Super Admin */}
-          {session?.user?.isSuperAdmin && session?.user?.organizations && session.user.organizations.length > 0 && (
-            <div className='p-3 border-b border-sidebar-border'>
-              <TenantSelector
-                organizations={session.user.organizations}
-                currentOrganizationId={session.user.currentOrganizationId}
-                collapsed={collapsed}
-              />
-            </div>
-          )}
+          {session?.user?.isSuperAdmin &&
+            session?.user?.organizations &&
+            session.user.organizations.length > 0 && (
+              <div className='p-3 border-b border-sidebar-border'>
+                <TenantSelector
+                  organizations={session.user.organizations}
+                  currentOrganizationId={session.user.currentOrganizationId}
+                  collapsed={collapsed}
+                />
+              </div>
+            )}
 
           {/* Navigation */}
           <ScrollArea className='flex-1'>

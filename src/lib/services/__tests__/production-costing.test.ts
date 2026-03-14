@@ -103,9 +103,7 @@ describe('Production Costing Service', () => {
     it('should throw error if order not found', async () => {
       vi.mocked(db.query.productionOrder.findFirst).mockResolvedValue(undefined);
 
-      await expect(calculateMaterialCost('invalid_order')).rejects.toThrow(
-        ProductionCostingError
-      );
+      await expect(calculateMaterialCost('invalid_order')).rejects.toThrow(ProductionCostingError);
     });
 
     it('should handle orders with no materials', async () => {
@@ -272,9 +270,7 @@ describe('Production Costing Service', () => {
     });
 
     it('should throw error for negative profit margin', async () => {
-      await expect(calculateSuggestedPrice('order_1', -10)).rejects.toThrow(
-        ProductionCostingError
-      );
+      await expect(calculateSuggestedPrice('order_1', -10)).rejects.toThrow(ProductionCostingError);
     });
   });
 
@@ -347,9 +343,7 @@ describe('Production Costing Service', () => {
     });
 
     it('should throw error for invalid quantity', async () => {
-      await expect(estimateProductionCost('recipe_1', 0)).rejects.toThrow(
-        ProductionCostingError
-      );
+      await expect(estimateProductionCost('recipe_1', 0)).rejects.toThrow(ProductionCostingError);
     });
 
     it('should throw error if recipe not found', async () => {
@@ -433,9 +427,7 @@ describe('Production Costing Service', () => {
     });
 
     it('should throw error for empty quantities array', async () => {
-      await expect(batchCostAnalysis('recipe_1', [])).rejects.toThrow(
-        ProductionCostingError
-      );
+      await expect(batchCostAnalysis('recipe_1', [])).rejects.toThrow(ProductionCostingError);
     });
 
     it('should throw error for invalid quantities', async () => {

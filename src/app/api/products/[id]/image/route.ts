@@ -31,10 +31,7 @@ async function uploadProductImageHandler(
     const file = formData.get('image') as File;
 
     if (!file) {
-      return NextResponse.json(
-        { error: 'No image file provided' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'No image file provided' }, { status: 400 });
     }
 
     // Validate file type
@@ -49,10 +46,7 @@ async function uploadProductImageHandler(
     // Validate file size (max 5MB)
     const maxSize = 5 * 1024 * 1024; // 5MB
     if (file.size > maxSize) {
-      return NextResponse.json(
-        { error: 'File size exceeds 5MB limit' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'File size exceeds 5MB limit' }, { status: 400 });
     }
 
     // Generate unique filename
@@ -80,10 +74,7 @@ async function uploadProductImageHandler(
     return NextResponse.json(updatedProduct);
   } catch (error) {
     console.error('Error uploading product image:', error);
-    return NextResponse.json(
-      { error: 'Failed to upload image' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to upload image' }, { status: 500 });
   }
 }
 
@@ -108,10 +99,7 @@ async function deleteProductImageHandler(
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error('Error deleting product image:', error);
-    return NextResponse.json(
-      { error: 'Failed to delete image' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to delete image' }, { status: 500 });
   }
 }
 

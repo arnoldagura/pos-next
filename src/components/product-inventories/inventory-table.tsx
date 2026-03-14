@@ -17,14 +17,7 @@ import {
   DropdownMenuLabel,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import {
-  MoreHorizontal,
-  Edit,
-  FileDown,
-  Printer,
-  History,
-  Settings,
-} from 'lucide-react';
+import { MoreHorizontal, Edit, FileDown, Printer, History, Settings } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { cn } from '@/lib/utils';
 import * as XLSX from 'xlsx';
@@ -87,16 +80,10 @@ export function InventoryTable({
     XLSX.utils.book_append_sheet(wb, ws, 'Inventory');
 
     // Auto-size columns
-    const maxWidth = exportData.reduce(
-      (w, r) => Math.max(w, Object.keys(r).length),
-      10
-    );
+    const maxWidth = exportData.reduce((w, r) => Math.max(w, Object.keys(r).length), 10);
     ws['!cols'] = Array(maxWidth).fill({ wch: 15 });
 
-    XLSX.writeFile(
-      wb,
-      `inventory-report-${new Date().toISOString().split('T')[0]}.xlsx`
-    );
+    XLSX.writeFile(wb, `inventory-report-${new Date().toISOString().split('T')[0]}.xlsx`);
   };
 
   const printReport = () => {
@@ -143,16 +130,14 @@ export function InventoryTable({
                     parseFloat(item.currentQuantity ?? '0') === 0
                       ? 'out-of-stock'
                       : item.belowThreshold
-                      ? 'low-stock'
-                      : 'in-stock';
+                        ? 'low-stock'
+                        : 'in-stock';
                   return `
                   <tr>
                     <td>${item.productName} ${item.variantName}</td>
                     <td>${item.sku || 'N/A'}</td>
                     <td>${item.locationName}</td>
-                    <td>${item.currentQuantity} ${
-                    item.unitOfMeasure || 'pcs'
-                  }</td>
+                    <td>${item.currentQuantity} ${item.unitOfMeasure || 'pcs'}</td>
                     <td>${item.alertThreshold}</td>
                     <td class="${statusClass}">${status.label}</td>
                     <td>$${item.unitPrice}</td>
@@ -186,9 +171,7 @@ export function InventoryTable({
     return (
       <div className='flex flex-col items-center justify-center h-64 space-y-2'>
         <p className='text-muted-foreground'>No inventory items found</p>
-        <p className='text-sm text-muted-foreground'>
-          Select a location to view inventory
-        </p>
+        <p className='text-sm text-muted-foreground'>Select a location to view inventory</p>
       </div>
     );
   }
@@ -229,32 +212,21 @@ export function InventoryTable({
               return (
                 <TableRow key={item.id}>
                   <TableCell>
-                    <div
-                      className={cn(
-                        'w-2 h-2 rounded-full',
-                        getStockIndicator(item)
-                      )}
-                    />
+                    <div className={cn('w-2 h-2 rounded-full', getStockIndicator(item))} />
                   </TableCell>
                   <TableCell className='font-medium'>
                     {item.productName} {item.variantName}
                   </TableCell>
-                  <TableCell className='text-muted-foreground'>
-                    {item.sku || 'N/A'}
-                  </TableCell>
+                  <TableCell className='text-muted-foreground'>{item.sku || 'N/A'}</TableCell>
                   <TableCell>{item.locationName}</TableCell>
                   <TableCell className='text-right'>
                     {item.currentQuantity} {item.unitOfMeasure || 'pcs'}
                   </TableCell>
-                  <TableCell className='text-right'>
-                    {item.alertThreshold}
-                  </TableCell>
+                  <TableCell className='text-right'>{item.alertThreshold}</TableCell>
                   <TableCell className='text-center'>
                     <Badge variant={status.variant}>{status.label}</Badge>
                   </TableCell>
-                  <TableCell className='text-right'>
-                    ${item.unitPrice}
-                  </TableCell>
+                  <TableCell className='text-right'>${item.unitPrice}</TableCell>
                   <TableCell>
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
@@ -264,26 +236,18 @@ export function InventoryTable({
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align='end'>
                         <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                        <DropdownMenuItem
-                          onClick={() => onAdjustStock(item.id)}
-                        >
+                        <DropdownMenuItem onClick={() => onAdjustStock(item.id)}>
                           <Edit className='h-4 w-4 mr-2' />
                           Adjust Stock
                         </DropdownMenuItem>
                         <DropdownMenuItem
-                          onClick={() =>
-                            router.push(
-                              `/product-inventories/${item.id}/movements`
-                            )
-                          }
+                          onClick={() => router.push(`/product-inventories/${item.id}/movements`)}
                         >
                           <History className='h-4 w-4 mr-2' />
                           View Movements
                         </DropdownMenuItem>
                         {onEditSettings && (
-                          <DropdownMenuItem
-                            onClick={() => onEditSettings(item)}
-                          >
+                          <DropdownMenuItem onClick={() => onEditSettings(item)}>
                             <Settings className='h-4 w-4 mr-2' />
                             Edit Settings
                           </DropdownMenuItem>

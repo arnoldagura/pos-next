@@ -35,18 +35,13 @@ export async function getSuppliersHandler(req: NextRequest) {
       if (searchCondition) conditions.push(searchCondition);
     }
 
-    const suppliers = await query.where(
-      and(...conditions)
-    );
+    const suppliers = await query.where(and(...conditions));
 
     return NextResponse.json({ suppliers });
   } catch (error) {
     console.error('Error fetching suppliers:', error);
 
-    return NextResponse.json(
-      { error: 'Failed to fetch suppliers' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to fetch suppliers' }, { status: 500 });
   }
 }
 
@@ -76,10 +71,7 @@ export async function createSupplierHandler(req: NextRequest) {
       );
     }
 
-    return NextResponse.json(
-      { error: 'Failed to create supplier' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to create supplier' }, { status: 500 });
   }
 }
 

@@ -35,10 +35,7 @@ async function getMaterialsByTypeHandler(
     const limit = parseInt(searchParams.get('limit') || '50', 10);
     const offset = (page - 1) * limit;
 
-    const conditions = [
-      eq(material.type, type as MaterialType),
-      isNull(material.deletedAt),
-    ];
+    const conditions = [eq(material.type, type as MaterialType), isNull(material.deletedAt)];
 
     if (statusParam !== null) {
       const status = statusParam === 'true';
@@ -77,10 +74,7 @@ async function getMaterialsByTypeHandler(
   } catch (error) {
     console.error('Error fetching materials by type:', error);
 
-    return NextResponse.json(
-      { error: 'Failed to fetch materials by type' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to fetch materials by type' }, { status: 500 });
   }
 }
 

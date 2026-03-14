@@ -6,9 +6,7 @@ const UPSTASH_TOKEN = process.env.UPSTASH_REDIS_REST_TOKEN;
 
 // Use Upstash Redis in production, in-memory fallback for local dev
 const redis =
-  UPSTASH_URL && UPSTASH_TOKEN
-    ? new Redis({ url: UPSTASH_URL, token: UPSTASH_TOKEN })
-    : undefined;
+  UPSTASH_URL && UPSTASH_TOKEN ? new Redis({ url: UPSTASH_URL, token: UPSTASH_TOKEN }) : undefined;
 
 // Tenant switch: 10 requests per 60s sliding window
 const tenantSwitchRateLimit = redis

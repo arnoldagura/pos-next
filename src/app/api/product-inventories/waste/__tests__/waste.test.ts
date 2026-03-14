@@ -42,14 +42,12 @@ describe('Inventory API - POST /api/product-inventory/waste', () => {
     } as never);
 
     // Mock stock validation (sufficient)
-    vi.mocked(inventoryCalculation.validateStockAvailability).mockResolvedValue(
-      {
-        inventoryId: 'inv-1',
-        available: true,
-        currentStock: 100,
-        requestedQuantity: 5,
-      }
-    );
+    vi.mocked(inventoryCalculation.validateStockAvailability).mockResolvedValue({
+      inventoryId: 'inv-1',
+      available: true,
+      currentStock: 100,
+      requestedQuantity: 5,
+    });
 
     // Mock current stock
     vi.mocked(inventoryCalculation.getCurrentStock)
@@ -80,20 +78,13 @@ describe('Inventory API - POST /api/product-inventory/waste', () => {
       ]),
     } as never);
 
-    vi.mocked(inventoryCalculation.invalidateInventoryCache).mockReturnValue(
-      undefined
-    );
-    vi.mocked(inventoryCalculation.invalidateLocationCache).mockReturnValue(
-      undefined
-    );
+    vi.mocked(inventoryCalculation.invalidateInventoryCache).mockReturnValue(undefined);
+    vi.mocked(inventoryCalculation.invalidateLocationCache).mockReturnValue(undefined);
 
-    const request = new NextRequest(
-      'http://localhost/api/product-inventory/waste',
-      {
-        method: 'POST',
-        body: JSON.stringify(wasteData),
-      }
-    );
+    const request = new NextRequest('http://localhost/api/product-inventory/waste', {
+      method: 'POST',
+      body: JSON.stringify(wasteData),
+    });
 
     const response = await recordWasteHandler(request);
     const data = await response.json();
@@ -124,23 +115,18 @@ describe('Inventory API - POST /api/product-inventory/waste', () => {
     } as never);
 
     // Mock stock validation (insufficient)
-    vi.mocked(inventoryCalculation.validateStockAvailability).mockResolvedValue(
-      {
-        inventoryId: 'inv-1',
-        available: false,
-        currentStock: 100,
-        requestedQuantity: 150,
-        shortfall: 50,
-      }
-    );
+    vi.mocked(inventoryCalculation.validateStockAvailability).mockResolvedValue({
+      inventoryId: 'inv-1',
+      available: false,
+      currentStock: 100,
+      requestedQuantity: 150,
+      shortfall: 50,
+    });
 
-    const request = new NextRequest(
-      'http://localhost/api/product-inventory/waste',
-      {
-        method: 'POST',
-        body: JSON.stringify(wasteData),
-      }
-    );
+    const request = new NextRequest('http://localhost/api/product-inventory/waste', {
+      method: 'POST',
+      body: JSON.stringify(wasteData),
+    });
 
     const response = await recordWasteHandler(request);
     const data = await response.json();
@@ -150,17 +136,14 @@ describe('Inventory API - POST /api/product-inventory/waste', () => {
   });
 
   it('should validate remarks are required', async () => {
-    const request = new NextRequest(
-      'http://localhost/api/product-inventory/waste',
-      {
-        method: 'POST',
-        body: JSON.stringify({
-          inventoryId: 'inv-1',
-          quantity: 5,
-          // Missing remarks
-        }),
-      }
-    );
+    const request = new NextRequest('http://localhost/api/product-inventory/waste', {
+      method: 'POST',
+      body: JSON.stringify({
+        inventoryId: 'inv-1',
+        quantity: 5,
+        // Missing remarks
+      }),
+    });
 
     const response = await recordWasteHandler(request);
     const data = await response.json();

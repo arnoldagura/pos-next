@@ -52,17 +52,12 @@ interface ReceiptDialogProps {
   receiptData: ReceiptData;
 }
 
-export function ReceiptDialog({
-  open,
-  onOpenChange,
-  receiptData,
-}: ReceiptDialogProps) {
+export function ReceiptDialog({ open, onOpenChange, receiptData }: ReceiptDialogProps) {
   const [isPrinting, setIsPrinting] = useState(false);
   const [itemStatuses, setItemStatuses] = useState<Map<string, string>>(
-    new Map(receiptData.items.map((item, idx) => [
-      item.id || `item-${idx}`,
-      item.itemStatus || 'pending'
-    ]))
+    new Map(
+      receiptData.items.map((item, idx) => [item.id || `item-${idx}`, item.itemStatus || 'pending'])
+    )
   );
 
   const handleItemStatusToggle = async (itemId: string, currentStatus: string) => {
@@ -91,9 +86,7 @@ export function ReceiptDialog({
   const handlePrint = () => {
     setIsPrinting(true);
     try {
-      const receiptHtml = renderToString(
-        <ReceiptTemplate data={receiptData} />
-      );
+      const receiptHtml = renderToString(<ReceiptTemplate data={receiptData} />);
       printReceipt(receiptHtml);
     } catch (error) {
       console.error('Print error:', error);
@@ -136,30 +129,30 @@ export function ReceiptDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className='max-w-2xl max-h-[90vh] overflow-y-auto'>
         <DialogHeader>
           <DialogTitle>Receipt & Items</DialogTitle>
           <DialogDescription>
-            Order {receiptData.orderNumber} -{' '}
-            {new Date(receiptData.orderDate).toLocaleDateString()}
+            Order {receiptData.orderNumber} - {new Date(receiptData.orderDate).toLocaleDateString()}
           </DialogDescription>
         </DialogHeader>
 
-        <Tabs defaultValue="receipt" className="w-full">
-          <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="receipt">Receipt</TabsTrigger>
-            <TabsTrigger value="items">
-              Items ({Array.from(itemStatuses.values()).filter(s => s === 'served').length}/{receiptData.items.length})
+        <Tabs defaultValue='receipt' className='w-full'>
+          <TabsList className='grid w-full grid-cols-2'>
+            <TabsTrigger value='receipt'>Receipt</TabsTrigger>
+            <TabsTrigger value='items'>
+              Items ({Array.from(itemStatuses.values()).filter((s) => s === 'served').length}/
+              {receiptData.items.length})
             </TabsTrigger>
           </TabsList>
 
-          <TabsContent value="receipt" className="my-4">
+          <TabsContent value='receipt' className='my-4'>
             <ReceiptTemplate data={receiptData} />
           </TabsContent>
 
-          <TabsContent value="items" className="my-4">
-            <div className="space-y-3">
-              <div className="text-sm text-muted-foreground mb-4">
+          <TabsContent value='items' className='my-4'>
+            <div className='space-y-3'>
+              <div className='text-sm text-muted-foreground mb-4'>
                 Click items to cycle through: pending → ready → served
               </div>
               {receiptData.items.map((item, index) => {
@@ -180,11 +173,13 @@ export function ReceiptDialog({
                 const getStatusIcon = () => {
                   switch (status) {
                     case 'ready':
-                      return <Check className="h-5 w-5 text-yellow-600 dark:text-yellow-400" />;
+                      return <Check className='h-5 w-5 text-yellow-600 dark:text-yellow-400' />;
                     case 'served':
-                      return <CheckCircle2 className="h-5 w-5 text-green-600 dark:text-green-400" />;
+                      return (
+                        <CheckCircle2 className='h-5 w-5 text-green-600 dark:text-green-400' />
+                      );
                     default:
-                      return <Circle className="h-5 w-5 text-muted-foreground" />;
+                      return <Circle className='h-5 w-5 text-muted-foreground' />;
                   }
                 };
 
@@ -194,20 +189,20 @@ export function ReceiptDialog({
                     onClick={() => handleItemStatusToggle(itemId, status)}
                     className={`flex items-center gap-3 p-3 rounded-lg border-2 cursor-pointer transition-colors ${getStatusStyles()}`}
                   >
-                    <div className="flex-shrink-0">
-                      {getStatusIcon()}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="font-medium text-foreground">
+                    <div className='flex-shrink-0'>{getStatusIcon()}</div>
+                    <div className='flex-1 min-w-0'>
+                      <div className='font-medium text-foreground'>
                         {item.quantity}x {item.productName}
                       </div>
                       {item.productSku && (
-                        <div className="text-xs text-muted-foreground">SKU: {item.productSku}</div>
+                        <div className='text-xs text-muted-foreground'>SKU: {item.productSku}</div>
                       )}
                     </div>
-                    <div className="text-right flex-shrink-0">
-                      <div className="text-xs font-medium text-muted-foreground capitalize mb-1">{status}</div>
-                      <div className="font-semibold text-foreground">${item.total}</div>
+                    <div className='text-right flex-shrink-0'>
+                      <div className='text-xs font-medium text-muted-foreground capitalize mb-1'>
+                        {status}
+                      </div>
+                      <div className='font-semibold text-foreground'>${item.total}</div>
                     </div>
                   </div>
                 );
@@ -216,37 +211,21 @@ export function ReceiptDialog({
           </TabsContent>
         </Tabs>
 
-        <div className="flex gap-2 flex-wrap justify-center border-t pt-4">
-          <Button
-            onClick={handlePrint}
-            disabled={isPrinting}
-            className="flex-1 min-w-[120px]"
-          >
-            <Printer className="h-4 w-4 mr-2" />
+        <div className='flex gap-2 flex-wrap justify-center border-t pt-4'>
+          <Button onClick={handlePrint} disabled={isPrinting} className='flex-1 min-w-[120px]'>
+            <Printer className='h-4 w-4 mr-2' />
             {isPrinting ? 'Printing...' : 'Print'}
           </Button>
-          <Button
-            onClick={handleDownload}
-            variant="outline"
-            className="flex-1 min-w-[120px]"
-          >
-            <Download className="h-4 w-4 mr-2" />
+          <Button onClick={handleDownload} variant='outline' className='flex-1 min-w-[120px]'>
+            <Download className='h-4 w-4 mr-2' />
             Download
           </Button>
-          <Button
-            onClick={handleShare}
-            variant="outline"
-            className="flex-1 min-w-[120px]"
-          >
-            <Share2 className="h-4 w-4 mr-2" />
+          <Button onClick={handleShare} variant='outline' className='flex-1 min-w-[120px]'>
+            <Share2 className='h-4 w-4 mr-2' />
             Share
           </Button>
-          <Button
-            onClick={handleEmail}
-            variant="outline"
-            className="flex-1 min-w-[120px]"
-          >
-            <Mail className="h-4 w-4 mr-2" />
+          <Button onClick={handleEmail} variant='outline' className='flex-1 min-w-[120px]'>
+            <Mail className='h-4 w-4 mr-2' />
             Email
           </Button>
         </div>

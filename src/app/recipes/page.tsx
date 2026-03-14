@@ -33,9 +33,7 @@ export default async function RecipesPage() {
         <div className=' rounded-lg shadow'>
           <div className='p-6 border-b'>
             <h1 className='text-3xl font-bold'>Production Recipes</h1>
-            <p className='text-gray-600 mt-1'>
-              Manage production recipes and formulas
-            </p>
+            <p className='text-gray-600 mt-1'>Manage production recipes and formulas</p>
           </div>
           <RecipesClient />
         </div>

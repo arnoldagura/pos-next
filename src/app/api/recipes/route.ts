@@ -91,10 +91,7 @@ export async function GET(req: NextRequest) {
     });
   } catch (error) {
     console.error('Error fetching recipes:', error);
-    return NextResponse.json(
-      { error: 'Failed to fetch recipes' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to fetch recipes' }, { status: 500 });
   }
 }
 
@@ -105,29 +102,21 @@ export async function POST(req: NextRequest) {
     const body = await req.json();
     const validatedData = createRecipeSchema.parse(body);
 
-    if (
-      validatedData.outputType === 'product' &&
-      !validatedData.outputProductId
-    ) {
+    if (validatedData.outputType === 'product' && !validatedData.outputProductId) {
       return NextResponse.json(
         { error: 'Output product is required when output type is product' },
         { status: 400 }
       );
     }
 
-    if (
-      validatedData.outputType === 'material' &&
-      !validatedData.outputMaterialId
-    ) {
+    if (validatedData.outputType === 'material' && !validatedData.outputMaterialId) {
       return NextResponse.json(
         { error: 'Output material is required when output type is material' },
         { status: 400 }
       );
     }
 
-    const recipeId = `recipe_${Date.now()}_${Math.random()
-      .toString(36)
-      .substring(2, 9)}`;
+    const recipeId = `recipe_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
 
     await db.transaction(async (tx) => {
       await tx.insert(productionRecipe).values({
@@ -147,9 +136,7 @@ export async function POST(req: NextRequest) {
       });
 
       const ingredientValues = validatedData.ingredients.map((ingredient) => ({
-        id: `recipe_ing_${Date.now()}_${Math.random()
-          .toString(36)
-          .substring(2, 9)}`,
+        id: `recipe_ing_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`,
         recipeId,
         materialId: ingredient.materialId,
         quantity: ingredient.quantity.toString(),
@@ -185,9 +172,6 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    return NextResponse.json(
-      { error: 'Failed to create recipe' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to create recipe' }, { status: 500 });
   }
 }

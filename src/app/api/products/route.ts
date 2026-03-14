@@ -102,10 +102,7 @@ export async function getProductsHandler(req: NextRequest) {
   } catch (error) {
     console.error('Error fetching products:', error);
 
-    return NextResponse.json(
-      { error: 'Failed to fetch products' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to fetch products' }, { status: 500 });
   }
 }
 
@@ -150,10 +147,7 @@ export async function createProductHandler(req: NextRequest) {
       );
     }
 
-    return NextResponse.json(
-      { error: 'Failed to create product' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to create product' }, { status: 500 });
   }
 }
 

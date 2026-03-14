@@ -14,9 +14,7 @@ import type { AnyPgColumn } from 'drizzle-orm/pg-core';
  *   return db.select().from(product).where(eq(product.organizationId, tenantId));
  * });
  */
-export async function tenantQuery<T>(
-  queryFn: (tenantId: string) => Promise<T>
-): Promise<T> {
+export async function tenantQuery<T>(queryFn: (tenantId: string) => Promise<T>): Promise<T> {
   const tenantId = await requireTenantId();
   return queryFn(tenantId);
 }
@@ -32,9 +30,10 @@ export async function tenantQuery<T>(
  * ]);
  * const products = await db.select().from(product).where(condition);
  */
-export async function withTenantCondition<
-  T extends { organizationId: AnyPgColumn }
->(table: T, additionalConditions?: SQL[]): Promise<SQL | undefined> {
+export async function withTenantCondition<T extends { organizationId: AnyPgColumn }>(
+  table: T,
+  additionalConditions?: SQL[]
+): Promise<SQL | undefined> {
   const tenantId = await requireTenantId();
   const conditions: SQL[] = [eq(table.organizationId, tenantId)];
 
@@ -54,9 +53,7 @@ export async function withTenantCondition<
  *   return db.select().from(product);
  * });
  */
-export async function crossTenantQuery<T>(
-  queryFn: () => Promise<T>
-): Promise<T> {
+export async function crossTenantQuery<T>(queryFn: () => Promise<T>): Promise<T> {
   const session = await getSession();
 
   if (!session?.user) {
@@ -67,9 +64,7 @@ export async function crossTenantQuery<T>(
   const isSuperAdmin = await hasRole(session.user.id, 'super_admin');
 
   if (!isSuperAdmin) {
-    throw new Error(
-      'Only super administrators can perform cross-tenant queries'
-    );
+    throw new Error('Only super administrators can perform cross-tenant queries');
   }
 
   return queryFn();
@@ -114,9 +109,7 @@ export async function withTenant<T>(
  * Helper to validate tenant ID in request
  * Ensures the ID from request matches user's current tenant (unless super admin)
  */
-export async function validateTenantAccess(
-  resourceTenantId: string
-): Promise<void> {
+export async function validateTenantAccess(resourceTenantId: string): Promise<void> {
   const session = await getSession();
 
   if (!session?.user) {
@@ -133,9 +126,7 @@ export async function validateTenantAccess(
   const currentTenantId = await requireTenantId();
 
   if (resourceTenantId !== currentTenantId) {
-    throw new Error(
-      'Access denied: Resource belongs to a different organization'
-    );
+    throw new Error('Access denied: Resource belongs to a different organization');
   }
 }
 

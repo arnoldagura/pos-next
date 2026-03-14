@@ -45,11 +45,7 @@ type CreateUserDialogProps = {
   onSuccess: () => void;
 };
 
-export function CreateUserDialog({
-  open,
-  onOpenChange,
-  onSuccess,
-}: CreateUserDialogProps) {
+export function CreateUserDialog({ open, onOpenChange, onSuccess }: CreateUserDialogProps) {
   const [loading, setLoading] = useState(false);
   const [roles, setRoles] = useState<Role[]>([]);
   const [loadingRoles, setLoadingRoles] = useState(true);
@@ -111,15 +107,11 @@ export function CreateUserDialog({
         throw new Error(result.error || 'Failed to create user');
       }
 
-      toast.success(
-        result.message || 'User created and added to organization successfully'
-      );
+      toast.success(result.message || 'User created and added to organization successfully');
       onSuccess();
       onOpenChange(false);
     } catch (error) {
-      toast.error(
-        error instanceof Error ? error.message : 'Failed to create user'
-      );
+      toast.error(error instanceof Error ? error.message : 'Failed to create user');
       console.error(error);
     } finally {
       setLoading(false);
@@ -132,8 +124,8 @@ export function CreateUserDialog({
         <DialogHeader>
           <DialogTitle>Create New User</DialogTitle>
           <DialogDescription>
-            Add a new user to your organization. They will be able to log in
-            with the provided credentials.
+            Add a new user to your organization. They will be able to log in with the provided
+            credentials.
           </DialogDescription>
         </DialogHeader>
 
@@ -148,9 +140,7 @@ export function CreateUserDialog({
               disabled={loading}
               autoComplete='name'
             />
-            {errors.name && (
-              <p className='text-sm text-red-500 mt-1'>{errors.name.message}</p>
-            )}
+            {errors.name && <p className='text-sm text-red-500 mt-1'>{errors.name.message}</p>}
           </div>
 
           <div>
@@ -164,18 +154,10 @@ export function CreateUserDialog({
               disabled={loading}
               autoComplete='email'
             />
-            {errors.email && (
-              <p className='text-sm text-red-500 mt-1'>
-                {errors.email.message}
-              </p>
-            )}
+            {errors.email && <p className='text-sm text-red-500 mt-1'>{errors.email.message}</p>}
           </div>
 
-          <FormFieldWrapper
-            label='Password'
-            error={errors.password?.message}
-            required
-          >
+          <FormFieldWrapper label='Password' error={errors.password?.message} required>
             <PasswordInput
               {...register('password')}
               placeholder='••••••••'
@@ -215,11 +197,7 @@ export function CreateUserDialog({
                 )}
               </SelectContent>
             </Select>
-            {errors.roleId && (
-              <p className='text-sm text-red-500 mt-1'>
-                {errors.roleId.message}
-              </p>
-            )}
+            {errors.roleId && <p className='text-sm text-red-500 mt-1'>{errors.roleId.message}</p>}
           </div>
 
           <DialogFooter>

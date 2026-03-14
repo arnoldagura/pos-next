@@ -94,11 +94,7 @@ export async function getOrganizationFromSubdomain(): Promise<TenantInfo> {
  * Used for query parameter or path-based registration
  */
 export async function getOrganizationBySlug(slug: string): Promise<TenantInfo> {
-  const [org] = await db
-    .select()
-    .from(organization)
-    .where(eq(organization.slug, slug))
-    .limit(1);
+  const [org] = await db.select().from(organization).where(eq(organization.slug, slug)).limit(1);
 
   return {
     organizationId: org?.id || null,
@@ -111,11 +107,7 @@ export async function getOrganizationBySlug(slug: string): Promise<TenantInfo> {
  * Get organization by ID
  */
 export async function getOrganizationById(id: string): Promise<TenantInfo> {
-  const [org] = await db
-    .select()
-    .from(organization)
-    .where(eq(organization.id, id))
-    .limit(1);
+  const [org] = await db.select().from(organization).where(eq(organization.id, id)).limit(1);
 
   return {
     organizationId: org?.id || null,
@@ -143,9 +135,7 @@ export async function getRegistrationTenant(
   // Strategy 2: Check query parameter (FALLBACK - for flexibility)
   if (searchParams) {
     const orgParam =
-      searchParams instanceof URLSearchParams
-        ? searchParams.get('org')
-        : searchParams.org;
+      searchParams instanceof URLSearchParams ? searchParams.get('org') : searchParams.org;
 
     if (orgParam) {
       const tenantInfo = await getOrganizationBySlug(orgParam);

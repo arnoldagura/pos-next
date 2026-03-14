@@ -9,10 +9,7 @@ const estimateCostSchema = z.object({
 });
 
 // POST /api/recipes/[id]/estimate-cost - Get cost estimate for a recipe
-export async function POST(
-  req: NextRequest,
-  context: { params: Promise<{ id: string }> }
-) {
+export async function POST(req: NextRequest, context: { params: Promise<{ id: string }> }) {
   try {
     const { id } = await context.params;
     const body = await req.json();
@@ -36,9 +33,6 @@ export async function POST(
       );
     }
 
-    return NextResponse.json(
-      { error: 'Failed to estimate cost' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to estimate cost' }, { status: 500 });
   }
 }

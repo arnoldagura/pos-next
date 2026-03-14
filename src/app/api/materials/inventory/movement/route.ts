@@ -18,15 +18,11 @@ export async function createMaterialMovementHandler(req: NextRequest) {
     });
 
     if (!inventory) {
-      return NextResponse.json(
-        { error: 'Material inventory not found' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'Material inventory not found' }, { status: 404 });
     }
 
     // Use provided unitPrice or fallback to current inventory cost
-    const finalUnitPrice =
-      validatedData.unitPrice ?? Number(inventory.cost || 0);
+    const finalUnitPrice = validatedData.unitPrice ?? Number(inventory.cost || 0);
     const unitPrice = finalUnitPrice.toFixed(2);
 
     const quantity = validatedData.quantity.toString();
@@ -61,10 +57,7 @@ export async function createMaterialMovementHandler(req: NextRequest) {
       );
     }
 
-    return NextResponse.json(
-      { error: 'Failed to create material movement' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to create material movement' }, { status: 500 });
   }
 }
 

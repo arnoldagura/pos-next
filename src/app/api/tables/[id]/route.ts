@@ -30,10 +30,7 @@ async function getTableHandler(
     return NextResponse.json(foundTable);
   } catch (error) {
     console.error('Error fetching table:', error);
-    return NextResponse.json(
-      { error: 'Failed to fetch table' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to fetch table' }, { status: 500 });
   }
 }
 
@@ -71,10 +68,7 @@ async function updateTableHandler(
       );
     }
 
-    return NextResponse.json(
-      { error: 'Failed to update table' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to update table' }, { status: 500 });
   }
 }
 
@@ -97,10 +91,7 @@ async function deleteTableHandler(
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error('Error deleting table:', error);
-    return NextResponse.json(
-      { error: 'Failed to delete table' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to delete table' }, { status: 500 });
   }
 }
 

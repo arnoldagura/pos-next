@@ -62,16 +62,13 @@ export default function CompleteProductionDialog({
     try {
       setSubmitting(true);
 
-      const response = await fetch(
-        `/api/production-orders/${orderId}/complete`,
-        {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            actualQuantity: parseFloat(values.actualQuantity),
-          }),
-        }
-      );
+      const response = await fetch(`/api/production-orders/${orderId}/complete`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          actualQuantity: parseFloat(values.actualQuantity),
+        }),
+      });
 
       if (!response.ok) {
         const error = await response.json();
@@ -84,9 +81,7 @@ export default function CompleteProductionDialog({
       onSuccess();
     } catch (error) {
       console.error('Error completing production:', error);
-      toast.error(
-        error instanceof Error ? error.message : 'Failed to complete production'
-      );
+      toast.error(error instanceof Error ? error.message : 'Failed to complete production');
     } finally {
       setSubmitting(false);
     }
@@ -98,8 +93,8 @@ export default function CompleteProductionDialog({
         <DialogHeader>
           <DialogTitle>Complete Production</DialogTitle>
           <DialogDescription>
-            Enter the actual quantity produced. This will add the output to
-            inventory and mark the order as completed.
+            Enter the actual quantity produced. This will add the output to inventory and mark the
+            order as completed.
           </DialogDescription>
         </DialogHeader>
 
@@ -119,9 +114,7 @@ export default function CompleteProductionDialog({
                       placeholder='Enter quantity'
                       {...field}
                     />
-                    <span className='text-sm text-muted-foreground min-w-fit'>
-                      {unitOfMeasure}
-                    </span>
+                    <span className='text-sm text-muted-foreground min-w-fit'>{unitOfMeasure}</span>
                   </div>
                 </FormControl>
                 <FormDescription>
@@ -131,8 +124,7 @@ export default function CompleteProductionDialog({
                       {' • '}
                       Variance:{' '}
                       {(
-                        ((parseFloat(field.value) - plannedQuantity) /
-                          plannedQuantity) *
+                        ((parseFloat(field.value) - plannedQuantity) / plannedQuantity) *
                         100
                       ).toFixed(1)}
                       %

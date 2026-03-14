@@ -60,9 +60,7 @@ export function TableOrderViewDialog({
     const fetchOrder = async () => {
       setIsLoading(true);
       try {
-        const response = await fetch(
-          `/api/orders?tableId=${tableId}&status=pending,processing`
-        );
+        const response = await fetch(`/api/orders?tableId=${tableId}&status=pending,processing`);
         if (response.ok) {
           const data = await response.json();
           if (data.orders && data.orders.length > 0) {
@@ -110,12 +108,8 @@ export function TableOrderViewDialog({
         ) : !order ? (
           <div className='flex flex-col items-center justify-center py-12 text-center'>
             <ShoppingCart className='h-12 w-12 text-muted-foreground mb-4' />
-            <p className='text-muted-foreground mb-6'>
-              No active order found for this table.
-            </p>
-            {onSelectTable && (
-              <Button onClick={onSelectTable}>Select Table</Button>
-            )}
+            <p className='text-muted-foreground mb-6'>No active order found for this table.</p>
+            {onSelectTable && <Button onClick={onSelectTable}>Select Table</Button>}
           </div>
         ) : (
           <div className='space-y-4'>
@@ -128,22 +122,15 @@ export function TableOrderViewDialog({
                 <Badge variant='outline'>
                   {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
                 </Badge>
-                <Badge
-                  variant={
-                    order.paymentStatus === 'paid' ? 'default' : 'secondary'
-                  }
-                >
-                  {order.paymentStatus.charAt(0).toUpperCase() +
-                    order.paymentStatus.slice(1)}
+                <Badge variant={order.paymentStatus === 'paid' ? 'default' : 'secondary'}>
+                  {order.paymentStatus.charAt(0).toUpperCase() + order.paymentStatus.slice(1)}
                 </Badge>
               </div>
             </div>
 
             <div className='flex items-center text-sm text-muted-foreground'>
               <Clock className='mr-2 h-4 w-4' />
-              <span>
-                Created at {new Date(order.createdAt).toLocaleString()}
-              </span>
+              <span>Created at {new Date(order.createdAt).toLocaleString()}</span>
             </div>
 
             <Separator />
@@ -159,19 +146,14 @@ export function TableOrderViewDialog({
                       <div className='flex-1'>
                         <p className='font-medium'>{item.productName}</p>
                         <p className='text-sm text-muted-foreground'>
-                          Qty: {item.quantity} ×{' '}
-                          {formatCurrency(item.unitPrice)}
+                          Qty: {item.quantity} × {formatCurrency(item.unitPrice)}
                         </p>
                       </div>
-                      <p className='font-semibold'>
-                        {formatCurrency(item.total)}
-                      </p>
+                      <p className='font-semibold'>{formatCurrency(item.total)}</p>
                     </div>
                   ))
                 ) : (
-                  <p className='text-center text-muted-foreground py-4'>
-                    No items in this order
-                  </p>
+                  <p className='text-center text-muted-foreground py-4'>No items in this order</p>
                 )}
               </div>
             </ScrollArea>
@@ -185,9 +167,7 @@ export function TableOrderViewDialog({
               </div>
               <div className='flex justify-between text-sm'>
                 <span className='text-muted-foreground'>Discount</span>
-                <span className='text-red-600'>
-                  -{formatCurrency(order.totalDiscount)}
-                </span>
+                <span className='text-red-600'>-{formatCurrency(order.totalDiscount)}</span>
               </div>
               <div className='flex justify-between text-sm'>
                 <span className='text-muted-foreground'>Tax</span>
@@ -207,17 +187,10 @@ export function TableOrderViewDialog({
               <>
                 <Separator />
                 <div className='flex gap-3'>
-                  <Button
-                    onClick={onSelectTable}
-                    className='flex-1'
-                    variant='outline'
-                  >
+                  <Button onClick={onSelectTable} className='flex-1' variant='outline'>
                     Select Table (New Order)
                   </Button>
-                  <Button
-                    onClick={() => onOpenChange(false)}
-                    className='flex-1'
-                  >
+                  <Button onClick={() => onOpenChange(false)} className='flex-1'>
                     Close
                   </Button>
                 </div>

@@ -18,27 +18,17 @@ async function getMaterialCategoryHandler(
     const [foundCategory] = await db
       .select()
       .from(materialCategory)
-      .where(
-        and(eq(materialCategory.id, id), isNull(materialCategory.deletedAt))
-      )
+      .where(and(eq(materialCategory.id, id), isNull(materialCategory.deletedAt)))
       .limit(1);
 
     if (!foundCategory) {
-      return NextResponse.json(
-        { error: 'Material category not found' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'Material category not found' }, { status: 404 });
     }
 
     const children = await db
       .select()
       .from(materialCategory)
-      .where(
-        and(
-          eq(materialCategory.parentId, id),
-          isNull(materialCategory.deletedAt)
-        )
-      )
+      .where(and(eq(materialCategory.parentId, id), isNull(materialCategory.deletedAt)))
       .orderBy(materialCategory.displayOrder, materialCategory.name);
 
     return NextResponse.json({
@@ -47,10 +37,7 @@ async function getMaterialCategoryHandler(
     });
   } catch (error) {
     console.error('Error fetching material category:', error);
-    return NextResponse.json(
-      { error: 'Failed to fetch material category' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to fetch material category' }, { status: 500 });
   }
 }
 
@@ -66,16 +53,11 @@ async function updateMaterialCategoryHandler(
     const [existing] = await db
       .select()
       .from(materialCategory)
-      .where(
-        and(eq(materialCategory.id, id), isNull(materialCategory.deletedAt))
-      )
+      .where(and(eq(materialCategory.id, id), isNull(materialCategory.deletedAt)))
       .limit(1);
 
     if (!existing) {
-      return NextResponse.json(
-        { error: 'Material category not found' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'Material category not found' }, { status: 404 });
     }
 
     if (validatedData.slug && validatedData.slug !== existing.slug) {
@@ -93,10 +75,7 @@ async function updateMaterialCategoryHandler(
       }
     }
 
-    if (
-      validatedData.parentId !== undefined &&
-      validatedData.parentId !== null
-    ) {
+    if (validatedData.parentId !== undefined && validatedData.parentId !== null) {
       if (validatedData.parentId === id) {
         return NextResponse.json(
           { error: 'Material category cannot be its own parent' },
@@ -111,17 +90,11 @@ async function updateMaterialCategoryHandler(
         .limit(1);
 
       if (parent.length === 0) {
-        return NextResponse.json(
-          { error: 'Parent category not found' },
-          { status: 400 }
-        );
+        return NextResponse.json({ error: 'Parent category not found' }, { status: 400 });
       }
 
       if (parent[0].parentId === id) {
-        return NextResponse.json(
-          { error: 'Circular reference detected' },
-          { status: 400 }
-        );
+        return NextResponse.json({ error: 'Circular reference detected' }, { status: 400 });
       }
     }
 
@@ -145,10 +118,7 @@ async function updateMaterialCategoryHandler(
       );
     }
 
-    return NextResponse.json(
-      { error: 'Failed to update material category' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to update material category' }, { status: 500 });
   }
 }
 
@@ -162,34 +132,23 @@ async function deleteMaterialCategoryHandler(
     const [existing] = await db
       .select()
       .from(materialCategory)
-      .where(
-        and(eq(materialCategory.id, id), isNull(materialCategory.deletedAt))
-      )
+      .where(and(eq(materialCategory.id, id), isNull(materialCategory.deletedAt)))
       .limit(1);
 
     if (!existing) {
-      return NextResponse.json(
-        { error: 'Material category not found' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'Material category not found' }, { status: 404 });
     }
 
     const children = await db
       .select()
       .from(materialCategory)
-      .where(
-        and(
-          eq(materialCategory.parentId, id),
-          isNull(materialCategory.deletedAt)
-        )
-      )
+      .where(and(eq(materialCategory.parentId, id), isNull(materialCategory.deletedAt)))
       .limit(1);
 
     if (children.length > 0) {
       return NextResponse.json(
         {
-          error:
-            'Cannot delete material category with children. Delete or move children first.',
+          error: 'Cannot delete material category with children. Delete or move children first.',
         },
         { status: 400 }
       );
@@ -210,10 +169,7 @@ async function deleteMaterialCategoryHandler(
     });
   } catch (error) {
     console.error('Error deleting material category:', error);
-    return NextResponse.json(
-      { error: 'Failed to delete material category' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to delete material category' }, { status: 500 });
   }
 }
 

@@ -121,9 +121,7 @@ export function OrganizationFormDialog({
 
   const mutation = useMutation({
     mutationFn: async (data: CreateOrganizationInput) => {
-      const url = isEditing
-        ? `/api/organizations/${organization.id}`
-        : '/api/organizations';
+      const url = isEditing ? `/api/organizations/${organization.id}` : '/api/organizations';
       const method = isEditing ? 'PATCH' : 'POST';
 
       const res = await fetch(url, {
@@ -141,9 +139,7 @@ export function OrganizationFormDialog({
     },
     onSuccess: () => {
       toast.success(
-        isEditing
-          ? 'Organization updated successfully'
-          : 'Organization created successfully'
+        isEditing ? 'Organization updated successfully' : 'Organization created successfully'
       );
       onSuccess();
       form.reset();
@@ -161,9 +157,7 @@ export function OrganizationFormDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className='max-w-2xl max-h-[90vh] overflow-y-auto'>
         <DialogHeader>
-          <DialogTitle>
-            {isEditing ? 'Edit Organization' : 'Create New Organization'}
-          </DialogTitle>
+          <DialogTitle>{isEditing ? 'Edit Organization' : 'Create New Organization'}</DialogTitle>
           <DialogDescription>
             {isEditing
               ? 'Update the organization details below'
@@ -254,10 +248,7 @@ export function OrganizationFormDialog({
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Subscription Tier *</FormLabel>
-                  <Select
-                    onValueChange={field.onChange}
-                    defaultValue={field.value}
-                  >
+                  <Select onValueChange={field.onChange} defaultValue={field.value}>
                     <FormControl>
                       <SelectTrigger>
                         <SelectValue placeholder='Select a tier' />
@@ -285,9 +276,7 @@ export function OrganizationFormDialog({
                       <Input
                         {...field}
                         type='number'
-                        onChange={(e) =>
-                          field.onChange(parseInt(e.target.value))
-                        }
+                        onChange={(e) => field.onChange(parseInt(e.target.value))}
                       />
                     </FormControl>
                     <FormMessage />
@@ -305,9 +294,7 @@ export function OrganizationFormDialog({
                       <Input
                         {...field}
                         type='number'
-                        onChange={(e) =>
-                          field.onChange(parseInt(e.target.value))
-                        }
+                        onChange={(e) => field.onChange(parseInt(e.target.value))}
                       />
                     </FormControl>
                     <FormMessage />
@@ -357,11 +344,7 @@ export function OrganizationFormDialog({
                   <FormItem>
                     <FormLabel>Billing Email</FormLabel>
                     <FormControl>
-                      <Input
-                        {...field}
-                        type='email'
-                        placeholder='billing@acme.com'
-                      />
+                      <Input {...field} type='email' placeholder='billing@acme.com' />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -386,8 +369,8 @@ export function OrganizationFormDialog({
                   ? 'Updating...'
                   : 'Creating...'
                 : isEditing
-                ? 'Update Organization'
-                : 'Create Organization'}
+                  ? 'Update Organization'
+                  : 'Create Organization'}
             </Button>
           </div>
         </Form>

@@ -1,14 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef, useCallback } from 'react';
-import {
-  Search,
-  Barcode,
-  ShoppingCart,
-  AlertCircle,
-  Filter,
-  X,
-} from 'lucide-react';
+import { Search, Barcode, ShoppingCart, AlertCircle, Filter, X } from 'lucide-react';
 import Image from 'next/image';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -36,14 +29,10 @@ export function ProductGrid({ locationId }: ProductGridProps) {
   const [products, setProducts] = useState<ProductPosItem[]>([]);
   const [allProducts, setAllProducts] = useState<ProductPosItem[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
-  const [inventory, setInventory] = useState<Map<string, ProductInventoryItem>>(
-    new Map()
-  );
+  const [inventory, setInventory] = useState<Map<string, ProductInventoryItem>>(new Map());
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
-  const [selectedCategories, setSelectedCategories] = useState<Set<string>>(
-    new Set()
-  );
+  const [selectedCategories, setSelectedCategories] = useState<Set<string>>(new Set());
   const [barcodeInput, setBarcodeInput] = useState('');
   const searchInputRef = useRef<HTMLInputElement>(null);
   const barcodeInputRef = useRef<HTMLInputElement>(null);
@@ -132,8 +121,7 @@ export function ProductGrid({ locationId }: ProductGridProps) {
       setProducts(allProducts);
     } else {
       const filtered = allProducts.filter(
-        (product) =>
-          product.categoryId && selectedCategories.has(product.categoryId)
+        (product) => product.categoryId && selectedCategories.has(product.categoryId)
       );
       setProducts(filtered);
     }
@@ -198,11 +186,7 @@ export function ProductGrid({ locationId }: ProductGridProps) {
         return;
       }
 
-      if (
-        locationId &&
-        stockItem &&
-        parseFloat(stockItem.currentQuantity ?? '0') <= 0
-      ) {
+      if (locationId && stockItem && parseFloat(stockItem.currentQuantity ?? '0') <= 0) {
         toast.error('Product is out of stock');
         return;
       }
@@ -237,9 +221,7 @@ export function ProductGrid({ locationId }: ProductGridProps) {
         const params = new URLSearchParams({ code: barcode });
         if (locationId) params.append('locationId', locationId);
 
-        const response = await fetch(
-          `/api/products/barcode/${barcode}?${params}`
-        );
+        const response = await fetch(`/api/products/barcode/${barcode}?${params}`);
 
         if (!response.ok) {
           toast.error('Product not found');
@@ -249,9 +231,7 @@ export function ProductGrid({ locationId }: ProductGridProps) {
 
         const inventoryItem = await response.json();
 
-        const product = allProducts.find(
-          (p) => p.id === inventoryItem.productId
-        );
+        const product = allProducts.find((p) => p.id === inventoryItem.productId);
 
         if (!product) {
           toast.error('Product not found');
@@ -386,28 +366,16 @@ export function ProductGrid({ locationId }: ProductGridProps) {
         <div className='flex items-center justify-between'>
           <div className='flex gap-4 text-xs text-gray-500'>
             <span>
-              <kbd className='px-1.5 py-0.5 bg-gray-100 rounded border'>
-                Ctrl+K
-              </kbd>{' '}
-              Search
+              <kbd className='px-1.5 py-0.5 bg-gray-100 rounded border'>Ctrl+K</kbd> Search
             </span>
             <span>
-              <kbd className='px-1.5 py-0.5 bg-gray-100 rounded border'>
-                Ctrl+B
-              </kbd>{' '}
-              Barcode
+              <kbd className='px-1.5 py-0.5 bg-gray-100 rounded border'>Ctrl+B</kbd> Barcode
             </span>
             <span>
-              <kbd className='px-1.5 py-0.5 bg-gray-100 rounded border'>
-                Esc
-              </kbd>{' '}
-              Clear
+              <kbd className='px-1.5 py-0.5 bg-gray-100 rounded border'>Esc</kbd> Clear
             </span>
             <span>
-              <kbd className='px-1.5 py-0.5 bg-gray-100 rounded border'>
-                ?
-              </kbd>{' '}
-              All shortcuts
+              <kbd className='px-1.5 py-0.5 bg-gray-100 rounded border'>?</kbd> All shortcuts
             </span>
           </div>
 
@@ -416,11 +384,7 @@ export function ProductGrid({ locationId }: ProductGridProps) {
               {Array.from(selectedCategories).map((categoryId) => {
                 const category = categories.find((c) => c.id === categoryId);
                 return category ? (
-                  <Badge
-                    key={categoryId}
-                    variant='secondary'
-                    className='gap-1 pr-1'
-                  >
+                  <Badge key={categoryId} variant='secondary' className='gap-1 pr-1'>
                     {category.name}
                     <button
                       onClick={() => toggleCategory(categoryId)}
@@ -453,12 +417,7 @@ export function ProductGrid({ locationId }: ProductGridProps) {
                 : 'No products available'}
             </p>
             {selectedCategories.size > 0 && (
-              <Button
-                variant='outline'
-                size='sm'
-                onClick={clearCategoryFilters}
-                className='mt-4'
-              >
+              <Button variant='outline' size='sm' onClick={clearCategoryFilters} className='mt-4'>
                 Clear Category Filters
               </Button>
             )}
@@ -488,20 +447,14 @@ interface ProductCardProps {
   onAddToCart: (product: ProductPosItem) => void;
 }
 
-function ProductCard({
-  product,
-  stockStatus,
-  inventoryItem,
-  onAddToCart,
-}: ProductCardProps) {
+function ProductCard({ product, stockStatus, inventoryItem, onAddToCart }: ProductCardProps) {
   const isOutOfStock = stockStatus?.status === 'out';
   const isLowStock = stockStatus?.status === 'low';
 
   const displayPrice = inventoryItem?.unitPrice
     ? parseFloat(inventoryItem.unitPrice)
     : parseFloat(product.sellingPrice);
-  const displayUnit =
-    inventoryItem?.unitOfMeasure || product.unitOfMeasure || 'units';
+  const displayUnit = inventoryItem?.unitOfMeasure || product.unitOfMeasure || 'units';
 
   return (
     <button
@@ -510,9 +463,7 @@ function ProductCard({
       className={cn(
         'group relative flex flex-col  rounded-lg border p-3 transition-all',
         'hover:shadow-lg hover:border-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-500',
-        isOutOfStock
-          ? 'opacity-60 cursor-not-allowed'
-          : 'cursor-pointer active:scale-95'
+        isOutOfStock ? 'opacity-60 cursor-not-allowed' : 'cursor-pointer active:scale-95'
       )}
     >
       <div className='relative aspect-square mb-2 rounded-md overflow-hidden bg-gray-100'>
@@ -551,18 +502,12 @@ function ProductCard({
       </div>
 
       <div className='flex-1 flex flex-col text-left'>
-        <h3 className='font-medium text-sm line-clamp-2 mb-1'>
-          {product.name}
-        </h3>
+        <h3 className='font-medium text-sm line-clamp-2 mb-1'>{product.name}</h3>
 
-        {product.sku && (
-          <p className='text-xs text-gray-500 mb-1'>SKU: {product.sku}</p>
-        )}
+        {product.sku && <p className='text-xs text-gray-500 mb-1'>SKU: {product.sku}</p>}
 
         <div className='mt-auto'>
-          <p className='text-lg font-bold text-blue-600'>
-            ${displayPrice.toFixed(2)}
-          </p>
+          <p className='text-lg font-bold text-blue-600'>${displayPrice.toFixed(2)}</p>
 
           {stockStatus && stockStatus.stock > 0 && (
             <p className='text-xs text-gray-500'>

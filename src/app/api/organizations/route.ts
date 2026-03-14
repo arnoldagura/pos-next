@@ -29,10 +29,7 @@ async function getOrganizationsHandler(req: NextRequest) {
 
     if (search) {
       conditions.push(
-        or(
-          ilike(organization.name, `%${search}%`),
-          ilike(organization.slug, `%${search}%`)
-        )
+        or(ilike(organization.name, `%${search}%`), ilike(organization.slug, `%${search}%`))
       );
     }
 
@@ -60,8 +57,7 @@ async function getOrganizationsHandler(req: NextRequest) {
     } as const;
 
     const sortColumn =
-      sortableColumns[sortBy as keyof typeof sortableColumns] ||
-      organization.createdAt;
+      sortableColumns[sortBy as keyof typeof sortableColumns] || organization.createdAt;
 
     // Fetch organizations
     const organizations = await db
@@ -116,10 +112,7 @@ async function getOrganizationsHandler(req: NextRequest) {
     });
   } catch (error) {
     console.error('Error fetching organizations:', error);
-    return NextResponse.json(
-      { error: 'Failed to fetch organizations' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to fetch organizations' }, { status: 500 });
   }
 }
 
@@ -144,10 +137,7 @@ async function createOrganizationHandler(req: NextRequest) {
     });
 
     if (existingOrg) {
-      return NextResponse.json(
-        { error: 'Organization slug already exists' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Organization slug already exists' }, { status: 400 });
     }
 
     if (validatedData.subdomain) {
@@ -156,10 +146,7 @@ async function createOrganizationHandler(req: NextRequest) {
       });
 
       if (existingSubdomain) {
-        return NextResponse.json(
-          { error: 'Subdomain already exists' },
-          { status: 400 }
-        );
+        return NextResponse.json({ error: 'Subdomain already exists' }, { status: 400 });
       }
     }
 
@@ -169,10 +156,7 @@ async function createOrganizationHandler(req: NextRequest) {
       });
 
       if (existingDomain) {
-        return NextResponse.json(
-          { error: 'Domain already exists' },
-          { status: 400 }
-        );
+        return NextResponse.json({ error: 'Domain already exists' }, { status: 400 });
       }
     }
 
@@ -210,12 +194,7 @@ async function createOrganizationHandler(req: NextRequest) {
         let [adminRole] = await db
           .select()
           .from(roleSchema)
-          .where(
-            and(
-              eq(roleSchema.organizationId, newOrg.id),
-              eq(roleSchema.name, 'admin')
-            )
-          )
+          .where(and(eq(roleSchema.organizationId, newOrg.id), eq(roleSchema.name, 'admin')))
           .limit(1);
 
         if (!adminRole) {
@@ -231,9 +210,7 @@ async function createOrganizationHandler(req: NextRequest) {
             .returning();
         }
 
-        const { createUserInvitation, getInvitationUrl } = await import(
-          '@/lib/invitations'
-        );
+        const { createUserInvitation, getInvitationUrl } = await import('@/lib/invitations');
         const { sendInvitationEmail } = await import('@/lib/email');
 
         invitation = await createUserInvitation({
@@ -284,10 +261,7 @@ async function createOrganizationHandler(req: NextRequest) {
       );
     }
 
-    return NextResponse.json(
-      { error: 'Failed to create organization' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to create organization' }, { status: 500 });
   }
 }
 

@@ -7,13 +7,9 @@ export const MATERIAL_TYPES: Record<MaterialType, string> = {
   wip_products: 'WIP Products',
 } as const;
 
-export const MATERIAL_TYPE_OPTIONS = Object.entries(MATERIAL_TYPES).map(
-  ([value, label]) => ({
-    value: value as MaterialType,
-    label,
-  })
-);
+export const MATERIAL_TYPE_OPTIONS = Object.entries(MATERIAL_TYPES).map(([value, label]) => ({
+  value: value as MaterialType,
+  label,
+}));
 
-export const VALID_MATERIAL_TYPES = Object.keys(
-  MATERIAL_TYPES
-) as MaterialType[];
+export const VALID_MATERIAL_TYPES = Object.keys(MATERIAL_TYPES) as MaterialType[];

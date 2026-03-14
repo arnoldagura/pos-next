@@ -96,9 +96,7 @@ export default function EditInventorySettingsDialog({
       onSuccess();
     } catch (error) {
       console.error('Error updating settings:', error);
-      toast.error(
-        error instanceof Error ? error.message : 'Failed to update settings'
-      );
+      toast.error(error instanceof Error ? error.message : 'Failed to update settings');
     } finally {
       setSubmitting(false);
     }
@@ -110,8 +108,7 @@ export default function EditInventorySettingsDialog({
         <DialogHeader>
           <DialogTitle>Edit Inventory Settings</DialogTitle>
           <DialogDescription>
-            Update settings for {inventory.productName} at{' '}
-            {inventory.locationName}
+            Update settings for {inventory.productName} at {inventory.locationName}
           </DialogDescription>
         </DialogHeader>
 
@@ -131,9 +128,7 @@ export default function EditInventorySettingsDialog({
                     {...field}
                   />
                 </FormControl>
-                <FormDescription>
-                  Get notified when stock falls below this level
-                </FormDescription>
+                <FormDescription>Get notified when stock falls below this level</FormDescription>
                 <FormMessage />
               </FormItem>
             )}
@@ -148,9 +143,7 @@ export default function EditInventorySettingsDialog({
                 <FormControl>
                   <Input placeholder='e.g., units, boxes, kg' {...field} />
                 </FormControl>
-                <FormDescription>
-                  Specify the unit of measure for this inventory
-                </FormDescription>
+                <FormDescription>Specify the unit of measure for this inventory</FormDescription>
                 <FormMessage />
               </FormItem>
             )}

@@ -1,10 +1,6 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { NextRequest } from 'next/server';
-import {
-  getInventoryByIdHandler,
-  updateInventoryHandler,
-  deleteInventoryHandler,
-} from '../route';
+import { getInventoryByIdHandler, updateInventoryHandler, deleteInventoryHandler } from '../route';
 import { db } from '@/db/db';
 import * as inventoryCalculation from '@/lib/services/inventory-calculation';
 import { createDefaultRouteContext } from '@/lib/types';
@@ -82,9 +78,7 @@ describe('Inventory API - GET /api/product-inventory/[id]', () => {
       unitOfMeasure: 'pcs',
     });
 
-    const request = new NextRequest(
-      'http://localhost/api/product-inventory/inv-1'
-    );
+    const request = new NextRequest('http://localhost/api/product-inventory/inv-1');
     const context = createDefaultRouteContext({ id: 'inv-1' });
     const response = await getInventoryByIdHandler(request, context);
     const data = await response.json();
@@ -106,9 +100,7 @@ describe('Inventory API - GET /api/product-inventory/[id]', () => {
       limit: vi.fn().mockResolvedValue([]),
     } as never);
 
-    const request = new NextRequest(
-      'http://localhost/api/product-inventory/non-existent'
-    );
+    const request = new NextRequest('http://localhost/api/product-inventory/non-existent');
     const context = createDefaultRouteContext({ id: 'non-existent' });
     const response = await getInventoryByIdHandler(request, context);
     const data = await response.json();
@@ -153,13 +145,10 @@ describe('Inventory API - PATCH /api/product-inventory/[id]', () => {
       ]),
     } as never);
 
-    const request = new NextRequest(
-      'http://localhost/api/product-inventory/inv-1',
-      {
-        method: 'PATCH',
-        body: JSON.stringify(updateData),
-      }
-    );
+    const request = new NextRequest('http://localhost/api/product-inventory/inv-1', {
+      method: 'PATCH',
+      body: JSON.stringify(updateData),
+    });
     const context = createDefaultRouteContext({ id: 'inv-1' });
     const response = await updateInventoryHandler(request, context);
     const data = await response.json();
@@ -176,13 +165,10 @@ describe('Inventory API - PATCH /api/product-inventory/[id]', () => {
       limit: vi.fn().mockResolvedValue([]),
     } as never);
 
-    const request = new NextRequest(
-      'http://localhost/api/product-inventory/non-existent',
-      {
-        method: 'PATCH',
-        body: JSON.stringify({ alertThreshold: 20 }),
-      }
-    );
+    const request = new NextRequest('http://localhost/api/product-inventory/non-existent', {
+      method: 'PATCH',
+      body: JSON.stringify({ alertThreshold: 20 }),
+    });
     const context = createDefaultRouteContext({ id: 'non-existent' });
     const response = await updateInventoryHandler(request, context);
     const data = await response.json();
@@ -210,12 +196,9 @@ describe('Inventory API - DELETE /api/product-inventory/[id]', () => {
       where: vi.fn().mockResolvedValue(undefined),
     } as never);
 
-    const request = new NextRequest(
-      'http://localhost/api/product-inventory/inv-1',
-      {
-        method: 'DELETE',
-      }
-    );
+    const request = new NextRequest('http://localhost/api/product-inventory/inv-1', {
+      method: 'DELETE',
+    });
     const context = createDefaultRouteContext({ id: 'inv-1' });
     const response = await deleteInventoryHandler(request, context);
     const data = await response.json();
@@ -231,12 +214,9 @@ describe('Inventory API - DELETE /api/product-inventory/[id]', () => {
       limit: vi.fn().mockResolvedValue([]),
     } as never);
 
-    const request = new NextRequest(
-      'http://localhost/api/product-inventory/non-existent',
-      {
-        method: 'DELETE',
-      }
-    );
+    const request = new NextRequest('http://localhost/api/product-inventory/non-existent', {
+      method: 'DELETE',
+    });
     const context = createDefaultRouteContext({ id: 'non-existent' });
     const response = await deleteInventoryHandler(request, context);
     const data = await response.json();

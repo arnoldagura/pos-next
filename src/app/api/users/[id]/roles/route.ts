@@ -15,10 +15,7 @@ async function assignRolesHandler(
     const tenantId = await getTenantId();
 
     if (!tenantId) {
-      return NextResponse.json(
-        { error: 'No tenant context available' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'No tenant context available' }, { status: 400 });
     }
 
     const { id: userId } = await context.params;
@@ -26,10 +23,7 @@ async function assignRolesHandler(
     const { roleIds } = body as { roleIds: string[] };
 
     if (!Array.isArray(roleIds)) {
-      return NextResponse.json(
-        { error: 'roleIds must be an array' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'roleIds must be an array' }, { status: 400 });
     }
 
     // Verify user belongs to this organization
@@ -37,10 +31,7 @@ async function assignRolesHandler(
       .select({ userId: userOrganization.userId })
       .from(userOrganization)
       .where(
-        and(
-          eq(userOrganization.userId, userId),
-          eq(userOrganization.organizationId, tenantId)
-        )
+        and(eq(userOrganization.userId, userId), eq(userOrganization.organizationId, tenantId))
       )
       .limit(1);
 
@@ -53,25 +44,16 @@ async function assignRolesHandler(
         .update(userOrganization)
         .set({ roleId: roleIds[0] })
         .where(
-          and(
-            eq(userOrganization.userId, userId),
-            eq(userOrganization.organizationId, tenantId)
-          )
+          and(eq(userOrganization.userId, userId), eq(userOrganization.organizationId, tenantId))
         );
     } else if (roleIds.length === 0) {
-      return NextResponse.json(
-        { error: 'At least one role must be assigned' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'At least one role must be assigned' }, { status: 400 });
     } else {
       await db
         .update(userOrganization)
         .set({ roleId: roleIds[0] })
         .where(
-          and(
-            eq(userOrganization.userId, userId),
-            eq(userOrganization.organizationId, tenantId)
-          )
+          and(eq(userOrganization.userId, userId), eq(userOrganization.organizationId, tenantId))
         );
     }
 
@@ -84,10 +66,7 @@ async function assignRolesHandler(
       .from(userOrganization)
       .innerJoin(role, eq(userOrganization.roleId, role.id))
       .where(
-        and(
-          eq(userOrganization.userId, userId),
-          eq(userOrganization.organizationId, tenantId)
-        )
+        and(eq(userOrganization.userId, userId), eq(userOrganization.organizationId, tenantId))
       );
 
     return NextResponse.json({
@@ -99,10 +78,7 @@ async function assignRolesHandler(
     });
   } catch (error) {
     console.error('Error assigning roles:', error);
-    return NextResponse.json(
-      { error: 'Failed to assign roles' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to assign roles' }, { status: 500 });
   }
 }
 

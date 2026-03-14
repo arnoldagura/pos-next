@@ -69,21 +69,18 @@ export default function AddBatchDialog({
       setSubmitting(true);
       console.log('Submitting values:', values);
       console.log('inventory:', inventory);
-      const response = await fetch(
-        `/api/material-inventories/${inventory.id}/add-batch`,
-        {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            ...values,
-            materialId: inventory.id,
-            unitOfMeasure: inventory.unitOfMeasure,
-            locationId: inventory.location.id,
-            quantity: parseFloat(values.quantity),
-            cost: parseFloat(values.cost),
-          }),
-        }
-      );
+      const response = await fetch(`/api/material-inventories/${inventory.id}/add-batch`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          ...values,
+          materialId: inventory.id,
+          unitOfMeasure: inventory.unitOfMeasure,
+          locationId: inventory.location.id,
+          quantity: parseFloat(values.quantity),
+          cost: parseFloat(values.cost),
+        }),
+      });
 
       if (!response.ok) {
         const error = await response.json();
@@ -96,9 +93,7 @@ export default function AddBatchDialog({
       onSuccess();
     } catch (error) {
       console.error('Error adding batch:', error);
-      toast.error(
-        error instanceof Error ? error.message : 'Failed to add batch'
-      );
+      toast.error(error instanceof Error ? error.message : 'Failed to add batch');
     } finally {
       setSubmitting(false);
     }
@@ -107,9 +102,7 @@ export default function AddBatchDialog({
   const quantity = form.watch('quantity');
   const cost = form.watch('cost');
   const unitPrice =
-    quantity && cost
-      ? (parseFloat(cost) / parseFloat(quantity)).toFixed(2)
-      : '0.00';
+    quantity && cost ? (parseFloat(cost) / parseFloat(quantity)).toFixed(2) : '0.00';
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -117,8 +110,7 @@ export default function AddBatchDialog({
         <DialogHeader>
           <DialogTitle>Add Batch to Inventory</DialogTitle>
           <DialogDescription>
-            Add a new batch of {inventory.material.name} to{' '}
-            {inventory.location.name}
+            Add a new batch of {inventory.material.name} to {inventory.location.name}
           </DialogDescription>
         </DialogHeader>
 
@@ -132,9 +124,7 @@ export default function AddBatchDialog({
                 <FormControl>
                   <Input placeholder='e.g., BATCH-001' {...field} />
                 </FormControl>
-                <FormDescription>
-                  Unique identifier for this batch
-                </FormDescription>
+                <FormDescription>Unique identifier for this batch</FormDescription>
                 <FormMessage />
               </FormItem>
             )}
@@ -148,13 +138,7 @@ export default function AddBatchDialog({
                 <FormItem>
                   <FormLabel>Quantity *</FormLabel>
                   <FormControl>
-                    <Input
-                      type='number'
-                      step='0.01'
-                      min='0.01'
-                      placeholder='0.00'
-                      {...field}
-                    />
+                    <Input type='number' step='0.01' min='0.01' placeholder='0.00' {...field} />
                   </FormControl>
                   <FormDescription>{inventory.unitOfMeasure}</FormDescription>
                   <FormMessage />
@@ -169,13 +153,7 @@ export default function AddBatchDialog({
                 <FormItem>
                   <FormLabel>Total Cost *</FormLabel>
                   <FormControl>
-                    <Input
-                      type='number'
-                      step='0.01'
-                      min='0'
-                      placeholder='0.00'
-                      {...field}
-                    />
+                    <Input type='number' step='0.01' min='0' placeholder='0.00' {...field} />
                   </FormControl>
                   <FormDescription>Unit: ${unitPrice}</FormDescription>
                   <FormMessage />
@@ -206,10 +184,7 @@ export default function AddBatchDialog({
               <FormItem>
                 <FormLabel>Remarks (Optional)</FormLabel>
                 <FormControl>
-                  <Textarea
-                    placeholder='Add any notes about this batch...'
-                    {...field}
-                  />
+                  <Textarea placeholder='Add any notes about this batch...' {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>

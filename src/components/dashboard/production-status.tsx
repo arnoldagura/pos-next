@@ -26,30 +26,25 @@ export function ProductionStatus({ data }: ProductionStatusProps) {
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <Factory className="h-5 w-5" />
+        <CardTitle className='flex items-center gap-2'>
+          <Factory className='h-5 w-5' />
           Production Orders Status
         </CardTitle>
       </CardHeader>
       <CardContent>
         {total === 0 ? (
-          <div className="text-center py-8 text-muted-foreground">
-            No production orders
-          </div>
+          <div className='text-center py-8 text-muted-foreground'>No production orders</div>
         ) : (
-          <div className="grid grid-cols-2 gap-3">
+          <div className='grid grid-cols-2 gap-3'>
             {data.map((item) => (
               <div
                 key={item.status}
-                className="flex items-center justify-between p-3 rounded-lg border"
+                className='flex items-center justify-between p-3 rounded-lg border'
               >
-                <Badge
-                  variant="secondary"
-                  className={statusColors[item.status] || 'bg-gray-100'}
-                >
+                <Badge variant='secondary' className={statusColors[item.status] || 'bg-gray-100'}>
                   {item.status.replace('_', ' ')}
                 </Badge>
-                <div className="font-semibold text-lg">{item.count}</div>
+                <div className='font-semibold text-lg'>{item.count}</div>
               </div>
             ))}
           </div>

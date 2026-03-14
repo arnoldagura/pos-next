@@ -15,10 +15,7 @@ async function getUserHandler(
     const tenantId = await getTenantId();
 
     if (!tenantId) {
-      return NextResponse.json(
-        { error: 'No tenant context available' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'No tenant context available' }, { status: 400 });
     }
 
     const { id } = await context.params;
@@ -35,9 +32,7 @@ async function getUserHandler(
       })
       .from(user)
       .innerJoin(userOrganization, eq(user.id, userOrganization.userId))
-      .where(
-        and(eq(user.id, id), eq(userOrganization.organizationId, tenantId))
-      )
+      .where(and(eq(user.id, id), eq(userOrganization.organizationId, tenantId)))
       .limit(1);
 
     if (!userInOrg) {
@@ -52,12 +47,7 @@ async function getUserHandler(
       })
       .from(userOrganization)
       .innerJoin(roleTable, eq(userOrganization.roleId, roleTable.id))
-      .where(
-        and(
-          eq(userOrganization.userId, id),
-          eq(userOrganization.organizationId, tenantId)
-        )
-      );
+      .where(and(eq(userOrganization.userId, id), eq(userOrganization.organizationId, tenantId)));
 
     return NextResponse.json({
       ...userInOrg,
@@ -69,10 +59,7 @@ async function getUserHandler(
     });
   } catch (error) {
     console.error('Error fetching user:', error);
-    return NextResponse.json(
-      { error: 'Failed to fetch user' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to fetch user' }, { status: 500 });
   }
 }
 
@@ -84,10 +71,7 @@ async function updateUserHandler(
     const tenantId = await getTenantId();
 
     if (!tenantId) {
-      return NextResponse.json(
-        { error: 'No tenant context available' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'No tenant context available' }, { status: 400 });
     }
 
     const { id } = await context.params;
@@ -95,12 +79,7 @@ async function updateUserHandler(
     const [userInOrg] = await db
       .select({ userId: userOrganization.userId })
       .from(userOrganization)
-      .where(
-        and(
-          eq(userOrganization.userId, id),
-          eq(userOrganization.organizationId, tenantId)
-        )
-      )
+      .where(and(eq(userOrganization.userId, id), eq(userOrganization.organizationId, tenantId)))
       .limit(1);
 
     if (!userInOrg) {
@@ -136,10 +115,7 @@ async function updateUserHandler(
     return NextResponse.json(updatedUser);
   } catch (error) {
     console.error('Error updating user:', error);
-    return NextResponse.json(
-      { error: 'Failed to update user' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to update user' }, { status: 500 });
   }
 }
 
@@ -151,10 +127,7 @@ async function deleteUserHandler(
     const tenantId = await getTenantId();
 
     if (!tenantId) {
-      return NextResponse.json(
-        { error: 'No tenant context available' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'No tenant context available' }, { status: 400 });
     }
 
     const { id } = await context.params;
@@ -163,12 +136,7 @@ async function deleteUserHandler(
     const [userInOrg] = await db
       .select({ userId: userOrganization.userId })
       .from(userOrganization)
-      .where(
-        and(
-          eq(userOrganization.userId, id),
-          eq(userOrganization.organizationId, tenantId)
-        )
-      )
+      .where(and(eq(userOrganization.userId, id), eq(userOrganization.organizationId, tenantId)))
       .limit(1);
 
     if (!userInOrg) {
@@ -177,20 +145,12 @@ async function deleteUserHandler(
 
     await db
       .delete(userOrganization)
-      .where(
-        and(
-          eq(userOrganization.userId, id),
-          eq(userOrganization.organizationId, tenantId)
-        )
-      );
+      .where(and(eq(userOrganization.userId, id), eq(userOrganization.organizationId, tenantId)));
 
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error('Error deleting user:', error);
-    return NextResponse.json(
-      { error: 'Failed to delete user' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to delete user' }, { status: 500 });
   }
 }
 

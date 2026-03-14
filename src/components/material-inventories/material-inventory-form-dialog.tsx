@@ -61,9 +61,7 @@ export default function MaterialInventoryFormDialog({
   const [materials, setMaterials] = useState<Material[]>([]);
   const [locations, setLocations] = useState<Location[]>([]);
   const [suppliers, setSuppliers] = useState<Supplier[]>([]);
-  const [selectedMaterial, setSelectedMaterial] = useState<Material | null>(
-    null
-  );
+  const [selectedMaterial, setSelectedMaterial] = useState<Material | null>(null);
   const [loading, setLoading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
 
@@ -150,9 +148,7 @@ export default function MaterialInventoryFormDialog({
         defaultSupplierId: values.defaultSupplierId || null,
         unitOfMeasure: values.unitOfMeasure,
         cost: values.cost ? parseFloat(values.cost) : undefined,
-        alertThreshold: values.alertThreshold
-          ? parseFloat(values.alertThreshold)
-          : undefined,
+        alertThreshold: values.alertThreshold ? parseFloat(values.alertThreshold) : undefined,
       };
       const response = await fetch('/api/material-inventories', {
         method: 'POST',
@@ -172,11 +168,7 @@ export default function MaterialInventoryFormDialog({
       onSuccess();
     } catch (error) {
       console.error('Error creating material inventory:', error);
-      toast.error(
-        error instanceof Error
-          ? error.message
-          : 'Failed to create material inventory'
-      );
+      toast.error(error instanceof Error ? error.message : 'Failed to create material inventory');
     } finally {
       setSubmitting(false);
     }
@@ -233,8 +225,7 @@ export default function MaterialInventoryFormDialog({
                 {selectedMaterial && (
                   <FormDescription>
                     Unit: {selectedMaterial.unitOfMeasure}
-                    {selectedMaterial.category &&
-                      ` • ${selectedMaterial.category.name}`}
+                    {selectedMaterial.category && ` • ${selectedMaterial.category.name}`}
                   </FormDescription>
                 )}
                 <FormMessage />
@@ -268,9 +259,7 @@ export default function MaterialInventoryFormDialog({
                     )}
                   </SelectContent>
                 </Select>
-                <FormDescription>
-                  Location where this material will be stored
-                </FormDescription>
+                <FormDescription>Location where this material will be stored</FormDescription>
                 <FormMessage />
               </FormItem>
             )}
@@ -283,10 +272,7 @@ export default function MaterialInventoryFormDialog({
               <FormItem>
                 <FormLabel>Variant Name (Optional)</FormLabel>
                 <FormControl>
-                  <Input
-                    placeholder='e.g., Standard, Large, Premium'
-                    {...field}
-                  />
+                  <Input placeholder='e.g., Standard, Large, Premium' {...field} />
                 </FormControl>
                 <FormDescription>
                   Distinguishes different variants of the same material
@@ -305,9 +291,7 @@ export default function MaterialInventoryFormDialog({
                 <FormControl>
                   <Input placeholder='Stock Keeping Unit' {...field} />
                 </FormControl>
-                <FormDescription>
-                  Unique identifier for this material variant
-                </FormDescription>
+                <FormDescription>Unique identifier for this material variant</FormDescription>
                 <FormMessage />
               </FormItem>
             )}
@@ -334,9 +318,7 @@ export default function MaterialInventoryFormDialog({
               <FormItem>
                 <FormLabel>Default Supplier (Optional)</FormLabel>
                 <Select
-                  onValueChange={(value) =>
-                    field.onChange(value === 'none' ? '' : value)
-                  }
+                  onValueChange={(value) => field.onChange(value === 'none' ? '' : value)}
                   value={field.value || 'none'}
                 >
                   <FormControl>
@@ -353,9 +335,7 @@ export default function MaterialInventoryFormDialog({
                     ))}
                   </SelectContent>
                 </Select>
-                <FormDescription>
-                  Preferred supplier for this material variant
-                </FormDescription>
+                <FormDescription>Preferred supplier for this material variant</FormDescription>
                 <FormMessage />
               </FormItem>
             )}
@@ -368,17 +348,9 @@ export default function MaterialInventoryFormDialog({
               <FormItem>
                 <FormLabel>Cost per Unit (Optional)</FormLabel>
                 <FormControl>
-                  <Input
-                    type='number'
-                    step='0.01'
-                    min='0'
-                    placeholder='0.00'
-                    {...field}
-                  />
+                  <Input type='number' step='0.01' min='0' placeholder='0.00' {...field} />
                 </FormControl>
-                <FormDescription>
-                  Default cost per unit of measure
-                </FormDescription>
+                <FormDescription>Default cost per unit of measure</FormDescription>
                 <FormMessage />
               </FormItem>
             )}
@@ -401,8 +373,7 @@ export default function MaterialInventoryFormDialog({
                 </FormControl>
                 <FormDescription>
                   Get notified when stock falls below this level
-                  {selectedMaterial &&
-                    ` (in ${selectedMaterial.unitOfMeasure})`}
+                  {selectedMaterial && ` (in ${selectedMaterial.unitOfMeasure})`}
                 </FormDescription>
                 <FormMessage />
               </FormItem>

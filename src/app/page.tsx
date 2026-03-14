@@ -2,9 +2,7 @@ export default function Home() {
   return (
     <div className='min-h-screen flex items-center justify-center'>
       <div className='text-center space-y-6 px-4'>
-        <h1 className='text-4xl font-bold text-gray-900'>
-          Welcome to POS System
-        </h1>
+        <h1 className='text-4xl font-bold text-gray-900'>Welcome to POS System</h1>
         <p className='text-lg text-gray-600 max-w-2xl mx-auto'>
           A modern point-of-sale system for managing your business operations
         </p>

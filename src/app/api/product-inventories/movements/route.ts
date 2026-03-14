@@ -21,9 +21,7 @@ export async function getMovementsHandler(req: NextRequest) {
     const conditions = [];
 
     if (inventoryId) {
-      conditions.push(
-        eq(productInventoryMovement.productInventoryId, inventoryId)
-      );
+      conditions.push(eq(productInventoryMovement.productInventoryId, inventoryId));
     }
 
     if (type) {
@@ -51,10 +49,7 @@ export async function getMovementsHandler(req: NextRequest) {
       .select()
       .from(productInventoryMovement)
       .where(whereClause)
-      .orderBy(
-        desc(productInventoryMovement.date),
-        desc(productInventoryMovement.createdAt)
-      )
+      .orderBy(desc(productInventoryMovement.date), desc(productInventoryMovement.createdAt))
       .limit(limit)
       .offset(offset);
 
@@ -68,10 +63,7 @@ export async function getMovementsHandler(req: NextRequest) {
   } catch (error) {
     console.error('Error fetching movements:', error);
 
-    return NextResponse.json(
-      { error: 'Failed to fetch movements' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to fetch movements' }, { status: 500 });
   }
 }
 

@@ -30,10 +30,7 @@ export function forbidden(message = 'Forbidden') {
 }
 
 export function validationError(err: ZodError) {
-  return NextResponse.json(
-    { error: 'Validation failed', details: err.issues },
-    { status: 400 }
-  );
+  return NextResponse.json({ error: 'Validation failed', details: err.issues }, { status: 400 });
 }
 
 export function handleApiError(err: unknown, fallbackMessage = 'Internal server error') {
@@ -43,8 +40,5 @@ export function handleApiError(err: unknown, fallbackMessage = 'Internal server 
     return validationError(err);
   }
 
-  return error(
-    err instanceof Error ? err.message : fallbackMessage,
-    500
-  );
+  return error(err instanceof Error ? err.message : fallbackMessage, 500);
 }

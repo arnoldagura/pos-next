@@ -40,19 +40,13 @@ async function getMaterialHandler(
       .limit(1);
 
     if (!foundMaterial) {
-      return NextResponse.json(
-        { error: 'Material not found' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'Material not found' }, { status: 404 });
     }
 
     return NextResponse.json(foundMaterial);
   } catch (error) {
     console.error('Error fetching material:', error);
-    return NextResponse.json(
-      { error: 'Failed to fetch material' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to fetch material' }, { status: 500 });
   }
 }
 
@@ -72,10 +66,7 @@ async function updateMaterialHandler(
       .returning();
 
     if (!updatedMaterial) {
-      return NextResponse.json(
-        { error: 'Material not found' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'Material not found' }, { status: 404 });
     }
 
     return NextResponse.json(updatedMaterial);
@@ -91,10 +82,7 @@ async function updateMaterialHandler(
       }
     }
 
-    return NextResponse.json(
-      { error: 'Failed to update material' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to update material' }, { status: 500 });
   }
 }
 
@@ -112,19 +100,13 @@ async function deleteMaterialHandler(
       .returning({ id: material.id });
 
     if (!deletedMaterial) {
-      return NextResponse.json(
-        { error: 'Material not found' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'Material not found' }, { status: 404 });
     }
 
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error('Error deleting material:', error);
-    return NextResponse.json(
-      { error: 'Failed to delete material' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to delete material' }, { status: 500 });
   }
 }
 

@@ -15,12 +15,7 @@ async function applyMigration() {
   try {
     console.log('Applying RBAC migration...');
 
-    const migrationPath = join(
-      process.cwd(),
-      'drizzle',
-      'migration',
-      '0001_tan_centennial.sql'
-    );
+    const migrationPath = join(process.cwd(), 'drizzle', 'migration', '0001_tan_centennial.sql');
     const migrationSQL = readFileSync(migrationPath, 'utf-8');
 
     // Split by statement breakpoint and execute each statement
