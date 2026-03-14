@@ -11,11 +11,13 @@ export default defineConfig({
   workers: process.env.CI ? 1 : undefined,
   reporter: 'html',
   timeout: 30000, // 30 seconds per test
+  globalSetup: './playwright-global-setup.ts',
   use: {
     baseURL: 'http://localhost:3000',
     trace: 'on-first-retry',
     screenshot: 'only-on-failure',
     actionTimeout: 10000, // 10 seconds for actions
+    storageState: 'auth-state.json',
   },
 
   projects: [
