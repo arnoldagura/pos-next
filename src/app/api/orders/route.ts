@@ -43,6 +43,7 @@ export async function POST(req: NextRequest) {
     const body = await req.json();
     const {
       locationId,
+      orderType,
       tableId,
       customerId,
       customerName,
@@ -68,6 +69,12 @@ export async function POST(req: NextRequest) {
       const orderId = randomUUID();
       const orderNumber = generateOrderNumber();
 
+      // Dine-in orders go to kitchen (pending), takeout completes immediately
+      const isDineIn = orderType === 'dine_in';
+      const isCashPayment = !paymentMethod || paymentMethod === 'cash';
+      const orderStatus = isDineIn ? 'pending' : 'completed';
+      const orderPaymentStatus = isCashPayment ? 'paid' : 'pending';
+
       const [newOrder] = await tx
         .insert(order)
         .values({
@@ -78,9 +85,9 @@ export async function POST(req: NextRequest) {
           tableId: tableId || null,
           customerId: customerId || null,
           customerName: customerName || null,
-          status: 'completed',
+          status: orderStatus,
           paymentMethod: paymentMethod || 'cash',
-          paymentStatus: 'paid',
+          paymentStatus: orderPaymentStatus,
           subtotal: subtotal.toString(),
           totalDiscount: totalDiscount.toString(),
           totalTax: totalTax.toString(),
@@ -88,7 +95,7 @@ export async function POST(req: NextRequest) {
           amountPaid: amountPaid?.toString() || total.toString(),
           changeGiven: changeGiven?.toString() || '0',
           notes: notes || null,
-          completedAt: new Date(),
+          completedAt: orderStatus === 'completed' ? new Date() : null,
         })
         .returning();
 

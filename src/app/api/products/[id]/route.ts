@@ -4,6 +4,7 @@ import { ACTIONS, RESOURCES } from '@/lib/rbac';
 import { requireTenantId } from '@/lib/tenant-context';
 import { RouteContext, createDefaultRouteContext } from '@/lib/types';
 import { updateProductSchema } from '@/lib/validations/product';
+import { invalidateProductCache } from '@/lib/cache';
 import { protectRoute } from '@/middleware/rbac';
 import { eq, and, isNull } from 'drizzle-orm';
 import { NextRequest, NextResponse } from 'next/server';
@@ -76,6 +77,8 @@ async function updateProductHandler(
       return NextResponse.json({ error: 'Product not found' }, { status: 404 });
     }
 
+    await invalidateProductCache(tenantId);
+
     return NextResponse.json(updatedProduct);
   } catch (error) {
     console.error('Error updating product:', error);
@@ -114,6 +117,8 @@ async function deleteProductHandler(
     if (!deletedProduct) {
       return NextResponse.json({ error: 'Product not found' }, { status: 404 });
     }
+
+    await invalidateProductCache(tenantId);
 
     return NextResponse.json({ success: true });
   } catch (error) {

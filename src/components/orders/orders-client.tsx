@@ -14,6 +14,14 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+} from '@/components/ui/dropdown-menu';
+import {
   Table,
   TableBody,
   TableCell,
@@ -25,6 +33,7 @@ import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Search, Filter, Receipt, RefreshCcw } from 'lucide-react';
 import { formatCurrency } from '@/lib/utils';
+import { toast } from 'sonner';
 import { ReceiptDialog } from '@/components/receipts/receipt-dialog';
 import { order, orderItem } from '@/drizzle/schema/orders';
 import type { InferSelectModel } from 'drizzle-orm';
@@ -60,17 +69,18 @@ interface ReceiptData {
 }
 
 const statusColors: Record<string, string> = {
-  pending: 'bg-yellow-100 text-yellow-800',
-  processing: 'bg-blue-100 text-blue-800',
-  completed: 'bg-green-100 text-green-800',
-  cancelled: 'bg-red-100 text-red-800',
+  pending: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400',
+  processing: 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400',
+  ready: 'bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-400',
+  completed: 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400',
+  cancelled: 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400',
 };
 
 const paymentStatusColors: Record<string, string> = {
-  pending: 'bg-yellow-100 text-yellow-800',
-  paid: 'bg-green-100 text-green-800',
-  partial: 'bg-orange-100 text-orange-800',
-  refunded: 'bg-red-100 text-red-800',
+  pending: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400',
+  paid: 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400',
+  partial: 'bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-400',
+  refunded: 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400',
 };
 
 export function OrdersClient() {
@@ -147,6 +157,32 @@ export function OrdersClient() {
     }
   };
 
+  const handleUpdateStatus = async (orderId: string, newStatus: string) => {
+    try {
+      const res = await fetch(`/api/orders/${orderId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status: newStatus }),
+      });
+
+      if (!res.ok) {
+        const err = await res.json();
+        throw new Error(err.error || 'Failed to update status');
+      }
+
+      toast.success(
+        newStatus === 'completed'
+          ? 'Order marked as served'
+          : newStatus === 'cancelled'
+            ? 'Order cancelled'
+            : `Order status updated to ${newStatus}`
+      );
+      refetch();
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : 'Failed to update order');
+    }
+  };
+
   return (
     <div className="space-y-6">
       <Card>
@@ -185,6 +221,7 @@ export function OrdersClient() {
                   <SelectItem value="all">All Statuses</SelectItem>
                   <SelectItem value="pending">Pending</SelectItem>
                   <SelectItem value="processing">Processing</SelectItem>
+                  <SelectItem value="ready">Ready</SelectItem>
                   <SelectItem value="completed">Completed</SelectItem>
                   <SelectItem value="cancelled">Cancelled</SelectItem>
                 </SelectContent>
@@ -300,14 +337,52 @@ export function OrdersClient() {
                         })}
                       </TableCell>
                       <TableCell>
-                        <Button
-                          size="sm"
-                          variant="ghost"
-                          onClick={() => handleViewReceipt(order.id)}
-                        >
-                          <Receipt className="h-4 w-4 mr-1" />
-                          Receipt
-                        </Button>
+                        <div className="flex items-center gap-1">
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button size="sm" variant="outline">
+                                {order.status}
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end">
+                              <DropdownMenuLabel>Change Status</DropdownMenuLabel>
+                              <DropdownMenuSeparator />
+                              {order.status !== 'pending' && (
+                                <DropdownMenuItem onClick={() => handleUpdateStatus(order.id, 'pending')}>
+                                  Pending
+                                </DropdownMenuItem>
+                              )}
+                              {order.status !== 'processing' && (
+                                <DropdownMenuItem onClick={() => handleUpdateStatus(order.id, 'processing')}>
+                                  Processing
+                                </DropdownMenuItem>
+                              )}
+                              {order.status !== 'ready' && (
+                                <DropdownMenuItem onClick={() => handleUpdateStatus(order.id, 'ready')}>
+                                  Ready
+                                </DropdownMenuItem>
+                              )}
+                              {order.status !== 'completed' && (
+                                <DropdownMenuItem onClick={() => handleUpdateStatus(order.id, 'completed')}>
+                                  Completed
+                                </DropdownMenuItem>
+                              )}
+                              {order.status !== 'cancelled' && (
+                                <DropdownMenuItem onClick={() => handleUpdateStatus(order.id, 'cancelled')}>
+                                  Cancelled
+                                </DropdownMenuItem>
+                              )}
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            onClick={() => handleViewReceipt(order.id)}
+                          >
+                            <Receipt className="h-4 w-4 mr-1" />
+                            Receipt
+                          </Button>
+                        </div>
                       </TableCell>
                     </TableRow>
                   ))}

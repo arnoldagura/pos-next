@@ -4,6 +4,7 @@ import { ACTIONS, RESOURCES } from '@/lib/rbac';
 import { requireTenantId } from '@/lib/tenant-context';
 import { createProductSchema } from '@/lib/validations/product';
 import { protectRoute } from '@/middleware/rbac';
+import { cacheGet, cacheSet, productCacheKey, invalidateProductCache } from '@/lib/cache';
 import { randomUUID } from 'crypto';
 import { and, eq, ilike, or, isNull, count, desc } from 'drizzle-orm';
 import { NextRequest, NextResponse } from 'next/server';
@@ -21,6 +22,21 @@ export async function getProductsHandler(req: NextRequest) {
     const page = parseInt(searchParams.get('page') || '1', 10);
     const limit = parseInt(searchParams.get('limit') || '50', 10);
     const offset = (page - 1) * limit;
+
+    // Try cache for non-search queries
+    if (!search) {
+      const cacheKey = productCacheKey(tenantId, {
+        status: statusParam,
+        categoryId,
+        includeDeleted: includeDeleted ? 'true' : null,
+        page: page.toString(),
+        limit: limit.toString(),
+      });
+      const cached = await cacheGet<{ products: unknown[]; pagination: unknown }>(cacheKey);
+      if (cached) {
+        return NextResponse.json(cached);
+      }
+    }
 
     const conditions = [eq(product.organizationId, tenantId)];
 
@@ -60,7 +76,7 @@ export async function getProductsHandler(req: NextRequest) {
       .limit(limit)
       .offset(offset);
 
-    return NextResponse.json({
+    const result = {
       products,
       pagination: {
         page,
@@ -68,7 +84,21 @@ export async function getProductsHandler(req: NextRequest) {
         total: totalCount,
         totalPages: Math.ceil(totalCount / limit),
       },
-    });
+    };
+
+    // Cache non-search results
+    if (!search) {
+      const cacheKey = productCacheKey(tenantId, {
+        status: statusParam,
+        categoryId,
+        includeDeleted: includeDeleted ? 'true' : null,
+        page: page.toString(),
+        limit: limit.toString(),
+      });
+      await cacheSet(cacheKey, result);
+    }
+
+    return NextResponse.json(result);
   } catch (error) {
     console.error('Error fetching products:', error);
 
@@ -106,6 +136,8 @@ export async function createProductHandler(req: NextRequest) {
         ...validatedData,
       })
       .returning();
+
+    await invalidateProductCache(tenantId);
 
     return NextResponse.json(newProduct[0], { status: 201 });
   } catch (error) {

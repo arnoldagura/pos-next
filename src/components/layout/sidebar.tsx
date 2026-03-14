@@ -22,6 +22,7 @@ import {
   UserCircle,
   Building2,
   Shield,
+  ChefHat,
 } from 'lucide-react';
 import { Suspense } from 'react';
 import { Button } from '@/components/ui/button';
@@ -47,6 +48,7 @@ const navGroups: NavGroup[] = [
   {
     items: [
       { title: 'POS', href: '/pos', icon: Store },
+      { title: 'Kitchen', href: '/kitchen', icon: ChefHat },
       { title: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
     ],
   },

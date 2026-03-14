@@ -17,6 +17,7 @@ import { organization } from './organizations';
 export const orderStatusEnum = pgEnum('order_status', [
   'pending',
   'processing',
+  'ready',
   'completed',
   'cancelled',
 ]);
@@ -35,6 +36,12 @@ export const paymentStatusEnum = pgEnum('payment_status', [
   'paid',
   'partial',
   'refunded',
+]);
+
+export const itemStatusEnum = pgEnum('item_status', [
+  'pending',
+  'ready',
+  'served',
 ]);
 
 export const order = pgTable(
@@ -115,6 +122,7 @@ export const orderItem = pgTable(
       .notNull(),
     subtotal: numeric('subtotal', { precision: 10, scale: 2 }).notNull(),
     total: numeric('total', { precision: 10, scale: 2 }).notNull(),
+    itemStatus: itemStatusEnum('item_status').default('pending').notNull(),
     notes: text('notes'),
     createdAt: timestamp('created_at').defaultNow().notNull(),
     updatedAt: timestamp('updated_at')
