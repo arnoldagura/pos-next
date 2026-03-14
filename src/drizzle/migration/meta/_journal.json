@@ -1,0 +1,97 @@
+{
+  "version": "7",
+  "dialect": "postgresql",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "7",
+      "when": 1764829403866,
+      "tag": "0000_naive_inertia",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1764913968705,
+      "tag": "0001_tan_centennial",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1765468056192,
+      "tag": "20251211154736_powerful_bastion",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1765475641292,
+      "tag": "20251211175401_stiff_lord_hawal",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1765476895188,
+      "tag": "20251211181455_smiling_bullseye",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1765503569135,
+      "tag": "20251212013929_heavy_wolverine",
+      "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1765505764754,
+      "tag": "20251212021604_rich_sprite",
+      "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1765523095367,
+      "tag": "20251212070455_sticky_justin_hammer",
+      "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1765556297155,
+      "tag": "20251212161817_noisy_absorbing_man",
+      "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1765738516085,
+      "tag": "20251214185516_overconfident_warstar",
+      "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1765786354434,
+      "tag": "20251215081234_dizzy_purple_man",
+      "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "7",
+      "when": 1767779000724,
+      "tag": "20260107094320_smart_thundra",
+      "breakpoints": true
+    },
+    {
+      "idx": 12,
+      "version": "7",
+      "when": 1773398914151,
+      "tag": "20260313104834_last_martin_li",
+      "breakpoints": true
+    }
+  ]
+}

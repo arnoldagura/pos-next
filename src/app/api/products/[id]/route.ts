@@ -1,0 +1,144 @@
+import { db } from '@/db/db';
+import { product, productCategory } from '@/drizzle/schema';
+import { ACTIONS, RESOURCES } from '@/lib/rbac';
+import { requireTenantId } from '@/lib/tenant-context';
+import { RouteContext, createDefaultRouteContext } from '@/lib/types';
+import { updateProductSchema } from '@/lib/validations/product';
+import { invalidateProductCache } from '@/lib/cache';
+import { protectRoute } from '@/middleware/rbac';
+import { eq, and, isNull } from 'drizzle-orm';
+import { NextRequest, NextResponse } from 'next/server';
+
+async function getProductHandler(
+  req: NextRequest,
+  context: RouteContext<{ id: string }> = createDefaultRouteContext({ id: '' })
+) {
+  try {
+    const tenantId = await requireTenantId();
+    const { id } = await context.params;
+
+    const [foundProduct] = await db
+      .select({
+        id: product.id,
+        name: product.name,
+        description: product.description,
+        categoryId: product.categoryId,
+        image: product.image,
+        status: product.status,
+        createdBy: product.createdBy,
+        updatedBy: product.updatedBy,
+        deletedAt: product.deletedAt,
+        createdAt: product.createdAt,
+        updatedAt: product.updatedAt,
+        category: {
+          id: productCategory.id,
+          name: productCategory.name,
+          slug: productCategory.slug,
+        },
+      })
+      .from(product)
+      .leftJoin(productCategory, eq(product.categoryId, productCategory.id))
+      .where(
+        and(eq(product.organizationId, tenantId), eq(product.id, id), isNull(product.deletedAt))
+      )
+      .limit(1);
+
+    if (!foundProduct) {
+      return NextResponse.json({ error: 'Product not found' }, { status: 404 });
+    }
+
+    return NextResponse.json(foundProduct);
+  } catch (error) {
+    console.error('Error fetching product:', error);
+    return NextResponse.json({ error: 'Failed to fetch product' }, { status: 500 });
+  }
+}
+
+async function updateProductHandler(
+  req: NextRequest,
+  context: RouteContext<{ id: string }> = createDefaultRouteContext({ id: '' })
+) {
+  try {
+    const tenantId = await requireTenantId();
+    const { id } = await context.params;
+    const body = await req.json();
+    const validatedData = updateProductSchema.parse(body);
+
+    const updateData: Record<string, unknown> = { ...validatedData };
+
+    const [updatedProduct] = await db
+      .update(product)
+      .set({ ...updateData, updatedAt: new Date() })
+      .where(and(eq(product.organizationId, tenantId), eq(product.id, id)))
+      .returning();
+
+    if (!updatedProduct) {
+      return NextResponse.json({ error: 'Product not found' }, { status: 404 });
+    }
+
+    await invalidateProductCache(tenantId);
+
+    return NextResponse.json(updatedProduct);
+  } catch (error) {
+    console.error('Error updating product:', error);
+
+    if (error instanceof Error) {
+      if (error.name === 'ZodError') {
+        return NextResponse.json(
+          { error: 'Validation error', details: error.cause },
+          { status: 400 }
+        );
+      }
+    }
+
+    return NextResponse.json({ error: 'Failed to update product' }, { status: 500 });
+  }
+}
+
+async function deleteProductHandler(
+  req: NextRequest,
+  context: RouteContext<{ id: string }> = createDefaultRouteContext({ id: '' })
+) {
+  try {
+    const tenantId = await requireTenantId();
+    const { id } = await context.params;
+
+    // Soft delete - set deletedAt timestamp
+    const [deletedProduct] = await db
+      .update(product)
+      .set({ deletedAt: new Date() })
+      .where(
+        and(eq(product.organizationId, tenantId), eq(product.id, id), isNull(product.deletedAt))
+      )
+      .returning({ id: product.id });
+
+    if (!deletedProduct) {
+      return NextResponse.json({ error: 'Product not found' }, { status: 404 });
+    }
+
+    await invalidateProductCache(tenantId);
+
+    return NextResponse.json({ success: true });
+  } catch (error) {
+    console.error('Error deleting product:', error);
+    return NextResponse.json({ error: 'Failed to delete product' }, { status: 500 });
+  }
+}
+
+// GET /api/products/:id - Get product by ID
+export const GET = protectRoute(getProductHandler, {
+  resource: RESOURCES.INVENTORY,
+  action: ACTIONS.READ,
+});
+
+// PATCH /api/products/:id - Update product by ID
+export const PATCH = protectRoute(updateProductHandler, {
+  resource: RESOURCES.INVENTORY,
+  action: ACTIONS.UPDATE,
+});
+
+// DELETE /api/products/:id - Delete product by ID
+export const DELETE = protectRoute(deleteProductHandler, {
+  resource: RESOURCES.INVENTORY,
+  action: ACTIONS.DELETE,
+});
