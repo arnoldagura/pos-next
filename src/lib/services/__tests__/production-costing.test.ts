@@ -19,6 +19,9 @@ vi.mock('@/db/db', () => ({
       productionRecipe: {
         findFirst: vi.fn(),
       },
+      materialInventory: {
+        findFirst: vi.fn(),
+      },
     },
   },
 }));
@@ -34,25 +37,29 @@ describe('Production Costing Service', () => {
         id: 'order_1',
         materials: [
           {
-            materialId: 'mat_1',
+            materialInventoryId: 'mat_inv_1',
             plannedQuantity: '10.00',
             actualQuantity: '10.00',
             unitCost: '5.00',
             unitOfMeasure: 'kg',
-            material: {
-              name: 'Flour',
-              defaultCost: '5.00',
+            materialInventory: {
+              cost: '5.00',
+              material: {
+                name: 'Flour',
+              },
             },
           },
           {
-            materialId: 'mat_2',
+            materialInventoryId: 'mat_inv_2',
             plannedQuantity: '5.00',
             actualQuantity: '5.00',
             unitCost: '10.00',
             unitOfMeasure: 'L',
-            material: {
-              name: 'Milk',
-              defaultCost: '10.00',
+            materialInventory: {
+              cost: '10.00',
+              material: {
+                name: 'Milk',
+              },
             },
           },
         ],
@@ -65,7 +72,7 @@ describe('Production Costing Service', () => {
       expect(result.totalCost).toBe(100); // (10 * 5) + (5 * 10) = 100
       expect(result.breakdown).toHaveLength(2);
       expect(result.breakdown[0]).toEqual({
-        materialId: 'mat_1',
+        materialInventoryId: 'mat_inv_1',
         materialName: 'Flour',
         quantity: 10,
         unitCost: 5,
@@ -79,14 +86,16 @@ describe('Production Costing Service', () => {
         id: 'order_1',
         materials: [
           {
-            materialId: 'mat_1',
+            materialInventoryId: 'mat_inv_1',
             plannedQuantity: '10.00',
             actualQuantity: null,
             unitCost: null,
             unitOfMeasure: 'kg',
-            material: {
-              name: 'Flour',
-              defaultCost: '8.00',
+            materialInventory: {
+              cost: '8.00',
+              material: {
+                name: 'Flour',
+              },
             },
           },
         ],
@@ -131,14 +140,16 @@ describe('Production Costing Service', () => {
         overheadCost: '150.00',
         materials: [
           {
-            materialId: 'mat_1',
+            materialInventoryId: 'mat_inv_1',
             plannedQuantity: '10.00',
             actualQuantity: '10.00',
             unitCost: '5.00',
             unitOfMeasure: 'kg',
-            material: {
-              name: 'Flour',
-              defaultCost: '5.00',
+            materialInventory: {
+              cost: '5.00',
+              material: {
+                name: 'Flour',
+              },
             },
           },
         ],
@@ -165,14 +176,16 @@ describe('Production Costing Service', () => {
         overheadCost: '150.00',
         materials: [
           {
-            materialId: 'mat_1',
+            materialInventoryId: 'mat_inv_1',
             plannedQuantity: '10.00',
             actualQuantity: '10.00',
             unitCost: '5.00',
             unitOfMeasure: 'kg',
-            material: {
-              name: 'Flour',
-              defaultCost: '5.00',
+            materialInventory: {
+              cost: '5.00',
+              material: {
+                name: 'Flour',
+              },
             },
           },
         ],
@@ -215,14 +228,16 @@ describe('Production Costing Service', () => {
         overheadCost: '0',
         materials: [
           {
-            materialId: 'mat_1',
+            materialInventoryId: 'mat_inv_1',
             plannedQuantity: '100.00',
             actualQuantity: '100.00',
             unitCost: '10.00',
             unitOfMeasure: 'kg',
-            material: {
-              name: 'Material',
-              defaultCost: '10.00',
+            materialInventory: {
+              cost: '10.00',
+              material: {
+                name: 'Material',
+              },
             },
           },
         ],
@@ -247,14 +262,16 @@ describe('Production Costing Service', () => {
         overheadCost: '0',
         materials: [
           {
-            materialId: 'mat_1',
+            materialInventoryId: 'mat_inv_1',
             plannedQuantity: '100.00',
             actualQuantity: '100.00',
             unitCost: '10.00',
             unitOfMeasure: 'kg',
-            material: {
-              name: 'Material',
-              defaultCost: '10.00',
+            materialInventory: {
+              cost: '10.00',
+              material: {
+                name: 'Material',
+              },
             },
           },
         ],
@@ -286,7 +303,6 @@ describe('Production Costing Service', () => {
             unitOfMeasure: 'kg',
             material: {
               name: 'Flour',
-              defaultCost: '5.00',
             },
           },
           {
@@ -295,13 +311,25 @@ describe('Production Costing Service', () => {
             unitOfMeasure: 'L',
             material: {
               name: 'Milk',
-              defaultCost: '10.00',
             },
           },
         ],
       };
 
       vi.mocked(db.query.productionRecipe.findFirst).mockResolvedValue(mockRecipe as never);
+
+      // Mock materialInventory lookups for each ingredient
+      vi.mocked(db.query.materialInventory.findFirst)
+        .mockResolvedValueOnce({
+          id: 'mat_inv_1',
+          materialId: 'mat_1',
+          cost: '5.00',
+        } as never)
+        .mockResolvedValueOnce({
+          id: 'mat_inv_2',
+          materialId: 'mat_2',
+          cost: '10.00',
+        } as never);
 
       const result = await estimateProductionCost('recipe_1', 100, 200, 150);
 
@@ -326,13 +354,19 @@ describe('Production Costing Service', () => {
             unitOfMeasure: 'kg',
             material: {
               name: 'Flour',
-              defaultCost: '5.00',
             },
           },
         ],
       };
 
       vi.mocked(db.query.productionRecipe.findFirst).mockResolvedValue(mockRecipe as never);
+
+      // Mock materialInventory lookup
+      vi.mocked(db.query.materialInventory.findFirst).mockResolvedValueOnce({
+        id: 'mat_inv_1',
+        materialId: 'mat_1',
+        cost: '5.00',
+      } as never);
 
       const result = await estimateProductionCost('recipe_1', 50);
 
@@ -367,13 +401,18 @@ describe('Production Costing Service', () => {
             unitOfMeasure: 'kg',
             material: {
               name: 'Material',
-              defaultCost: '5.00',
             },
           },
         ],
       };
 
       vi.mocked(db.query.productionRecipe.findFirst).mockResolvedValue(mockRecipe as never);
+
+      // Mock materialInventory lookups for each batch (3 batches)
+      vi.mocked(db.query.materialInventory.findFirst)
+        .mockResolvedValueOnce({ id: 'mat_inv_1', materialId: 'mat_1', cost: '5.00' } as never)
+        .mockResolvedValueOnce({ id: 'mat_inv_1', materialId: 'mat_1', cost: '5.00' } as never)
+        .mockResolvedValueOnce({ id: 'mat_inv_1', materialId: 'mat_1', cost: '5.00' } as never);
 
       // Labor cost decreases with volume (economies of scale)
       const laborCalculator = (qty: number) => 100 + qty * 0.5;
@@ -382,6 +421,7 @@ describe('Production Costing Service', () => {
 
       const result = await batchCostAnalysis(
         'recipe_1',
+        undefined,
         [10, 50, 100],
         laborCalculator,
         overheadCalculator
@@ -411,7 +451,6 @@ describe('Production Costing Service', () => {
             unitOfMeasure: 'kg',
             material: {
               name: 'Material',
-              defaultCost: '5.00',
             },
           },
         ],
@@ -419,7 +458,12 @@ describe('Production Costing Service', () => {
 
       vi.mocked(db.query.productionRecipe.findFirst).mockResolvedValue(mockRecipe as never);
 
-      const result = await batchCostAnalysis('recipe_1', [10, 50]);
+      // Mock materialInventory lookups for each batch (2 batches)
+      vi.mocked(db.query.materialInventory.findFirst)
+        .mockResolvedValueOnce({ id: 'mat_inv_1', materialId: 'mat_1', cost: '5.00' } as never)
+        .mockResolvedValueOnce({ id: 'mat_inv_1', materialId: 'mat_1', cost: '5.00' } as never);
+
+      const result = await batchCostAnalysis('recipe_1', undefined, [10, 50]);
 
       expect(result.batches[0].costSavingsVsSmallest).toBeUndefined();
       expect(result.batches[1].costSavingsVsSmallest).toBeDefined();
@@ -427,11 +471,13 @@ describe('Production Costing Service', () => {
     });
 
     it('should throw error for empty quantities array', async () => {
-      await expect(batchCostAnalysis('recipe_1', [])).rejects.toThrow(ProductionCostingError);
+      await expect(batchCostAnalysis('recipe_1', undefined, [])).rejects.toThrow(
+        ProductionCostingError
+      );
     });
 
     it('should throw error for invalid quantities', async () => {
-      await expect(batchCostAnalysis('recipe_1', [10, -5, 100])).rejects.toThrow(
+      await expect(batchCostAnalysis('recipe_1', undefined, [10, -5, 100])).rejects.toThrow(
         ProductionCostingError
       );
     });
@@ -447,7 +493,6 @@ describe('Production Costing Service', () => {
             unitOfMeasure: 'kg',
             material: {
               name: 'Material',
-              defaultCost: '5.00',
             },
           },
         ],
@@ -455,7 +500,13 @@ describe('Production Costing Service', () => {
 
       vi.mocked(db.query.productionRecipe.findFirst).mockResolvedValue(mockRecipe as never);
 
-      const result = await batchCostAnalysis('recipe_1', [100, 10, 50]);
+      // Mock materialInventory lookups for each batch (3 batches)
+      vi.mocked(db.query.materialInventory.findFirst)
+        .mockResolvedValueOnce({ id: 'mat_inv_1', materialId: 'mat_1', cost: '5.00' } as never)
+        .mockResolvedValueOnce({ id: 'mat_inv_1', materialId: 'mat_1', cost: '5.00' } as never)
+        .mockResolvedValueOnce({ id: 'mat_inv_1', materialId: 'mat_1', cost: '5.00' } as never);
+
+      const result = await batchCostAnalysis('recipe_1', undefined, [100, 10, 50]);
 
       expect(result.batches[0].quantity).toBe(10);
       expect(result.batches[1].quantity).toBe(50);

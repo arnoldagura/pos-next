@@ -24,7 +24,7 @@ describe('Inventory API - POST /api/product-inventory/waste', () => {
 
   it('should record waste', async () => {
     const wasteData = {
-      inventoryId: 'inv-1',
+      productInventoryId: 'inv-1',
       quantity: 5,
       remarks: 'Expired products',
     };
@@ -68,7 +68,7 @@ describe('Inventory API - POST /api/product-inventory/waste', () => {
       returning: vi.fn().mockResolvedValue([
         {
           id: 'waste-1',
-          inventoryId: 'inv-1',
+          productInventoryId: 'inv-1',
           type: 'waste',
           quantity: '5',
           date: new Date(),
@@ -97,7 +97,7 @@ describe('Inventory API - POST /api/product-inventory/waste', () => {
 
   it('should reject waste with insufficient stock', async () => {
     const wasteData = {
-      inventoryId: 'inv-1',
+      productInventoryId: 'inv-1',
       quantity: 150,
       remarks: 'Too much waste',
     };
@@ -139,7 +139,7 @@ describe('Inventory API - POST /api/product-inventory/waste', () => {
     const request = new NextRequest('http://localhost/api/product-inventory/waste', {
       method: 'POST',
       body: JSON.stringify({
-        inventoryId: 'inv-1',
+        productInventoryId: 'inv-1',
         quantity: 5,
         // Missing remarks
       }),

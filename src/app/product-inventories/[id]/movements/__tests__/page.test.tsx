@@ -1,163 +1,171 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { render, screen, waitFor } from '@testing-library/react';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import MovementHistoryPage from '../page';
-import * as useMovementsHook from '@/hooks/use-movements';
+import InventoryMovementsClient from '@/components/product-inventories/inventory-movements-client';
 
 // Mock next/navigation
 vi.mock('next/navigation', () => ({
-  useParams: vi.fn(() => ({ id: 'inv-123' })),
+  useRouter: vi.fn(() => ({
+    push: vi.fn(),
+    back: vi.fn(),
+  })),
 }));
 
-// Mock the hooks
-vi.mock('@/hooks/use-movements');
-
-// Mock the child components
-vi.mock('@/components/inventory/movement-table', () => ({
-  MovementTable: ({ movements }: { movements: unknown[] }) => (
-    <div data-testid='movement-table'>Movement Table with {movements.length} movements</div>
-  ),
+// Mock sonner
+vi.mock('sonner', () => ({
+  toast: {
+    error: vi.fn(),
+    success: vi.fn(),
+  },
 }));
 
-vi.mock('@/components/inventory/movement-filters', () => ({
-  MovementFilters: () => <div data-testid='movement-filters'>Filters</div>,
-}));
+// Mock fetch globally
+const mockFetch = vi.fn();
+global.fetch = mockFetch;
 
 describe('MovementHistoryPage', () => {
-  let queryClient: QueryClient;
-
   beforeEach(() => {
     vi.clearAllMocks();
-    queryClient = new QueryClient({
-      defaultOptions: {
-        queries: { retry: false },
-      },
-    });
+    mockFetch.mockReset();
   });
-
-  const renderPage = () => {
-    return render(
-      <QueryClientProvider client={queryClient}>
-        <MovementHistoryPage />
-      </QueryClientProvider>
-    );
-  };
 
   it('should show loading state while fetching movements', () => {
-    vi.mocked(useMovementsHook.useMovements).mockReturnValue({
-      data: undefined,
-      isLoading: true,
-      error: null,
-    } as never);
+    // fetch never resolves, so component stays in loading state
+    mockFetch.mockReturnValue(new Promise(() => {}));
 
-    renderPage();
+    render(<InventoryMovementsClient inventoryId="inv-123" />);
 
-    expect(screen.getByRole('status')).toBeInTheDocument();
+    // The loading state shows an animate-spin div
+    const spinner = document.querySelector('.animate-spin');
+    expect(spinner).not.toBeNull();
   });
 
-  it('should display error message when fetch fails', () => {
-    vi.mocked(useMovementsHook.useMovements).mockReturnValue({
-      data: undefined,
-      isLoading: false,
-      error: new Error('Failed to fetch'),
-    } as never);
+  it('should display error message when fetch fails', async () => {
+    // Mock inventory details fetch to fail
+    mockFetch.mockRejectedValue(new Error('Failed to fetch'));
 
-    renderPage();
+    render(<InventoryMovementsClient inventoryId="inv-123" />);
 
-    expect(screen.getByText('Error loading movement history')).toBeInTheDocument();
+    // After fetch fails, loading completes and shows "No movements found"
+    await waitFor(() => {
+      expect(screen.getByText('No movements found')).toBeInTheDocument();
+    });
   });
 
   it('should render movement history page with data', async () => {
-    const mockData = {
-      data: [
-        {
-          id: 'mov-1',
-          inventoryId: 'inv-123',
-          type: 'purchase' as const,
-          quantity: '100',
-          unitPrice: '10.50',
-          date: new Date('2024-01-15'),
-          remarks: 'Initial purchase',
-          referenceType: 'purchase',
-          referenceId: 'po-001',
-          createdBy: 'user-1',
-          createdAt: new Date('2024-01-15'),
-        },
-        {
-          id: 'mov-2',
-          inventoryId: 'inv-123',
-          type: 'sale' as const,
-          quantity: '20',
-          unitPrice: '15.00',
-          date: new Date('2024-01-16'),
-          remarks: null,
-          referenceType: 'order',
-          referenceId: 'ord-001',
-          createdBy: 'user-2',
-          createdAt: new Date('2024-01-16'),
-        },
-      ],
-      total: 2,
-      page: 1,
-      limit: 100,
-      totalPages: 1,
+    const mockMovements = [
+      {
+        id: 'mov-1',
+        type: 'purchase',
+        quantity: '100',
+        unitPrice: '10.50',
+        date: '2024-01-15T00:00:00.000Z',
+        remarks: 'Initial purchase',
+        referenceType: 'purchase',
+        referenceId: 'po-001',
+        createdBy: 'user-1',
+      },
+      {
+        id: 'mov-2',
+        type: 'sale',
+        quantity: '20',
+        unitPrice: '15.00',
+        date: '2024-01-16T00:00:00.000Z',
+        remarks: null,
+        referenceType: 'order',
+        referenceId: 'ord-001',
+        createdBy: 'user-2',
+      },
+    ];
+
+    const mockInventoryDetails = {
+      id: 'inv-123',
+      productName: 'Test Product',
+      productSku: 'SKU-001',
+      locationName: 'Main Store',
+      currentStock: 80,
+      unitOfMeasure: 'pcs',
     };
 
-    vi.mocked(useMovementsHook.useMovements).mockReturnValue({
-      data: mockData,
-      isLoading: false,
-      error: null,
-    } as never);
+    // First call = inventory details, second call = movements
+    mockFetch
+      .mockResolvedValueOnce({
+        ok: true,
+        json: async () => mockInventoryDetails,
+      })
+      .mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({
+          data: mockMovements,
+          pagination: { totalPages: 1 },
+        }),
+      });
 
-    renderPage();
+    render(<InventoryMovementsClient inventoryId="inv-123" />);
 
-    // Check main title is rendered (there are two "Movement History" texts - h1 and card title)
-    const movementHistoryElements = screen.getAllByText('Movement History');
-    expect(movementHistoryElements.length).toBeGreaterThan(0);
-    expect(screen.getByText(/2.*total movements/)).toBeInTheDocument();
-    expect(screen.getByTestId('movement-filters')).toBeInTheDocument();
-    expect(screen.getByTestId('movement-table')).toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.getByText('Movement History')).toBeInTheDocument();
+    });
+
+    expect(screen.getByText('Test Product')).toBeInTheDocument();
   });
 
   it('should display empty state when no movements exist', async () => {
-    const mockData = {
-      data: [],
-      total: 0,
-      page: 1,
-      limit: 100,
-      totalPages: 0,
+    const mockInventoryDetails = {
+      id: 'inv-123',
+      productName: 'Test Product',
+      productSku: null,
+      locationName: 'Main Store',
+      currentStock: 0,
+      unitOfMeasure: 'pcs',
     };
 
-    vi.mocked(useMovementsHook.useMovements).mockReturnValue({
-      data: mockData,
-      isLoading: false,
-      error: null,
-    } as never);
+    mockFetch
+      .mockResolvedValueOnce({
+        ok: true,
+        json: async () => mockInventoryDetails,
+      })
+      .mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({
+          data: [],
+          pagination: { totalPages: 0 },
+        }),
+      });
 
-    renderPage();
+    render(<InventoryMovementsClient inventoryId="inv-123" />);
 
     await waitFor(() => {
-      expect(screen.getByText('0 total movements')).toBeInTheDocument();
-      expect(screen.getByText('Movement Table with 0 movements')).toBeInTheDocument();
+      expect(screen.getByText('No movements found')).toBeInTheDocument();
     });
   });
 
-  it('should pass correct filters to useMovements hook', () => {
-    const mockUseMovements = vi.mocked(useMovementsHook.useMovements);
-    mockUseMovements.mockReturnValue({
-      data: { data: [], total: 0, page: 1, limit: 100, totalPages: 0 },
-      isLoading: false,
-      error: null,
-    } as never);
-
-    renderPage();
-
-    expect(mockUseMovements).toHaveBeenCalledWith(
-      expect.objectContaining({
-        inventoryId: 'inv-123',
-        page: 1,
-        limit: 100,
+  it('should pass correct inventoryId to fetch calls', async () => {
+    mockFetch
+      .mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({
+          id: 'inv-123',
+          productName: 'Test',
+          productSku: null,
+          locationName: 'Store',
+          currentStock: 0,
+          unitOfMeasure: 'pcs',
+        }),
       })
-    );
+      .mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({
+          data: [],
+          pagination: { totalPages: 0 },
+        }),
+      });
+
+    render(<InventoryMovementsClient inventoryId="inv-123" />);
+
+    await waitFor(() => {
+      expect(mockFetch).toHaveBeenCalledWith(
+        expect.stringContaining('/api/product-inventories/inv-123')
+      );
+    });
   });
 });

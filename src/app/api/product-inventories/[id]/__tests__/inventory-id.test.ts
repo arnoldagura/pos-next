@@ -29,12 +29,17 @@ describe('Inventory API - GET /api/product-inventory/[id]', () => {
       id: 'inv-1',
       productId: 'prod-1',
       productName: 'Product 1',
-      productSku: 'SKU001',
       productDescription: 'Test product',
       locationId: 'loc-1',
       locationName: 'Location 1',
-      alertThreshold: '10',
+      sku: 'SKU001',
+      slug: 'product-1',
+      barcode: null,
+      unitPrice: '10.00',
+      cost: '5.00',
       unitOfMeasure: 'pcs',
+      taxRate: '0',
+      alertThreshold: '10',
       createdAt: new Date('2024-01-01'),
       updatedAt: new Date('2024-01-01'),
     };
@@ -42,7 +47,7 @@ describe('Inventory API - GET /api/product-inventory/[id]', () => {
     const mockMovements = [
       {
         id: 'mov-1',
-        inventoryId: 'inv-1',
+        productInventoryId: 'inv-1',
         type: 'purchase',
         quantity: '100',
         unitPrice: '10.00',
@@ -119,13 +124,19 @@ describe('Inventory API - PATCH /api/product-inventory/[id]', () => {
     const updateData = {
       alertThreshold: 20,
       unitOfMeasure: 'kg',
+      slug: 'product-1',
     };
 
-    // Mock inventory exists check
+    // Mock inventory exists check (leftJoin with .then)
     vi.mocked(db.select).mockReturnValueOnce({
       from: vi.fn().mockReturnThis(),
+      leftJoin: vi.fn().mockReturnThis(),
       where: vi.fn().mockReturnThis(),
-      limit: vi.fn().mockResolvedValue([{ id: 'inv-1' }]),
+      limit: vi.fn().mockReturnThis(),
+      then: vi.fn().mockResolvedValue({
+        product_inventory: { id: 'inv-1', slug: 'product-1', sku: 'SKU-001' },
+        product: { name: 'Product 1' },
+      }),
     } as never);
 
     // Mock update
@@ -159,22 +170,25 @@ describe('Inventory API - PATCH /api/product-inventory/[id]', () => {
   });
 
   it('should return 404 if inventory not found', async () => {
+    // Mock inventory exists check returns null
     vi.mocked(db.select).mockReturnValueOnce({
       from: vi.fn().mockReturnThis(),
+      leftJoin: vi.fn().mockReturnThis(),
       where: vi.fn().mockReturnThis(),
-      limit: vi.fn().mockResolvedValue([]),
+      limit: vi.fn().mockReturnThis(),
+      then: vi.fn().mockResolvedValue(null),
     } as never);
 
     const request = new NextRequest('http://localhost/api/product-inventory/non-existent', {
       method: 'PATCH',
-      body: JSON.stringify({ alertThreshold: 20 }),
+      body: JSON.stringify({ alertThreshold: 20, slug: 'test' }),
     });
     const context = createDefaultRouteContext({ id: 'non-existent' });
     const response = await updateInventoryHandler(request, context);
     const data = await response.json();
 
     expect(response.status).toBe(404);
-    expect(data.error).toBe('Inventory not found');
+    expect(data.error).toBe('Product Inventory not found');
   });
 });
 

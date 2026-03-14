@@ -24,7 +24,7 @@ describe('Inventory API - POST /api/product-inventory/movement', () => {
 
   it('should create purchase movement', async () => {
     const movementData = {
-      inventoryId: 'inv-1',
+      productInventoryId: 'inv-1',
       type: 'purchase' as const,
       quantity: 100,
       unitPrice: 10.5,
@@ -49,7 +49,7 @@ describe('Inventory API - POST /api/product-inventory/movement', () => {
       returning: vi.fn().mockResolvedValue([
         {
           id: 'mov-1',
-          inventoryId: 'inv-1',
+          productInventoryId: 'inv-1',
           type: 'purchase',
           quantity: '100',
           unitPrice: '10.50',
@@ -81,7 +81,7 @@ describe('Inventory API - POST /api/product-inventory/movement', () => {
 
   it('should validate stock availability for sales', async () => {
     const movementData = {
-      inventoryId: 'inv-1',
+      productInventoryId: 'inv-1',
       type: 'sale' as const,
       quantity: 150,
     };
@@ -130,7 +130,7 @@ describe('Inventory API - POST /api/product-inventory/movement', () => {
     const request = new NextRequest('http://localhost/api/product-inventory/movement', {
       method: 'POST',
       body: JSON.stringify({
-        inventoryId: 'non-existent',
+        productInventoryId: 'non-existent',
         type: 'purchase',
         quantity: 100,
       }),

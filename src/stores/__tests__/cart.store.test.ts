@@ -65,11 +65,12 @@ describe('Cart Store', () => {
 
     it('should delete a cart', () => {
       const cart1Id = useCartStore.getState().createCart();
-      // const cart2Id = useCartStore.getState().createCart();
+      const cart2Id = useCartStore.getState().createCart();
 
       useCartStore.getState().deleteCart(cart1Id);
       expect(useCartStore.getState().carts.size).toBe(1);
       expect(useCartStore.getState().carts.has(cart1Id)).toBe(false);
+      expect(useCartStore.getState().carts.has(cart2Id)).toBe(true);
     });
 
     it('should switch to another cart when deleting active cart', () => {

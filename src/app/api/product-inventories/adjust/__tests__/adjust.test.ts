@@ -24,7 +24,7 @@ describe('Inventory API - POST /api/product-inventory/adjust', () => {
 
   it('should create positive adjustment', async () => {
     const adjustmentData = {
-      inventoryId: 'inv-1',
+      productInventoryId: 'inv-1',
       quantity: 10,
       remarks: 'Found missing items',
     };
@@ -60,7 +60,7 @@ describe('Inventory API - POST /api/product-inventory/adjust', () => {
       returning: vi.fn().mockResolvedValue([
         {
           id: 'adj-1',
-          inventoryId: 'inv-1',
+          productInventoryId: 'inv-1',
           type: 'adjustment',
           quantity: '10',
           date: new Date(),
@@ -89,7 +89,7 @@ describe('Inventory API - POST /api/product-inventory/adjust', () => {
 
   it('should create negative adjustment with validation', async () => {
     const adjustmentData = {
-      inventoryId: 'inv-1',
+      productInventoryId: 'inv-1',
       quantity: -5,
       remarks: 'Damaged items removed',
     };
@@ -125,7 +125,7 @@ describe('Inventory API - POST /api/product-inventory/adjust', () => {
       returning: vi.fn().mockResolvedValue([
         {
           id: 'adj-1',
-          inventoryId: 'inv-1',
+          productInventoryId: 'inv-1',
           type: 'adjustment',
           quantity: '5',
           date: new Date(),
@@ -152,7 +152,7 @@ describe('Inventory API - POST /api/product-inventory/adjust', () => {
 
   it('should reject negative adjustment with insufficient stock', async () => {
     const adjustmentData = {
-      inventoryId: 'inv-1',
+      productInventoryId: 'inv-1',
       quantity: -150,
       remarks: 'Too many items',
     };
@@ -192,7 +192,7 @@ describe('Inventory API - POST /api/product-inventory/adjust', () => {
     const request = new NextRequest('http://localhost/api/product-inventory/adjust', {
       method: 'POST',
       body: JSON.stringify({
-        inventoryId: 'inv-1',
+        productInventoryId: 'inv-1',
         quantity: 10,
         // Missing remarks
       }),
