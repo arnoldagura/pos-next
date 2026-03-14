@@ -1,4 +1,4 @@
-import { chromium, FullConfig } from '@playwright/test';
+import { chromium } from '@playwright/test';
 import dotenv from 'dotenv';
 
 dotenv.config();
@@ -11,8 +11,8 @@ dotenv.config();
  *   1. Run `npx tsx src/db/seed-e2e-user.ts` to create the test user
  *   2. Set E2E_TEST_EMAIL and E2E_TEST_PASSWORD in .env
  */
-async function globalSetup(config: FullConfig) {
-  const baseURL = config?.use?.baseURL || 'http://localhost:3000';
+async function globalSetup() {
+  const baseURL = process.env.PLAYWRIGHT_BASE_URL || 'http://localhost:3000';
 
   const testEmail = process.env.E2E_TEST_EMAIL || 'e2e-test@example.com';
   const testPassword = process.env.E2E_TEST_PASSWORD || 'Test@123456';
