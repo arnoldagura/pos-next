@@ -88,67 +88,67 @@ export default function QuickCreateProductDialog({
 
   return (
     <>
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className='sm:max-w-[400px]'>
-        <DialogHeader>
-          <DialogTitle>Quick Create Product</DialogTitle>
-          <DialogDescription>
-            Create a new product to add to inventory. You can edit details later.
-          </DialogDescription>
-        </DialogHeader>
-        <form onSubmit={handleSubmit} className='space-y-4'>
-          <div className='space-y-2'>
-            <Label htmlFor='product-name'>Product Name *</Label>
-            <Input
-              id='product-name'
-              placeholder='e.g., Iced Coffee, Chicken Wings'
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              autoFocus
-            />
-          </div>
-          <div className='space-y-2'>
-            <Label>Category (Optional)</Label>
-            <SearchableCombobox
-              options={categories}
-              value={categoryId}
-              onValueChange={setCategoryId}
-              placeholder='Select category'
-              searchPlaceholder='Search categories...'
-              emptyMessage='No categories found.'
-              loading={loadingCategories}
-              onCreateNew={() => setQuickCreateCategoryOpen(true)}
-              createNewLabel='Create new category'
-            />
-          </div>
-          <DialogFooter>
-            <Button
-              type='button'
-              variant='outline'
-              onClick={() => onOpenChange(false)}
-              disabled={submitting}
-            >
-              Cancel
-            </Button>
-            <Button type='submit' disabled={submitting || !name.trim()}>
-              {submitting && <Loader2 className='mr-2 h-4 w-4 animate-spin' />}
-              Create Product
-            </Button>
-          </DialogFooter>
-        </form>
-      </DialogContent>
-    </Dialog>
+      <Dialog open={open} onOpenChange={onOpenChange}>
+        <DialogContent className='sm:max-w-[400px]'>
+          <DialogHeader>
+            <DialogTitle>Quick Create Product</DialogTitle>
+            <DialogDescription>
+              Create a new product to add to inventory. You can edit details later.
+            </DialogDescription>
+          </DialogHeader>
+          <form onSubmit={handleSubmit} className='space-y-4'>
+            <div className='space-y-2'>
+              <Label htmlFor='product-name'>Product Name *</Label>
+              <Input
+                id='product-name'
+                placeholder='e.g., Iced Coffee, Chicken Wings'
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                autoFocus
+              />
+            </div>
+            <div className='space-y-2'>
+              <Label>Category (Optional)</Label>
+              <SearchableCombobox
+                options={categories}
+                value={categoryId}
+                onValueChange={setCategoryId}
+                placeholder='Select category'
+                searchPlaceholder='Search categories...'
+                emptyMessage='No categories found.'
+                loading={loadingCategories}
+                onCreateNew={() => setQuickCreateCategoryOpen(true)}
+                createNewLabel='Create new category'
+              />
+            </div>
+            <DialogFooter>
+              <Button
+                type='button'
+                variant='outline'
+                onClick={() => onOpenChange(false)}
+                disabled={submitting}
+              >
+                Cancel
+              </Button>
+              <Button type='submit' disabled={submitting || !name.trim()}>
+                {submitting && <Loader2 className='mr-2 h-4 w-4 animate-spin' />}
+                Create Product
+              </Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
 
-    <QuickCreateCategoryDialog
-      open={quickCreateCategoryOpen}
-      onOpenChange={setQuickCreateCategoryOpen}
-      apiEndpoint='/api/categories'
-      title='Create Product Category'
-      onCreated={(cat) => {
-        setCategories((prev) => [...prev, { value: cat.id, label: cat.name }]);
-        setCategoryId(cat.id);
-      }}
-    />
-  </>
+      <QuickCreateCategoryDialog
+        open={quickCreateCategoryOpen}
+        onOpenChange={setQuickCreateCategoryOpen}
+        apiEndpoint='/api/categories'
+        title='Create Product Category'
+        onCreated={(cat) => {
+          setCategories((prev) => [...prev, { value: cat.id, label: cat.name }]);
+          setCategoryId(cat.id);
+        }}
+      />
+    </>
   );
 }

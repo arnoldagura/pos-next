@@ -109,82 +109,82 @@ export default function QuickCreateMaterialDialog({
 
   return (
     <>
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className='sm:max-w-[400px]'>
-        <DialogHeader>
-          <DialogTitle>Quick Create Material</DialogTitle>
-          <DialogDescription>
-            Create a new material to add to inventory. You can edit details later.
-          </DialogDescription>
-        </DialogHeader>
-        <form onSubmit={handleSubmit} className='space-y-4'>
-          <div className='space-y-2'>
-            <Label htmlFor='material-name'>Material Name *</Label>
-            <Input
-              id='material-name'
-              placeholder='e.g., Coffee Beans, Flour, Sugar'
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              autoFocus
-            />
-          </div>
-          <div className='space-y-2'>
-            <Label>Material Type *</Label>
-            <Select value={type} onValueChange={setType}>
-              <SelectTrigger>
-                <SelectValue placeholder='Select type' />
-              </SelectTrigger>
-              <SelectContent>
-                {MATERIAL_TYPES.map((t) => (
-                  <SelectItem key={t.value} value={t.value}>
-                    {t.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-          <div className='space-y-2'>
-            <Label>Category (Optional)</Label>
-            <SearchableCombobox
-              options={categories}
-              value={categoryId}
-              onValueChange={setCategoryId}
-              placeholder='Select category'
-              searchPlaceholder='Search categories...'
-              emptyMessage='No categories found.'
-              loading={loadingCategories}
-              onCreateNew={() => setQuickCreateCategoryOpen(true)}
-              createNewLabel='Create new category'
-            />
-          </div>
-          <DialogFooter>
-            <Button
-              type='button'
-              variant='outline'
-              onClick={() => onOpenChange(false)}
-              disabled={submitting}
-            >
-              Cancel
-            </Button>
-            <Button type='submit' disabled={submitting || !name.trim() || !type}>
-              {submitting && <Loader2 className='mr-2 h-4 w-4 animate-spin' />}
-              Create Material
-            </Button>
-          </DialogFooter>
-        </form>
-      </DialogContent>
-    </Dialog>
+      <Dialog open={open} onOpenChange={onOpenChange}>
+        <DialogContent className='sm:max-w-[400px]'>
+          <DialogHeader>
+            <DialogTitle>Quick Create Material</DialogTitle>
+            <DialogDescription>
+              Create a new material to add to inventory. You can edit details later.
+            </DialogDescription>
+          </DialogHeader>
+          <form onSubmit={handleSubmit} className='space-y-4'>
+            <div className='space-y-2'>
+              <Label htmlFor='material-name'>Material Name *</Label>
+              <Input
+                id='material-name'
+                placeholder='e.g., Coffee Beans, Flour, Sugar'
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                autoFocus
+              />
+            </div>
+            <div className='space-y-2'>
+              <Label>Material Type *</Label>
+              <Select value={type} onValueChange={setType}>
+                <SelectTrigger>
+                  <SelectValue placeholder='Select type' />
+                </SelectTrigger>
+                <SelectContent>
+                  {MATERIAL_TYPES.map((t) => (
+                    <SelectItem key={t.value} value={t.value}>
+                      {t.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className='space-y-2'>
+              <Label>Category (Optional)</Label>
+              <SearchableCombobox
+                options={categories}
+                value={categoryId}
+                onValueChange={setCategoryId}
+                placeholder='Select category'
+                searchPlaceholder='Search categories...'
+                emptyMessage='No categories found.'
+                loading={loadingCategories}
+                onCreateNew={() => setQuickCreateCategoryOpen(true)}
+                createNewLabel='Create new category'
+              />
+            </div>
+            <DialogFooter>
+              <Button
+                type='button'
+                variant='outline'
+                onClick={() => onOpenChange(false)}
+                disabled={submitting}
+              >
+                Cancel
+              </Button>
+              <Button type='submit' disabled={submitting || !name.trim() || !type}>
+                {submitting && <Loader2 className='mr-2 h-4 w-4 animate-spin' />}
+                Create Material
+              </Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
 
-    <QuickCreateCategoryDialog
-      open={quickCreateCategoryOpen}
-      onOpenChange={setQuickCreateCategoryOpen}
-      apiEndpoint='/api/material-categories'
-      title='Create Material Category'
-      onCreated={(cat) => {
-        setCategories((prev) => [...prev, { value: cat.id, label: cat.name }]);
-        setCategoryId(cat.id);
-      }}
-    />
+      <QuickCreateCategoryDialog
+        open={quickCreateCategoryOpen}
+        onOpenChange={setQuickCreateCategoryOpen}
+        apiEndpoint='/api/material-categories'
+        title='Create Material Category'
+        onCreated={(cat) => {
+          setCategories((prev) => [...prev, { value: cat.id, label: cat.name }]);
+          setCategoryId(cat.id);
+        }}
+      />
     </>
   );
 }
