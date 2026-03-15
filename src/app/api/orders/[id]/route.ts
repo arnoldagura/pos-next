@@ -67,9 +67,7 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
     return NextResponse.json({
       order: orderData,
       items,
-      branding: branding
-        ? { logo: branding.logo, companyName: branding.companyName }
-        : undefined,
+      branding: branding ? { logo: branding.logo, companyName: branding.companyName } : undefined,
     });
   } catch (error) {
     console.error('Error fetching order:', error);
