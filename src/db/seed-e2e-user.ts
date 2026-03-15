@@ -27,11 +27,7 @@ async function seedE2EUser() {
     console.log(`Creating E2E test user: ${email}\n`);
 
     // Check if user already exists
-    const [existingUser] = await db
-      .select()
-      .from(user)
-      .where(eq(user.email, email))
-      .limit(1);
+    const [existingUser] = await db.select().from(user).where(eq(user.email, email)).limit(1);
 
     let userId: string;
 
@@ -77,11 +73,7 @@ async function seedE2EUser() {
       console.log('User already assigned to an organization');
     } else {
       // Find admin role for this org
-      const [adminRole] = await db
-        .select()
-        .from(role)
-        .where(eq(role.name, 'admin'))
-        .limit(1);
+      const [adminRole] = await db.select().from(role).where(eq(role.name, 'admin')).limit(1);
 
       if (!adminRole) {
         console.error('No admin role found. Run seed-tenants.ts first.');

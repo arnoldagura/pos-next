@@ -32,7 +32,7 @@ describe('MovementHistoryPage', () => {
     // fetch never resolves, so component stays in loading state
     mockFetch.mockReturnValue(new Promise(() => {}));
 
-    render(<InventoryMovementsClient inventoryId="inv-123" />);
+    render(<InventoryMovementsClient inventoryId='inv-123' />);
 
     // The loading state shows an animate-spin div
     const spinner = document.querySelector('.animate-spin');
@@ -43,7 +43,7 @@ describe('MovementHistoryPage', () => {
     // Mock inventory details fetch to fail
     mockFetch.mockRejectedValue(new Error('Failed to fetch'));
 
-    render(<InventoryMovementsClient inventoryId="inv-123" />);
+    render(<InventoryMovementsClient inventoryId='inv-123' />);
 
     // After fetch fails, loading completes and shows "No movements found"
     await waitFor(() => {
@@ -100,7 +100,7 @@ describe('MovementHistoryPage', () => {
         }),
       });
 
-    render(<InventoryMovementsClient inventoryId="inv-123" />);
+    render(<InventoryMovementsClient inventoryId='inv-123' />);
 
     await waitFor(() => {
       expect(screen.getByText('Movement History')).toBeInTheDocument();
@@ -132,7 +132,7 @@ describe('MovementHistoryPage', () => {
         }),
       });
 
-    render(<InventoryMovementsClient inventoryId="inv-123" />);
+    render(<InventoryMovementsClient inventoryId='inv-123' />);
 
     await waitFor(() => {
       expect(screen.getByText('No movements found')).toBeInTheDocument();
@@ -160,7 +160,7 @@ describe('MovementHistoryPage', () => {
         }),
       });
 
-    render(<InventoryMovementsClient inventoryId="inv-123" />);
+    render(<InventoryMovementsClient inventoryId='inv-123' />);
 
     await waitFor(() => {
       expect(mockFetch).toHaveBeenCalledWith(

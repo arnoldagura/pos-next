@@ -3,11 +3,6 @@ import { db } from '@/db/db';
 import { organization } from '@/drizzle/schema';
 import { eq } from 'drizzle-orm';
 
-/**
- * Extract tenant information from the request
- * Supports multiple strategies: subdomain, path, query parameter
- */
-
 interface TenantInfo {
   organizationId: string | null;
   organizationSlug: string | null;
@@ -15,24 +10,40 @@ interface TenantInfo {
 }
 
 /**
- * Check if current request has a subdomain
- * Returns subdomain string if present, null otherwise
+ * Extract tenant subdomain from a hostname.
+ * Strips the configured app domain to find the tenant prefix.
+ *
+ * Examples with NEXT_PUBLIC_APP_DOMAIN="pos.arnoldagura.com":
+ *   cafemaria.pos.arnoldagura.com → "cafemaria"
+ *   pos.arnoldagura.com           → null (no tenant, it's the app root)
+ *
+ * Examples with NEXT_PUBLIC_APP_DOMAIN="localhost":
+ *   acme.localhost:3000           → "acme"
+ *   localhost:3000                → null
  */
-export async function getCurrentSubdomain(): Promise<string | null> {
-  const headersList = await headers();
-  const host = headersList.get('host') || '';
+export function extractTenantSubdomain(host: string): string | null {
   const hostWithoutPort = host.split(':')[0];
-  const parts = hostWithoutPort.split('.');
+  const appDomain = process.env.NEXT_PUBLIC_APP_DOMAIN || 'localhost';
 
-  if (parts.length < 2) {
+  // Host must end with the app domain and have something before it
+  if (!hostWithoutPort.endsWith(appDomain)) {
     return null;
   }
 
-  const subdomain = parts[0];
-  const domain = parts[parts.length - 1];
+  // Strip the app domain to get the tenant prefix
+  // e.g. "cafemaria.pos.arnoldagura.com" minus ".pos.arnoldagura.com" = "cafemaria"
+  const prefix = hostWithoutPort.slice(0, hostWithoutPort.length - appDomain.length);
 
-  // Skip if no subdomain, www, or just localhost
-  if (!subdomain || subdomain === 'www' || (domain === 'localhost' && parts.length === 1)) {
+  // No prefix means we're on the root domain (no tenant)
+  if (!prefix || prefix === '.') {
+    return null;
+  }
+
+  // Remove trailing dot: "cafemaria." → "cafemaria"
+  const subdomain = prefix.endsWith('.') ? prefix.slice(0, -1) : prefix;
+
+  // Skip www
+  if (!subdomain || subdomain === 'www') {
     return null;
   }
 
@@ -40,38 +51,24 @@ export async function getCurrentSubdomain(): Promise<string | null> {
 }
 
 /**
+ * Check if current request has a tenant subdomain
+ * Returns subdomain string if present, null otherwise
+ */
+export async function getCurrentSubdomain(): Promise<string | null> {
+  const headersList = await headers();
+  const host = headersList.get('host') || '';
+  return extractTenantSubdomain(host);
+}
+
+/**
  * Get organization from subdomain
- * Example: acme.yourapp.com -> "acme"
+ * Example: acme.pos.arnoldagura.com -> "acme"
  * Example: acme.localhost:3000 -> "acme"
  */
 export async function getOrganizationFromSubdomain(): Promise<TenantInfo> {
-  const headersList = await headers();
-  const host = headersList.get('host') || '';
+  const subdomain = await getCurrentSubdomain();
 
-  // Remove port if present (e.g., "acme.localhost:3000" -> "acme.localhost")
-  const hostWithoutPort = host.split(':')[0];
-
-  // Extract subdomain
-  const parts = hostWithoutPort.split('.');
-
-  // For localhost: "acme.localhost" -> parts = ["acme", "localhost"]
-  // For production: "acme.yourapp.com" -> parts = ["acme", "yourapp", "com"]
-
-  // Need at least 2 parts (subdomain.domain)
-  if (parts.length < 2) {
-    return { organizationId: null, organizationSlug: null, organization: null };
-  }
-
-  const subdomain = parts[0];
-  const domain = parts[parts.length - 1];
-
-  // Skip if no subdomain or if it's www
-  if (!subdomain || subdomain === 'www') {
-    return { organizationId: null, organizationSlug: null, organization: null };
-  }
-
-  // For localhost, check if it's just "localhost" without subdomain
-  if (domain === 'localhost' && parts.length === 1) {
+  if (!subdomain) {
     return { organizationId: null, organizationSlug: null, organization: null };
   }
 

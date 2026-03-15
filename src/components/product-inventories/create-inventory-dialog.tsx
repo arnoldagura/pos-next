@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
@@ -33,6 +33,8 @@ import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 import { Loader2 } from 'lucide-react';
 import { Product, Location } from '@/lib/types';
+import { SearchableCombobox, ComboboxOption } from '@/components/ui/searchable-combobox';
+import QuickCreateProductDialog from './quick-create-product-dialog';
 
 const formSchema = z.object({
   productId: z.string().min(1, 'Product is required'),
@@ -61,8 +63,10 @@ export default function CreateInventoryDialog({
 }: CreateInventoryDialogProps) {
   const [products, setProducts] = useState<Product[]>([]);
   const [locations, setLocations] = useState<Location[]>([]);
-  const [loading, setLoading] = useState(false);
+  const [loadingProducts, setLoadingProducts] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [quickCreateOpen, setQuickCreateOpen] = useState(false);
+  const searchTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -86,10 +90,12 @@ export default function CreateInventoryDialog({
     }
   }, [open]);
 
-  const fetchProducts = async () => {
+  const fetchProducts = async (search?: string) => {
     try {
-      setLoading(true);
-      const response = await fetch('/api/products?status=active&limit=100');
+      setLoadingProducts(true);
+      const params = new URLSearchParams({ status: 'active', limit: '100' });
+      if (search) params.set('search', search);
+      const response = await fetch(`/api/products?${params}`);
       if (!response.ok) throw new Error('Failed to fetch products');
       const data = await response.json();
       setProducts(data.products || []);
@@ -97,9 +103,16 @@ export default function CreateInventoryDialog({
       console.error('Error fetching products:', error);
       toast.error('Failed to load products');
     } finally {
-      setLoading(false);
+      setLoadingProducts(false);
     }
   };
+
+  const handleProductSearch = useCallback((search: string) => {
+    if (searchTimerRef.current) clearTimeout(searchTimerRef.current);
+    searchTimerRef.current = setTimeout(() => {
+      fetchProducts(search || undefined);
+    }, 300);
+  }, []);
 
   const fetchLocations = async () => {
     try {
@@ -111,6 +124,16 @@ export default function CreateInventoryDialog({
       console.error('Error fetching locations:', error);
       toast.error('Failed to load locations');
     }
+  };
+
+  const productOptions: ComboboxOption[] = products.map((p) => ({
+    value: p.id,
+    label: p.name,
+  }));
+
+  const handleProductCreated = (product: { id: string; name: string }) => {
+    setProducts((prev) => [{ ...product, status: true } as Product, ...prev]);
+    form.setValue('productId', product.id, { shouldValidate: true });
   };
 
   const onSubmit = async (values: FormValues) => {
@@ -151,212 +174,212 @@ export default function CreateInventoryDialog({
   };
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className='sm:max-w-[600px] max-h-[90vh] overflow-y-auto'>
-        <DialogHeader>
-          <DialogTitle>Add Product to Inventory</DialogTitle>
-          <DialogDescription>
-            Set up inventory tracking for a product at a specific location. This creates a unique
-            inventory item with its own pricing and unit of measure.
-          </DialogDescription>
-        </DialogHeader>
+    <>
+      <Dialog open={open} onOpenChange={onOpenChange}>
+        <DialogContent className='sm:max-w-[600px] max-h-[90vh] overflow-y-auto'>
+          <DialogHeader>
+            <DialogTitle>Add Product to Inventory</DialogTitle>
+            <DialogDescription>
+              Set up inventory tracking for a product at a specific location. This creates a unique
+              inventory item with its own pricing and unit of measure.
+            </DialogDescription>
+          </DialogHeader>
 
-        <Form form={form} onSubmit={onSubmit} className='space-y-4'>
-          <FormField
-            control={form.control}
-            name='productId'
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Product *</FormLabel>
-                <Select
-                  onValueChange={(value) => {
-                    field.onChange(value);
-                  }}
-                  value={field.value}
-                >
-                  <FormControl>
-                    <SelectTrigger>
-                      <SelectValue placeholder='Select product' />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    {loading ? (
-                      <div className='p-2 text-center text-sm text-muted-foreground'>
-                        Loading products...
-                      </div>
-                    ) : products.length === 0 ? (
-                      <div className='p-2 text-center text-sm text-muted-foreground'>
-                        No products found
-                      </div>
-                    ) : (
-                      products.map((product) => (
-                        <SelectItem key={product.id} value={product.id}>
-                          {product.name}
-                        </SelectItem>
-                      ))
-                    )}
-                  </SelectContent>
-                </Select>
-                <FormDescription>Base product template</FormDescription>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name='locationId'
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Location *</FormLabel>
-                <Select onValueChange={field.onChange} value={field.value}>
-                  <FormControl>
-                    <SelectTrigger>
-                      <SelectValue placeholder='Select location' />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    {locations.length === 0 ? (
-                      <div className='p-2 text-center text-sm text-muted-foreground'>
-                        No locations found
-                      </div>
-                    ) : (
-                      locations.map((location) => (
-                        <SelectItem key={location.id} value={location.id}>
-                          {location.name}
-                        </SelectItem>
-                      ))
-                    )}
-                  </SelectContent>
-                </Select>
-                <FormDescription>
-                  Location where this inventory item will be tracked
-                </FormDescription>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name='variantName'
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Variant Name (Optional)</FormLabel>
-                <FormControl>
-                  <Input placeholder='e.g., Standard, Large, Premium' {...field} />
-                </FormControl>
-                <FormDescription>
-                  Distinguishes different variants of the same product
-                </FormDescription>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name='barcode'
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Barcode</FormLabel>
-                <FormControl>
-                  <Input placeholder='Enter barcode' {...field} />
-                </FormControl>
-                <FormDescription>Optional barcode for this inventory item</FormDescription>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <div className='grid grid-cols-2 gap-4'>
+          <Form form={form} onSubmit={onSubmit} className='space-y-4'>
             <FormField
               control={form.control}
-              name='unitPrice'
+              name='productId'
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Unit Price (Selling) *</FormLabel>
+                  <FormLabel>Product *</FormLabel>
                   <FormControl>
-                    <Input type='number' step='0.01' min='0' placeholder='0.00' {...field} />
+                    <SearchableCombobox
+                      options={productOptions}
+                      value={field.value}
+                      onValueChange={field.onChange}
+                      placeholder='Select product'
+                      searchPlaceholder='Search products...'
+                      emptyMessage='No products found.'
+                      loading={loadingProducts}
+                      onSearchChange={handleProductSearch}
+                      onCreateNew={() => setQuickCreateOpen(true)}
+                      createNewLabel='Create new product'
+                    />
                   </FormControl>
-                  <FormDescription>Price per unit for selling</FormDescription>
+                  <FormDescription>Base product template</FormDescription>
                   <FormMessage />
                 </FormItem>
               )}
             />
+            <FormField
+              control={form.control}
+              name='locationId'
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Location *</FormLabel>
+                  <Select onValueChange={field.onChange} value={field.value}>
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder='Select location' />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {locations.length === 0 ? (
+                        <div className='p-2 text-center text-sm text-muted-foreground'>
+                          No locations found
+                        </div>
+                      ) : (
+                        locations.map((location) => (
+                          <SelectItem key={location.id} value={location.id}>
+                            {location.name}
+                          </SelectItem>
+                        ))
+                      )}
+                    </SelectContent>
+                  </Select>
+                  <FormDescription>
+                    Location where this inventory item will be tracked
+                  </FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name='variantName'
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Variant Name (Optional)</FormLabel>
+                  <FormControl>
+                    <Input placeholder='e.g., Standard, Large, Premium' {...field} />
+                  </FormControl>
+                  <FormDescription>
+                    Distinguishes different variants of the same product
+                  </FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name='barcode'
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Barcode</FormLabel>
+                  <FormControl>
+                    <Input placeholder='Enter barcode' {...field} />
+                  </FormControl>
+                  <FormDescription>Optional barcode for this inventory item</FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <div className='grid grid-cols-2 gap-4'>
+              <FormField
+                control={form.control}
+                name='unitPrice'
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Unit Price (Selling) *</FormLabel>
+                    <FormControl>
+                      <Input type='number' step='0.01' min='0' placeholder='0.00' {...field} />
+                    </FormControl>
+                    <FormDescription>Price per unit for selling</FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
-            <FormField
-              control={form.control}
-              name='cost'
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Cost Price</FormLabel>
-                  <FormControl>
-                    <Input type='number' step='0.01' min='0' placeholder='0.00' {...field} />
-                  </FormControl>
-                  <FormDescription>Cost per unit</FormDescription>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          </div>
-          <div className='grid grid-cols-2 gap-4'>
-            <FormField
-              control={form.control}
-              name='unitOfMeasure'
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Unit of Measure *</FormLabel>
-                  <FormControl>
-                    <Input placeholder='e.g., slice, whole, kg' {...field} />
-                  </FormControl>
-                  <FormDescription>Unit for this inventory</FormDescription>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+              <FormField
+                control={form.control}
+                name='cost'
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Cost Price</FormLabel>
+                    <FormControl>
+                      <Input type='number' step='0.01' min='0' placeholder='0.00' {...field} />
+                    </FormControl>
+                    <FormDescription>Cost per unit</FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+            <div className='grid grid-cols-2 gap-4'>
+              <FormField
+                control={form.control}
+                name='unitOfMeasure'
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Unit of Measure *</FormLabel>
+                    <FormControl>
+                      <Input placeholder='e.g., slice, whole, kg' {...field} />
+                    </FormControl>
+                    <FormDescription>Unit for this inventory</FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
+              <FormField
+                control={form.control}
+                name='taxRate'
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Tax Rate (%)</FormLabel>
+                    <FormControl>
+                      <Input
+                        type='number'
+                        step='0.01'
+                        min='0'
+                        max='100'
+                        placeholder='0'
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormDescription>Tax percentage</FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
             <FormField
               control={form.control}
-              name='taxRate'
+              name='alertThreshold'
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Tax Rate (%)</FormLabel>
+                  <FormLabel>Alert Threshold</FormLabel>
                   <FormControl>
-                    <Input type='number' step='0.01' min='0' max='100' placeholder='0' {...field} />
+                    <Input type='number' step='0.01' min='0' placeholder='10' {...field} />
                   </FormControl>
-                  <FormDescription>Tax percentage</FormDescription>
+                  <FormDescription>Get notified when stock falls below this level</FormDescription>
                   <FormMessage />
                 </FormItem>
               )}
             />
-          </div>
-          <FormField
-            control={form.control}
-            name='alertThreshold'
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Alert Threshold</FormLabel>
-                <FormControl>
-                  <Input type='number' step='0.01' min='0' placeholder='10' {...field} />
-                </FormControl>
-                <FormDescription>Get notified when stock falls below this level</FormDescription>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <DialogFooter>
-            <Button
-              type='button'
-              variant='outline'
-              onClick={() => onOpenChange(false)}
-              disabled={submitting}
-            >
-              Cancel
-            </Button>
-            <Button type='submit' disabled={submitting}>
-              {submitting && <Loader2 className='mr-2 h-4 w-4 animate-spin' />}
-              Add to Inventory
-            </Button>
-          </DialogFooter>
-        </Form>
-      </DialogContent>
-    </Dialog>
+            <DialogFooter>
+              <Button
+                type='button'
+                variant='outline'
+                onClick={() => onOpenChange(false)}
+                disabled={submitting}
+              >
+                Cancel
+              </Button>
+              <Button type='submit' disabled={submitting}>
+                {submitting && <Loader2 className='mr-2 h-4 w-4 animate-spin' />}
+                Add to Inventory
+              </Button>
+            </DialogFooter>
+          </Form>
+        </DialogContent>
+      </Dialog>
+
+      <QuickCreateProductDialog
+        open={quickCreateOpen}
+        onOpenChange={setQuickCreateOpen}
+        onCreated={handleProductCreated}
+      />
+    </>
   );
 }

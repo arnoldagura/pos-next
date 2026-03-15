@@ -11,12 +11,7 @@ import { requireTenantId } from '@/lib/tenant-context';
 import { eq, and, sql, gte, lte, desc } from 'drizzle-orm';
 import { NextRequest, NextResponse } from 'next/server';
 
-function salesQuery(
-  tenantId: string,
-  start: Date,
-  end: Date,
-  locationId: string | null
-) {
+function salesQuery(tenantId: string, start: Date, end: Date, locationId: string | null) {
   return db
     .select({
       total: sql<string>`COALESCE(SUM(${order.total}::numeric), 0)`,

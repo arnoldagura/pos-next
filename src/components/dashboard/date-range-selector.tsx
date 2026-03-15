@@ -21,47 +21,50 @@ interface DateRangeSelectorProps {
   onChange: (range: DateRange) => void;
 }
 
-const PRESETS: { id: PeriodPreset; label: string; getDates: () => { start: string; end: string } }[] =
-  [
-    {
-      id: 'today',
-      label: 'Today',
-      getDates: () => {
-        const today = format(new Date(), 'yyyy-MM-dd');
-        return { start: today, end: today };
-      },
+const PRESETS: {
+  id: PeriodPreset;
+  label: string;
+  getDates: () => { start: string; end: string };
+}[] = [
+  {
+    id: 'today',
+    label: 'Today',
+    getDates: () => {
+      const today = format(new Date(), 'yyyy-MM-dd');
+      return { start: today, end: today };
     },
-    {
-      id: '7d',
-      label: '7 Days',
-      getDates: () => {
-        const end = new Date();
-        const start = new Date();
-        start.setDate(start.getDate() - 6);
-        return { start: format(start, 'yyyy-MM-dd'), end: format(end, 'yyyy-MM-dd') };
-      },
+  },
+  {
+    id: '7d',
+    label: '7 Days',
+    getDates: () => {
+      const end = new Date();
+      const start = new Date();
+      start.setDate(start.getDate() - 6);
+      return { start: format(start, 'yyyy-MM-dd'), end: format(end, 'yyyy-MM-dd') };
     },
-    {
-      id: '30d',
-      label: '30 Days',
-      getDates: () => {
-        const end = new Date();
-        const start = new Date();
-        start.setDate(start.getDate() - 29);
-        return { start: format(start, 'yyyy-MM-dd'), end: format(end, 'yyyy-MM-dd') };
-      },
+  },
+  {
+    id: '30d',
+    label: '30 Days',
+    getDates: () => {
+      const end = new Date();
+      const start = new Date();
+      start.setDate(start.getDate() - 29);
+      return { start: format(start, 'yyyy-MM-dd'), end: format(end, 'yyyy-MM-dd') };
     },
-    {
-      id: '90d',
-      label: '90 Days',
-      getDates: () => {
-        const end = new Date();
-        const start = new Date();
-        start.setDate(start.getDate() - 89);
-        return { start: format(start, 'yyyy-MM-dd'), end: format(end, 'yyyy-MM-dd') };
-      },
+  },
+  {
+    id: '90d',
+    label: '90 Days',
+    getDates: () => {
+      const end = new Date();
+      const start = new Date();
+      start.setDate(start.getDate() - 89);
+      return { start: format(start, 'yyyy-MM-dd'), end: format(end, 'yyyy-MM-dd') };
     },
-  ];
+  },
+];
 
 export function getDefaultDateRange(): DateRange {
   const today = format(new Date(), 'yyyy-MM-dd');
@@ -111,11 +114,7 @@ export function DateRangeSelector({ value, onChange }: DateRangeSelectorProps) {
 
       <Popover open={popoverOpen} onOpenChange={setPopoverOpen}>
         <PopoverTrigger asChild>
-          <Button
-            variant={!activePreset ? 'default' : 'outline'}
-            size='sm'
-            className='gap-1'
-          >
+          <Button variant={!activePreset ? 'default' : 'outline'} size='sm' className='gap-1'>
             <Calendar className='h-4 w-4' />
             {!activePreset ? value.label : 'Custom'}
             <ChevronDown className='h-3 w-3' />

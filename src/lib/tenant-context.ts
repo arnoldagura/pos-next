@@ -9,6 +9,7 @@ import {
   NoTenantAccessError,
   TenantAccessDeniedError,
 } from './errors/tenant-errors';
+import { extractTenantSubdomain } from './tenant-registration';
 import { logTenantSwitch } from './audit';
 import {
   isTenantSwitchRateLimited,
@@ -41,48 +42,37 @@ export const getTenantId = cache(async (): Promise<string | null> => {
 
   // PRIORITY 1: Check subdomain (PRIMARY for multi-tenant SaaS)
   const host = headersList.get('host') || '';
-  const hostWithoutPort = host.split(':')[0];
-  const parts = hostWithoutPort.split('.');
+  const subdomain = extractTenantSubdomain(host);
 
-  if (parts.length >= 2) {
-    const subdomain = parts[0];
-    const domain = parts[parts.length - 1];
+  if (subdomain) {
+    const [org] = await db
+      .select({ id: organization.id })
+      .from(organization)
+      .where(eq(organization.subdomain, subdomain))
+      .limit(1);
 
-    // Valid subdomain detection
-    if (subdomain && subdomain !== 'www' && !(domain === 'localhost' && parts.length === 1)) {
-      const [org] = await db
-        .select({ id: organization.id })
-        .from(organization)
-        .where(eq(organization.subdomain, subdomain))
-        .limit(1);
+    if (org) {
+      // Verify user has access to this subdomain's organization
+      if (isSuperAdmin) {
+        return org.id;
+      } else {
+        const [userOrg] = await db
+          .select({ organizationId: userOrganization.organizationId })
+          .from(userOrganization)
+          .where(
+            and(
+              eq(userOrganization.userId, session.user.id),
+              eq(userOrganization.organizationId, org.id)
+            )
+          )
+          .limit(1);
 
-      if (org) {
-        // Verify user has access to this subdomain's organization
-        if (isSuperAdmin) {
-          // Super admins have access to all organizations
+        if (userOrg) {
           return org.id;
         } else {
-          // Regular users: check if they're assigned to this organization
-          const [userOrg] = await db
-            .select({ organizationId: userOrganization.organizationId })
-            .from(userOrganization)
-            .where(
-              and(
-                eq(userOrganization.userId, session.user.id),
-                eq(userOrganization.organizationId, org.id)
-              )
-            )
-            .limit(1);
-
-          if (userOrg) {
-            return org.id;
-          } else {
-            // User is trying to access a subdomain they don't have access to
-            // Throw error instead of falling back to their default org
-            throw new TenantAccessDeniedError(
-              `You do not have access to this organization. Please contact your administrator.`
-            );
-          }
+          throw new TenantAccessDeniedError(
+            `You do not have access to this organization. Please contact your administrator.`
+          );
         }
       }
     }

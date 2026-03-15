@@ -134,6 +134,8 @@ export default function MaterialInventoriesClient() {
                     <Image
                       src={inventory.material.image}
                       alt={inventory.material.name}
+                      width={40}
+                      height={40}
                       className='w-10 h-10 rounded object-cover'
                     />
                   ) : (
@@ -251,6 +253,8 @@ export default function MaterialInventoriesClient() {
                     <Image
                       src={inventory.material.image}
                       alt={inventory.material.name}
+                      width={32}
+                      height={32}
                       className='w-8 h-8 rounded object-cover'
                     />
                   ) : (
