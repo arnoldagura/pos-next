@@ -2,7 +2,7 @@
 
 import { useSidebar } from '@/contexts/sidebar-context';
 import { useSession } from '@/lib/auth-client';
-import { Menu } from 'lucide-react';
+import { Menu, Store } from 'lucide-react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 
@@ -20,7 +20,10 @@ export function MobileHeader() {
         <Button variant='ghost' size='sm' onClick={toggleMobile}>
           <Menu className='h-5 w-5' />
         </Button>
-        <Link href='/' className='text-xl font-bold'>
+        <Link href='/' className='flex items-center gap-2 text-xl font-bold'>
+          <div className='w-7 h-7 rounded-lg bg-primary flex items-center justify-center'>
+            <Store className='h-4 w-4 text-primary-foreground' />
+          </div>
           POS Next
         </Link>
         <div className='w-10' /> {/* Spacer for centering */}

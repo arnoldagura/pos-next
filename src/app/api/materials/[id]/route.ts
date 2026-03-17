@@ -4,6 +4,8 @@ import { ACTIONS, RESOURCES } from '@/lib/rbac';
 import { RouteContext, createDefaultRouteContext } from '@/lib/types';
 import { updateMaterialSchema } from '@/lib/validations/material';
 import { protectRoute } from '@/middleware/rbac';
+import { invalidateEntityCache } from '@/lib/cache';
+import { requireTenantId } from '@/lib/tenant-context';
 import { eq, and, isNull } from 'drizzle-orm';
 import { NextRequest, NextResponse } from 'next/server';
 
@@ -55,6 +57,7 @@ async function updateMaterialHandler(
   context: RouteContext<{ id: string }> = createDefaultRouteContext({ id: '' })
 ) {
   try {
+    const tenantId = await requireTenantId();
     const { id } = await context.params;
     const body = await req.json();
     const validatedData = updateMaterialSchema.parse(body);
@@ -68,6 +71,8 @@ async function updateMaterialHandler(
     if (!updatedMaterial) {
       return NextResponse.json({ error: 'Material not found' }, { status: 404 });
     }
+
+    await invalidateEntityCache('materials', tenantId);
 
     return NextResponse.json(updatedMaterial);
   } catch (error) {
@@ -91,6 +96,7 @@ async function deleteMaterialHandler(
   context: RouteContext<{ id: string }> = createDefaultRouteContext({ id: '' })
 ) {
   try {
+    const tenantId = await requireTenantId();
     const { id } = await context.params;
 
     const [deletedMaterial] = await db
@@ -102,6 +108,8 @@ async function deleteMaterialHandler(
     if (!deletedMaterial) {
       return NextResponse.json({ error: 'Material not found' }, { status: 404 });
     }
+
+    await invalidateEntityCache('materials', tenantId);
 
     return NextResponse.json({ success: true });
   } catch (error) {

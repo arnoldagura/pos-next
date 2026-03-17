@@ -20,7 +20,7 @@ import {
   Receipt,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { formatCurrency } from '@/lib/utils';
+import { useFormatCurrency } from '@/hooks/use-org-settings';
 import { useQuery } from '@tanstack/react-query';
 
 interface DashboardStats {
@@ -87,6 +87,7 @@ function trendProps(value: number | null) {
 
 export function DashboardClient() {
   const [dateRange, setDateRange] = useState<DateRange>(getDefaultDateRange);
+  const formatCurrency = useFormatCurrency();
 
   const {
     data: stats,
@@ -151,7 +152,8 @@ export function DashboardClient() {
           value={formatCurrency(parseFloat(stats.sales.current.total))}
           description={dateRange.label}
           icon={DollarSign}
-          iconClassName='text-green-600'
+          iconClassName='text-emerald-600'
+          iconBgClassName='bg-emerald-50 dark:bg-emerald-950/40'
           trend={trendProps(stats.sales.trends.revenue)}
         />
         <StatsCard
@@ -160,6 +162,7 @@ export function DashboardClient() {
           description={`prev: ${stats.sales.previous.count}`}
           icon={ShoppingCart}
           iconClassName='text-blue-600'
+          iconBgClassName='bg-blue-50 dark:bg-blue-950/40'
           trend={trendProps(stats.sales.trends.orders)}
         />
         <StatsCard
@@ -168,6 +171,7 @@ export function DashboardClient() {
           description={`prev: ${formatCurrency(parseFloat(stats.sales.previousAverageOrderValue))}`}
           icon={Receipt}
           iconClassName='text-purple-600'
+          iconBgClassName='bg-purple-50 dark:bg-purple-950/40'
           trend={trendProps(stats.sales.trends.avgOrder)}
         />
         <StatsCard
@@ -176,6 +180,7 @@ export function DashboardClient() {
           description={`${stats.inventory.totalItems} items in stock`}
           icon={Package}
           iconClassName='text-orange-600'
+          iconBgClassName='bg-orange-50 dark:bg-orange-950/40'
         />
       </div>
 

@@ -8,8 +8,11 @@ import {
   materialBatch,
 } from '@/drizzle/schema';
 import { requireTenantId } from '@/lib/tenant-context';
+import { cacheGet, cacheSet, buildCacheKey } from '@/lib/cache';
 import { eq, and, sql, gte, lte, desc } from 'drizzle-orm';
 import { NextRequest, NextResponse } from 'next/server';
+
+const DASHBOARD_CACHE_TTL = 180; // 3 minutes
 
 function salesQuery(tenantId: string, start: Date, end: Date, locationId: string | null) {
   return db
@@ -34,15 +37,26 @@ export async function GET(req: NextRequest) {
     const tenantId = await requireTenantId();
     const { searchParams } = new URL(req.url);
     const locationId = searchParams.get('locationId');
+    const startDateParam = searchParams.get('startDate');
+    const endDateParam = searchParams.get('endDate');
+
+    // Check cache
+    const cacheKey = buildCacheKey('dashboard', tenantId, {
+      startDate: startDateParam,
+      endDate: endDateParam,
+      locationId,
+    });
+    const cached = await cacheGet(cacheKey);
+    if (cached) {
+      return NextResponse.json(cached);
+    }
 
     // Date range: accept startDate/endDate or default to today
     const now = new Date();
-    const endDate = searchParams.get('endDate')
-      ? new Date(searchParams.get('endDate')! + 'T23:59:59')
-      : new Date(now);
+    const endDate = endDateParam ? new Date(endDateParam + 'T23:59:59') : new Date(now);
 
-    const startDate = searchParams.get('startDate')
-      ? new Date(searchParams.get('startDate')! + 'T00:00:00')
+    const startDate = startDateParam
+      ? new Date(startDateParam + 'T00:00:00')
       : new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0);
 
     // Previous period: same duration shifted back
@@ -253,7 +267,7 @@ export async function GET(req: NextRequest) {
       return Math.round(((current - previous) / previous) * 100 * 10) / 10;
     }
 
-    return NextResponse.json({
+    const result = {
       sales: {
         current: {
           total: currentSales?.total || '0',
@@ -282,7 +296,10 @@ export async function GET(req: NextRequest) {
       },
       expiringMaterials,
       paymentMethods,
-    });
+    };
+
+    await cacheSet(cacheKey, result, DASHBOARD_CACHE_TTL);
+    return NextResponse.json(result);
   } catch (error) {
     console.error('Error fetching dashboard stats:', error);
     return NextResponse.json(

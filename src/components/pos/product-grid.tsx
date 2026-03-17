@@ -32,10 +32,17 @@ export function ProductGrid({ locationId }: ProductGridProps) {
   const [inventory, setInventory] = useState<Map<string, ProductInventoryItem>>(new Map());
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
+  const [debouncedSearch, setDebouncedSearch] = useState('');
   const [selectedCategories, setSelectedCategories] = useState<Set<string>>(new Set());
   const [barcodeInput, setBarcodeInput] = useState('');
   const searchInputRef = useRef<HTMLInputElement>(null);
   const barcodeInputRef = useRef<HTMLInputElement>(null);
+
+  // Debounce search input — wait 300ms after last keystroke before hitting the API
+  useEffect(() => {
+    const timer = setTimeout(() => setDebouncedSearch(search), 300);
+    return () => clearTimeout(timer);
+  }, [search]);
 
   const { addItem } = useCartStore();
 
@@ -61,13 +68,12 @@ export function ProductGrid({ locationId }: ProductGridProps) {
         limit: '1000',
       });
 
-      if (search) params.append('search', search);
+      if (debouncedSearch) params.append('search', debouncedSearch);
 
       const response = await fetch(`/api/products?${params}`);
       if (!response.ok) throw new Error('Failed to fetch products');
 
       const data = await response.json();
-      console.log('data', data);
       setAllProducts(data.products || []);
     } catch (error) {
       console.error('Failed to load products:', error);
@@ -75,7 +81,7 @@ export function ProductGrid({ locationId }: ProductGridProps) {
     } finally {
       setLoading(false);
     }
-  }, [search]);
+  }, [debouncedSearch]);
 
   const fetchInventory = useCallback(async () => {
     if (!locationId) return;

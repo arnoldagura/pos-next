@@ -8,6 +8,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
+import { TableSkeleton } from '@/components/ui/list-skeleton';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
@@ -160,11 +161,7 @@ export function InventoryTable({
   };
 
   if (isLoading) {
-    return (
-      <div className='flex items-center justify-center h-64'>
-        <div className='text-muted-foreground'>Loading inventory...</div>
-      </div>
-    );
+    return <TableSkeleton rows={8} columns={7} showToolbar={false} />;
   }
 
   if (data.length === 0) {

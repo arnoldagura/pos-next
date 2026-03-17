@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { Search, Pencil, Trash2, Shield, Plus } from 'lucide-react';
+import { TableSkeleton } from '@/components/ui/list-skeleton';
 import {
   Table,
   TableBody,
@@ -134,9 +135,7 @@ export function UsersClient({ currentUserId }: UsersClientProps) {
       </div>
 
       {loading ? (
-        <div className='flex items-center justify-center py-12'>
-          <div className='text-gray-500'>Loading users...</div>
-        </div>
+        <TableSkeleton rows={6} columns={6} showToolbar={false} />
       ) : (
         <>
           <div className='rounded-md border'>

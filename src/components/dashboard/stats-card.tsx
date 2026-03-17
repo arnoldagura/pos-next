@@ -1,5 +1,6 @@
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { LucideIcon } from 'lucide-react';
+import { Card, CardContent } from '@/components/ui/card';
+import { LucideIcon, TrendingUp, TrendingDown } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 interface StatsCardProps {
   title: string;
@@ -11,6 +12,7 @@ interface StatsCardProps {
     isPositive: boolean;
   };
   iconClassName?: string;
+  iconBgClassName?: string;
 }
 
 export function StatsCard({
@@ -20,22 +22,41 @@ export function StatsCard({
   icon: Icon,
   trend,
   iconClassName = 'text-blue-600',
+  iconBgClassName = 'bg-blue-50 dark:bg-blue-950/40',
 }: StatsCardProps) {
   return (
-    <Card>
-      <CardHeader className='flex flex-row items-center justify-between space-y-0 pb-2'>
-        <CardTitle className='text-sm font-medium'>{title}</CardTitle>
-        <Icon className={`h-4 w-4 ${iconClassName}`} />
-      </CardHeader>
-      <CardContent>
-        <div className='text-2xl font-bold'>{value}</div>
-        {description && <p className='text-xs text-muted-foreground mt-1'>{description}</p>}
-        {trend && (
-          <p className={`text-xs mt-1 ${trend.isPositive ? 'text-green-600' : 'text-red-600'}`}>
-            {trend.isPositive ? '+' : ''}
-            {trend.value}% from last period
-          </p>
-        )}
+    <Card className='card-hover'>
+      <CardContent className='pt-6'>
+        <div className='flex items-start justify-between'>
+          <div className='space-y-1 flex-1'>
+            <p className='text-sm font-medium text-muted-foreground'>{title}</p>
+            <p className='text-3xl font-bold tracking-tight'>{value}</p>
+          </div>
+          <div className={cn('p-2.5 rounded-xl shrink-0', iconBgClassName)}>
+            <Icon className={cn('h-5 w-5', iconClassName)} />
+          </div>
+        </div>
+        <div className='mt-3 flex items-center gap-2'>
+          {trend && (
+            <span
+              className={cn(
+                'inline-flex items-center gap-1 text-xs font-medium px-1.5 py-0.5 rounded-md',
+                trend.isPositive
+                  ? 'text-emerald-700 bg-emerald-50 dark:text-emerald-400 dark:bg-emerald-950/40'
+                  : 'text-red-700 bg-red-50 dark:text-red-400 dark:bg-red-950/40'
+              )}
+            >
+              {trend.isPositive ? (
+                <TrendingUp className='h-3 w-3' />
+              ) : (
+                <TrendingDown className='h-3 w-3' />
+              )}
+              {trend.isPositive ? '+' : ''}
+              {trend.value}%
+            </span>
+          )}
+          {description && <p className='text-xs text-muted-foreground truncate'>{description}</p>}
+        </div>
       </CardContent>
     </Card>
   );

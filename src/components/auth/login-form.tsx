@@ -6,6 +6,10 @@ import { signIn } from '@/lib/auth-client';
 import { FormWrapper, FormFieldWrapper } from '../forms/form-wrapper';
 import { loginUserSchema, type LoginUserInput } from '@/lib/validations';
 import { PasswordInput } from '@/components/ui/password-input';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Card, CardContent, CardHeader } from '@/components/ui/card';
+import { AlertCircle, Mail, LogIn, Loader2, Store } from 'lucide-react';
 
 interface LoginFormProps {
   organizationName?: string | null;
@@ -20,230 +24,144 @@ export function LoginForm({ organizationName, organizationId }: LoginFormProps =
     try {
       setError(null);
 
-      // If organizationId is provided, validate access BEFORE signing in
       if (organizationId) {
         const validationResponse = await fetch('/api/auth/login-with-org', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            email: data.email,
-            organizationId,
-          }),
+          body: JSON.stringify({ email: data.email, organizationId }),
         });
-
         const validationResult = await validationResponse.json();
-
         if (!validationResponse.ok) {
           setError(validationResult.error || 'Access denied');
           return;
         }
-
-        // Validation passed, now proceed with better-auth sign-in
-        const result = await signIn.email({
-          email: data.email,
-          password: data.password,
-        });
-
-        if (result.error) {
-          setError(result.error.message || 'Invalid email or password');
-          return;
-        }
-
-        // Sign in successful, redirect to dashboard
-        router.push('/dashboard');
-        router.refresh();
-      } else {
-        // Standard login (no organization validation)
-        const result = await signIn.email({
-          email: data.email,
-          password: data.password,
-        });
-
-        if (result.error) {
-          setError(result.error.message || 'Login failed');
-          return;
-        }
-
-        router.push('/dashboard');
-        router.refresh();
       }
-    } catch (err) {
+
+      const result = await signIn.email({ email: data.email, password: data.password });
+      if (result.error) {
+        setError(result.error.message || 'Invalid email or password');
+        return;
+      }
+
+      router.push('/dashboard');
+      router.refresh();
+    } catch {
       setError('An unexpected error occurred');
-      console.error('Login error:', err);
     }
   };
 
   return (
-    <div className='w-full space-y-6 bg-white p-6 sm:p-8 rounded-xl shadow-lg border border-gray-200'>
-      <div className='text-center space-y-2'>
-        <div className='inline-flex items-center justify-center w-16 h-16 bg-blue-100 rounded-full mb-2'>
-          <svg
-            className='w-8 h-8 text-blue-600'
-            fill='none'
-            stroke='currentColor'
-            viewBox='0 0 24 24'
-          >
-            <path
-              strokeLinecap='round'
-              strokeLinejoin='round'
-              strokeWidth={2}
-              d='M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z'
-            />
-          </svg>
-        </div>
-        <h1 className='text-2xl sm:text-3xl font-bold text-gray-900'>Welcome back</h1>
-        <p className='text-gray-600 text-sm sm:text-base'>
-          {organizationName
-            ? `Sign in to ${organizationName}`
-            : 'Sign in to your account to continue'}
-        </p>
-      </div>
-
-      {error && (
-        <div
-          className='p-4 bg-red-50 border-l-4 border-red-500 rounded-r-lg'
-          role='alert'
-          aria-live='polite'
-        >
-          <div className='flex items-start'>
-            <svg
-              className='shrink-0 w-5 h-5 text-red-500 mt-0.5'
-              fill='currentColor'
-              viewBox='0 0 20 20'
-            >
-              <path
-                fillRule='evenodd'
-                d='M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z'
-                clipRule='evenodd'
-              />
-            </svg>
-            <p className='ml-3 text-sm font-medium text-red-800'>{error}</p>
+    <Card className='w-full shadow-lg border-border/60'>
+      <CardHeader className='pb-0 pt-8 px-8'>
+        <div className='flex flex-col items-center text-center space-y-3'>
+          <div className='flex items-center justify-center w-14 h-14 rounded-2xl bg-primary text-primary-foreground shadow-md'>
+            <Store className='w-7 h-7' />
+          </div>
+          <div className='space-y-1'>
+            <h1 className='text-2xl font-bold tracking-tight'>Welcome back</h1>
+            <p className='text-sm text-muted-foreground'>
+              {organizationName
+                ? `Sign in to ${organizationName}`
+                : 'Sign in to your account to continue'}
+            </p>
           </div>
         </div>
-      )}
+      </CardHeader>
 
-      <FormWrapper
-        schema={loginUserSchema}
-        defaultValues={{ email: '', password: '', rememberMe: false }}
-        onSubmit={handleSubmit}
-      >
-        {(form) => {
-          const {
-            register,
-            formState: { errors, isSubmitting },
-          } = form;
+      <CardContent className='px-8 pb-8 pt-6 space-y-5'>
+        {error && (
+          <div
+            className='flex items-start gap-3 p-3.5 rounded-lg bg-destructive/10 border border-destructive/20 text-destructive'
+            role='alert'
+            aria-live='polite'
+          >
+            <AlertCircle className='w-4 h-4 mt-0.5 shrink-0' />
+            <p className='text-sm font-medium'>{error}</p>
+          </div>
+        )}
 
-          return (
-            <>
-              <FormFieldWrapper label='Email' error={errors.email?.message} required>
-                <div className='relative'>
-                  <div className='absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none'>
-                    <svg
-                      className='h-5 w-5 text-gray-400'
-                      fill='none'
-                      stroke='currentColor'
-                      viewBox='0 0 24 24'
-                    >
-                      <path
-                        strokeLinecap='round'
-                        strokeLinejoin='round'
-                        strokeWidth={2}
-                        d='M16 12a4 4 0 10-8 0 4 4 0 008 0zm0 0v1.5a2.5 2.5 0 005 0V12a9 9 0 10-9 9m4.5-1.206a8.959 8.959 0 01-4.5 1.207'
-                      />
-                    </svg>
-                  </div>
-                  <input
-                    {...register('email')}
-                    type='email'
-                    placeholder='you@example.com'
-                    className='w-full pl-10 pr-3 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors'
-                    autoComplete='email'
-                    aria-invalid={errors.email ? 'true' : 'false'}
-                    aria-describedby={errors.email ? 'email-error' : undefined}
-                  />
-                </div>
-              </FormFieldWrapper>
-
-              <FormFieldWrapper label='Password' error={errors.password?.message} required>
-                <PasswordInput
-                  {...register('password')}
-                  placeholder='••••••••'
-                  autoComplete='current-password'
-                  aria-invalid={errors.password ? 'true' : 'false'}
-                  aria-describedby={errors.password ? 'password-error' : undefined}
-                />
-              </FormFieldWrapper>
-
-              <div className='flex items-center'>
-                <input
-                  {...register('rememberMe')}
-                  type='checkbox'
-                  id='rememberMe'
-                  className='h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded cursor-pointer'
-                />
-                <label
-                  htmlFor='rememberMe'
-                  className='ml-2 block text-sm text-gray-900 cursor-pointer select-none'
-                >
-                  Remember me
-                </label>
-              </div>
-
-              <button
-                type='submit'
-                disabled={isSubmitting}
-                className='w-full px-4 py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:bg-gray-400 disabled:cursor-not-allowed transition-all duration-200 transform hover:scale-[1.02] active:scale-[0.98] shadow-md'
-                aria-label={isSubmitting ? 'Signing in' : 'Sign in to your account'}
-              >
-                {isSubmitting ? (
-                  <span className='flex items-center justify-center'>
-                    <svg
-                      className='animate-spin -ml-1 mr-3 h-5 w-5 text-white'
-                      fill='none'
-                      viewBox='0 0 24 24'
-                    >
-                      <circle
-                        className='opacity-25'
-                        cx='12'
-                        cy='12'
-                        r='10'
-                        stroke='currentColor'
-                        strokeWidth='4'
-                      />
-                      <path
-                        className='opacity-75'
-                        fill='currentColor'
-                        d='M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z'
-                      />
-                    </svg>
-                    Signing in...
-                  </span>
-                ) : (
-                  'Sign in'
-                )}
-              </button>
-            </>
-          );
-        }}
-      </FormWrapper>
-
-      <div className='relative'>
-        <div className='absolute inset-0 flex items-center'>
-          <div className='w-full border-t border-gray-300' />
-        </div>
-        <div className='relative flex justify-center text-sm'>
-          <span className='px-2 bg-white text-gray-500'>New here?</span>
-        </div>
-      </div>
-
-      <div className='text-center'>
-        <a
-          href='/register'
-          className='inline-flex items-center justify-center w-full px-4 py-2.5 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors'
+        <FormWrapper
+          schema={loginUserSchema}
+          defaultValues={{ email: '', password: '', rememberMe: false }}
+          onSubmit={handleSubmit}
         >
-          Create new account
-        </a>
-      </div>
-    </div>
+          {(form) => {
+            const {
+              register,
+              formState: { errors, isSubmitting },
+            } = form;
+
+            return (
+              <div className='space-y-4'>
+                <FormFieldWrapper label='Email' error={errors.email?.message} required>
+                  <div className='relative'>
+                    <Mail className='absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground' />
+                    <Input
+                      {...register('email')}
+                      type='email'
+                      placeholder='you@example.com'
+                      className='pl-9'
+                      autoComplete='email'
+                      aria-invalid={errors.email ? 'true' : 'false'}
+                    />
+                  </div>
+                </FormFieldWrapper>
+
+                <FormFieldWrapper label='Password' error={errors.password?.message} required>
+                  <PasswordInput
+                    {...register('password')}
+                    placeholder='••••••••'
+                    autoComplete='current-password'
+                    aria-invalid={errors.password ? 'true' : 'false'}
+                  />
+                </FormFieldWrapper>
+
+                <div className='flex items-center gap-2'>
+                  <input
+                    {...register('rememberMe')}
+                    type='checkbox'
+                    id='rememberMe'
+                    className='h-4 w-4 rounded border-input accent-primary cursor-pointer'
+                  />
+                  <label
+                    htmlFor='rememberMe'
+                    className='text-sm text-muted-foreground cursor-pointer select-none'
+                  >
+                    Remember me
+                  </label>
+                </div>
+
+                <Button type='submit' disabled={isSubmitting} className='w-full gap-2' size='lg'>
+                  {isSubmitting ? (
+                    <>
+                      <Loader2 className='h-4 w-4 animate-spin' />
+                      Signing in...
+                    </>
+                  ) : (
+                    <>
+                      <LogIn className='h-4 w-4' />
+                      Sign in
+                    </>
+                  )}
+                </Button>
+              </div>
+            );
+          }}
+        </FormWrapper>
+
+        <div className='relative'>
+          <div className='absolute inset-0 flex items-center'>
+            <div className='w-full border-t border-border' />
+          </div>
+          <div className='relative flex justify-center text-xs'>
+            <span className='px-2 bg-card text-muted-foreground'>New here?</span>
+          </div>
+        </div>
+
+        <Button variant='outline' className='w-full' asChild>
+          <a href='/register'>Create new account</a>
+        </Button>
+      </CardContent>
+    </Card>
   );
 }

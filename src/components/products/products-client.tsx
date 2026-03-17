@@ -13,6 +13,7 @@ import {
   MoreVertical,
 } from 'lucide-react';
 import Image from 'next/image';
+import { TableSkeleton } from '@/components/ui/list-skeleton';
 import {
   Table,
   TableBody,
@@ -324,7 +325,7 @@ export function ProductsClient() {
 
       {/* Bulk Actions */}
       {selectedProducts.size > 0 && (
-        <div className='flex items-center gap-2 p-3 bg-blue-50 rounded-lg border border-blue-200'>
+        <div className='flex items-center gap-2 p-3 bg-primary/5 rounded-lg border border-primary/20'>
           <span className='text-sm font-medium'>{selectedProducts.size} selected</span>
           <Button size='sm' variant='outline' onClick={() => handleBulkAction('activate')}>
             Activate
@@ -336,7 +337,7 @@ export function ProductsClient() {
             size='sm'
             variant='outline'
             onClick={() => handleBulkAction('delete')}
-            className='text-red-600 hover:text-red-700'
+            className='text-destructive hover:text-destructive/80'
           >
             Delete
           </Button>
@@ -347,9 +348,7 @@ export function ProductsClient() {
       )}
 
       {loading ? (
-        <div className='flex items-center justify-center py-12'>
-          <div className='text-gray-500'>Loading products...</div>
-        </div>
+        <TableSkeleton rows={8} columns={7} showToolbar={false} />
       ) : (
         <>
           <div className='rounded-md border overflow-x-auto'>
@@ -366,7 +365,7 @@ export function ProductsClient() {
                   <TableHead>
                     <button
                       onClick={() => handleSort('name')}
-                      className='flex items-center hover:text-gray-900'
+                      className='flex items-center hover:text-foreground'
                     >
                       Name
                       {getSortIcon('name')}
@@ -377,7 +376,7 @@ export function ProductsClient() {
                   <TableHead>
                     <button
                       onClick={() => handleSort('createdAt')}
-                      className='flex items-center hover:text-gray-900'
+                      className='flex items-center hover:text-foreground'
                     >
                       Created
                       {getSortIcon('createdAt')}
