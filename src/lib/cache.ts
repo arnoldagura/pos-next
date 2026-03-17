@@ -59,22 +59,40 @@ export async function cacheInvalidate(prefix: string): Promise<void> {
 }
 
 /**
- * Build a cache key for product catalog queries
+ * Build a cache key for a given entity and query params
  */
-export function productCacheKey(tenantId: string, params: Record<string, string | null>): string {
+export function buildCacheKey(
+  entity: string,
+  tenantId: string,
+  params: Record<string, string | null>
+): string {
   const parts = Object.entries(params)
     .filter(([, v]) => v !== null && v !== undefined)
     .sort(([a], [b]) => a.localeCompare(b))
     .map(([k, v]) => `${k}=${v}`)
     .join('&');
-  return `cache:products:${tenantId}:${parts}`;
+  return `cache:${entity}:${tenantId}:${parts}`;
+}
+
+/**
+ * Invalidate all cache entries for an entity + tenant
+ */
+export async function invalidateEntityCache(entity: string, tenantId: string): Promise<void> {
+  await cacheInvalidate(`cache:${entity}:${tenantId}`);
+}
+
+/**
+ * Build a cache key for product catalog queries
+ */
+export function productCacheKey(tenantId: string, params: Record<string, string | null>): string {
+  return buildCacheKey('products', tenantId, params);
 }
 
 /**
  * Invalidate all product cache for a tenant
  */
 export async function invalidateProductCache(tenantId: string): Promise<void> {
-  await cacheInvalidate(`cache:products:${tenantId}`);
+  await invalidateEntityCache('products', tenantId);
 }
 
 /**

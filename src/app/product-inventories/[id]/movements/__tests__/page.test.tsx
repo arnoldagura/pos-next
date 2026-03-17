@@ -34,9 +34,9 @@ describe('MovementHistoryPage', () => {
 
     render(<InventoryMovementsClient inventoryId='inv-123' />);
 
-    // The loading state shows an animate-spin div
-    const spinner = document.querySelector('.animate-spin');
-    expect(spinner).not.toBeNull();
+    // The loading state shows a skeleton with animate-pulse elements
+    const skeleton = document.querySelector('.animate-pulse');
+    expect(skeleton).not.toBeNull();
   });
 
   it('should display error message when fetch fails', async () => {

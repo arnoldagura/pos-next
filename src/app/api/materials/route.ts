@@ -5,6 +5,7 @@ import { requireTenantId } from '@/lib/tenant-context';
 import { MaterialType } from '@/lib/types';
 import { createMaterialSchema } from '@/lib/validations/material';
 import { protectRoute } from '@/middleware/rbac';
+import { buildCacheKey, cacheGet, cacheSet, invalidateEntityCache } from '@/lib/cache';
 import { randomUUID } from 'crypto';
 import { and, eq, ilike, or, isNull, count, desc } from 'drizzle-orm';
 import { NextRequest, NextResponse } from 'next/server';
@@ -23,6 +24,22 @@ export async function getMaterialsHandler(req: NextRequest) {
     const page = parseInt(searchParams.get('page') || '1', 10);
     const limit = parseInt(searchParams.get('limit') || '50', 10);
     const offset = (page - 1) * limit;
+
+    // Try cache for non-search queries
+    if (!search) {
+      const cacheKey = buildCacheKey('materials', tenantId, {
+        status: statusParam,
+        categoryId,
+        type,
+        includeDeleted: includeDeleted ? 'true' : null,
+        page: page.toString(),
+        limit: limit.toString(),
+      });
+      const cached = await cacheGet<{ materials: unknown[]; pagination: unknown }>(cacheKey);
+      if (cached) {
+        return NextResponse.json(cached);
+      }
+    }
 
     const conditions = [eq(material.organizationId, tenantId)];
 
@@ -66,7 +83,7 @@ export async function getMaterialsHandler(req: NextRequest) {
       .limit(limit)
       .offset(offset);
 
-    return NextResponse.json({
+    const result = {
       materials,
       pagination: {
         page,
@@ -74,7 +91,22 @@ export async function getMaterialsHandler(req: NextRequest) {
         total: totalCount,
         totalPages: Math.ceil(totalCount / limit),
       },
-    });
+    };
+
+    // Cache non-search results
+    if (!search) {
+      const cacheKey = buildCacheKey('materials', tenantId, {
+        status: statusParam,
+        categoryId,
+        type,
+        includeDeleted: includeDeleted ? 'true' : null,
+        page: page.toString(),
+        limit: limit.toString(),
+      });
+      await cacheSet(cacheKey, result);
+    }
+
+    return NextResponse.json(result);
   } catch (error) {
     console.error('Error fetching materials:', error);
 
@@ -96,6 +128,8 @@ export async function createMaterialHandler(req: NextRequest) {
         ...validatedData,
       })
       .returning();
+
+    await invalidateEntityCache('materials', tenantId);
 
     return NextResponse.json(newMaterial[0], { status: 201 });
   } catch (error) {

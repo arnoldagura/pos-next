@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { Plus, Pencil, Trash2, MapPin, Phone, Mail, Search } from 'lucide-react';
+import { TableSkeleton } from '@/components/ui/list-skeleton';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
@@ -129,9 +130,7 @@ export function LocationsClient() {
       </div>
 
       {loading ? (
-        <div className='flex items-center justify-center py-12'>
-          <div className='text-gray-500'>Loading locations...</div>
-        </div>
+        <TableSkeleton rows={6} columns={5} showToolbar={false} />
       ) : locations.length === 0 ? (
         <div className='flex flex-col items-center justify-center py-12 text-center'>
           <MapPin className='h-12 w-12 text-gray-400 mb-4' />

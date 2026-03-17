@@ -1,5 +1,6 @@
 'use client';
 
+import { useState } from 'react';
 import { useSession, signOut } from '@/lib/auth-client';
 import {
   DropdownMenu,
@@ -12,28 +13,33 @@ import {
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
-import { LogOut, User, Settings } from 'lucide-react';
+import { LogOut, User, Settings, Loader2 } from 'lucide-react';
 import Link from 'next/link';
 
 export function UserMenu() {
   const { data: session, isPending } = useSession();
+  const [signingOut, setSigningOut] = useState(false);
 
   const handleSignOut = async () => {
+    // Show overlay immediately — hides the dashboard before the network request
+    setSigningOut(true);
     try {
-      await signOut({
-        fetchOptions: {
-          onSuccess: () => {
-            // Redirect after successful sign out
-            window.location.href = '/login';
-          },
-        },
-      });
-    } catch (error) {
-      console.error('Sign out error:', error);
-      // Force redirect even if there's an error
+      await signOut();
+    } catch {
+      // ignore
+    } finally {
       window.location.href = '/login';
     }
   };
+
+  if (signingOut) {
+    return (
+      <div className='fixed inset-0 z-[200] flex flex-col items-center justify-center bg-background/95 backdrop-blur-sm'>
+        <Loader2 className='h-8 w-8 animate-spin text-primary' />
+        <p className='mt-3 text-sm text-muted-foreground font-medium'>Signing out…</p>
+      </div>
+    );
+  }
 
   if (isPending) {
     return (

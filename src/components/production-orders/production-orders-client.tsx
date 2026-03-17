@@ -12,6 +12,7 @@ import {
 } from '@/components/ui/select';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { CardGridSkeleton } from '@/components/ui/list-skeleton';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -253,22 +254,7 @@ export default function ProductionOrdersClient() {
       </div>
 
       {loading ? (
-        <div className='grid gap-4 md:grid-cols-2 lg:grid-cols-3'>
-          {[...Array(6)].map((_, i) => (
-            <Card key={i} className='animate-pulse'>
-              <CardHeader className='space-y-2'>
-                <div className='h-4 bg-gray-200 rounded w-3/4'></div>
-                <div className='h-3 bg-gray-200 rounded w-1/2'></div>
-              </CardHeader>
-              <CardContent>
-                <div className='space-y-2'>
-                  <div className='h-3 bg-gray-200 rounded'></div>
-                  <div className='h-3 bg-gray-200 rounded w-5/6'></div>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
+        <CardGridSkeleton cards={6} showToolbar={false} />
       ) : filteredOrders.length === 0 ? (
         <Card>
           <CardContent className='flex flex-col items-center justify-center py-12'>

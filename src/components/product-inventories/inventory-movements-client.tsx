@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
+import { TableSkeleton } from '@/components/ui/list-skeleton';
 import {
   Select,
   SelectContent,
@@ -203,13 +204,7 @@ export default function InventoryMovementsClient({ inventoryId }: InventoryMovem
       </div>
 
       {loading ? (
-        <Card>
-          <CardContent className='py-12'>
-            <div className='flex items-center justify-center'>
-              <div className='animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900'></div>
-            </div>
-          </CardContent>
-        </Card>
+        <TableSkeleton rows={8} columns={7} showToolbar={false} />
       ) : movements.length === 0 ? (
         <Card>
           <CardContent className='flex flex-col items-center justify-center py-12'>

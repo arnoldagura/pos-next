@@ -64,7 +64,7 @@ jobs:
           fail_ci_if_error: false
 
   e2e:
-    name: E2E Tests
+    name: E2E Tests (Mocked)
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -87,10 +87,13 @@ jobs:
       - name: Install Playwright Browsers
         run: pnpm exec playwright install --with-deps chromium
 
-      - name: Run E2E tests
-        run: pnpm run test:e2e
+      - name: Run E2E tests (mocked - no real DB required)
+        run: pnpm run test:e2e:mocked
         env:
-          DATABASE_URL: postgresql://test:test@localhost:5432/testdb
+          BETTER_AUTH_URL: http://localhost:3000
+          BETTER_AUTH_SECRET: ci-test-secret-do-not-use-in-production
+          DATABASE_URL: postgresql://ci:ci@localhost:5432/ci_placeholder
+          NEXT_PUBLIC_APP_URL: http://localhost:3000
 
       - name: Upload Playwright Report
         uses: actions/upload-artifact@v4

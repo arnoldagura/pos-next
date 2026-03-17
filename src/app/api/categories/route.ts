@@ -5,9 +5,12 @@ import { eq, isNull, and } from 'drizzle-orm';
 import { protectRoute } from '@/middleware/rbac';
 import { RESOURCES, ACTIONS } from '@/lib/rbac';
 import { requireTenantId } from '@/lib/tenant-context';
+import { buildCacheKey, cacheGet, cacheSet, invalidateEntityCache } from '@/lib/cache';
 import { createProductCategorySchema, generateSlug } from '@/lib/validations';
 import { randomUUID } from 'crypto';
 import { ZodError } from 'zod';
+
+const CATEGORY_CACHE_TTL = 600; // 10 minutes — categories rarely change
 
 async function getCategoriesHandler(req: NextRequest) {
   try {
@@ -16,6 +19,17 @@ async function getCategoriesHandler(req: NextRequest) {
     const parentId = searchParams.get('parentId');
     const isActiveParam = searchParams.get('isActive');
     const includeDeleted = searchParams.get('includeDeleted') === 'true';
+
+    // Try cache
+    const cacheKey = buildCacheKey('categories', tenantId, {
+      parentId,
+      isActive: isActiveParam,
+      includeDeleted: includeDeleted ? 'true' : null,
+    });
+    const cached = await cacheGet(cacheKey);
+    if (cached) {
+      return NextResponse.json(cached);
+    }
 
     const conditions = [eq(productCategory.organizationId, tenantId)];
 
@@ -40,7 +54,9 @@ async function getCategoriesHandler(req: NextRequest) {
       .where(conditions.length > 0 ? and(...conditions) : undefined)
       .orderBy(productCategory.displayOrder, productCategory.name);
 
-    return NextResponse.json({ categories });
+    const result = { categories };
+    await cacheSet(cacheKey, result, CATEGORY_CACHE_TTL);
+    return NextResponse.json(result);
   } catch (error) {
     console.error('Error fetching product categories:', error);
     return NextResponse.json({ error: 'Failed to fetch product categories' }, { status: 500 });
@@ -95,6 +111,8 @@ async function createCategoryHandler(req: NextRequest) {
         parentId: validatedData.parentId || null,
       })
       .returning();
+
+    await invalidateEntityCache('categories', tenantId);
 
     return NextResponse.json(newCategory[0], { status: 201 });
   } catch (error: unknown) {

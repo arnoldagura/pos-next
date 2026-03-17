@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { Search, Plus, Pencil, Trash2, Download, PackagePlus, AlertTriangle } from 'lucide-react';
+import { TableSkeleton } from '@/components/ui/list-skeleton';
 import {
   Table,
   TableBody,
@@ -260,9 +261,7 @@ export function MaterialsClient() {
       </div>
 
       {loading ? (
-        <div className='flex items-center justify-center py-12'>
-          <div className='text-gray-500'>Loading materials...</div>
-        </div>
+        <TableSkeleton rows={8} columns={7} showToolbar={false} />
       ) : (
         <>
           <div className='rounded-md border overflow-x-auto'>

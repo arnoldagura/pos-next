@@ -4,10 +4,13 @@ import { location } from '@/drizzle/schema';
 import { eq, ilike, or, and } from 'drizzle-orm';
 import { protectRoute } from '@/middleware/rbac';
 import { RESOURCES, ACTIONS } from '@/lib/rbac';
+import { buildCacheKey, cacheGet, cacheSet, invalidateEntityCache } from '@/lib/cache';
 import { createLocationSchema } from '@/lib/validations';
 import { randomUUID } from 'crypto';
 import { ZodError } from 'zod';
 import { requireTenantId } from '@/lib/tenant-context';
+
+const LOCATION_CACHE_TTL = 600; // 10 minutes — locations rarely change
 
 async function getLocationsHandler(req: NextRequest) {
   try {
@@ -15,6 +18,15 @@ async function getLocationsHandler(req: NextRequest) {
     const { searchParams } = new URL(req.url);
     const isActiveParam = searchParams.get('isActive');
     const search = searchParams.get('search');
+
+    // Try cache for non-search queries
+    if (!search) {
+      const cacheKey = buildCacheKey('locations', tenantId, { isActive: isActiveParam });
+      const cached = await cacheGet(cacheKey);
+      if (cached) {
+        return NextResponse.json(cached);
+      }
+    }
 
     const query = db.select().from(location);
 
@@ -37,7 +49,14 @@ async function getLocationsHandler(req: NextRequest) {
 
     const locations = await query.where(and(...conditions));
 
-    return NextResponse.json({ locations });
+    const result = { locations };
+
+    if (!search) {
+      const cacheKey = buildCacheKey('locations', tenantId, { isActive: isActiveParam });
+      await cacheSet(cacheKey, result, LOCATION_CACHE_TTL);
+    }
+
+    return NextResponse.json(result);
   } catch (error) {
     console.error('Error fetching locations:', error);
     return NextResponse.json({ error: 'Failed to fetch locations' }, { status: 500 });
@@ -58,6 +77,8 @@ async function createLocationHandler(req: NextRequest) {
         ...validatedData,
       })
       .returning();
+
+    await invalidateEntityCache('locations', tenantId);
 
     return NextResponse.json(newLocation[0], { status: 201 });
   } catch (error: unknown) {

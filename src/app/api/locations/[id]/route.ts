@@ -4,6 +4,7 @@ import { location } from '@/drizzle/schema';
 import { eq, and } from 'drizzle-orm';
 import { protectRoute } from '@/middleware/rbac';
 import { RESOURCES, ACTIONS } from '@/lib/rbac';
+import { invalidateEntityCache } from '@/lib/cache';
 import { updateLocationSchema } from '@/lib/validations';
 import { RouteContext, createDefaultRouteContext } from '@/lib/types/route';
 import { requireTenantId } from '@/lib/tenant-context';
@@ -56,6 +57,8 @@ async function updateLocationHandler(
       return NextResponse.json({ error: 'Location not found' }, { status: 404 });
     }
 
+    await invalidateEntityCache('locations', tenantId);
+
     return NextResponse.json(updatedLocation);
   } catch (error: unknown) {
     console.error('Error updating location:', error);
@@ -89,6 +92,8 @@ async function deleteLocationHandler(
     if (!deletedLocation) {
       return NextResponse.json({ error: 'Location not found' }, { status: 404 });
     }
+
+    await invalidateEntityCache('locations', tenantId);
 
     return NextResponse.json({ success: true });
   } catch (error) {

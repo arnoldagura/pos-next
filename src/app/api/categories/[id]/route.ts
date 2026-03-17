@@ -5,6 +5,7 @@ import { eq, isNull, and } from 'drizzle-orm';
 import { protectRoute } from '@/middleware/rbac';
 import { RESOURCES, ACTIONS } from '@/lib/rbac';
 import { requireTenantId } from '@/lib/tenant-context';
+import { invalidateEntityCache } from '@/lib/cache';
 import { updateProductCategorySchema } from '@/lib/validations';
 import { ZodError } from 'zod';
 import { RouteContext, createDefaultRouteContext } from '@/lib/types/route';
@@ -138,6 +139,8 @@ async function updateCategoryHandler(
       .where(and(eq(productCategory.organizationId, tenantId), eq(productCategory.id, id)))
       .returning();
 
+    await invalidateEntityCache('categories', tenantId);
+
     return NextResponse.json(updatedCategory);
   } catch (error: unknown) {
     console.error('Error updating product category:', error);
@@ -206,6 +209,8 @@ async function deleteCategoryHandler(
         updatedAt: new Date(),
       })
       .where(and(eq(productCategory.organizationId, tenantId), eq(productCategory.id, id)));
+
+    await invalidateEntityCache('categories', tenantId);
 
     return NextResponse.json({
       success: true,

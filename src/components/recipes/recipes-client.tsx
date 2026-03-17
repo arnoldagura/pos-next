@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { Search, Plus, Copy, Power, ChefHat, Package, MoreVertical, Pencil } from 'lucide-react';
+import { TableSkeleton } from '@/components/ui/list-skeleton';
 import {
   Table,
   TableBody,
@@ -234,10 +235,7 @@ export function RecipesClient() {
       </div>
 
       {loading ? (
-        <div className='text-center py-12'>
-          <div className='inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-current border-r-transparent'></div>
-          <p className='mt-2 text-gray-600'>Loading recipes...</p>
-        </div>
+        <TableSkeleton rows={7} columns={6} showToolbar={false} />
       ) : recipes.length === 0 ? (
         <div className='text-center py-12'>
           <ChefHat className='mx-auto h-12 w-12 text-gray-400' />

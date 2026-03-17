@@ -11,6 +11,7 @@ import {
   Package,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { CardGridSkeleton } from '@/components/ui/list-skeleton';
 import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
 import { MaterialCategoryFormDialog } from './material-category-form-dialog';
@@ -323,9 +324,7 @@ export function MaterialCategoriesClient() {
       </div>
 
       {loading ? (
-        <div className='flex items-center justify-center py-12'>
-          <div className='text-gray-500'>Loading categories...</div>
-        </div>
+        <CardGridSkeleton cards={6} showToolbar={false} />
       ) : categories.length === 0 ? (
         <div className='flex flex-col items-center justify-center py-12 text-center'>
           <Package className='h-16 w-16 text-gray-300 mb-4' />

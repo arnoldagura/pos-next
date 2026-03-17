@@ -17,7 +17,7 @@ import {
   Settings,
   PanelLeftClose,
   PanelLeft,
-  Store,
+  Store as StoreIcon,
   ShoppingCart,
   UserCircle,
   Building2,
@@ -47,7 +47,7 @@ interface NavGroup {
 const navGroups: NavGroup[] = [
   {
     items: [
-      { title: 'POS', href: '/pos', icon: Store },
+      { title: 'POS', href: '/pos', icon: StoreIcon },
       { title: 'Kitchen', href: '/kitchen', icon: ChefHat },
       { title: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
     ],
@@ -134,9 +134,18 @@ export function Sidebar() {
         <div className='flex h-full flex-col'>
           {/* Header with Logo and Toggle */}
           <div className='flex items-center justify-between h-16 px-4 border-b border-sidebar-border'>
-            {!collapsed && (
-              <Link href='/' className='text-xl font-bold text-sidebar-foreground'>
-                POS Next
+            {collapsed ? (
+              <Link href='/' className='flex items-center justify-center'>
+                <div className='w-8 h-8 rounded-lg bg-sidebar-primary flex items-center justify-center'>
+                  <StoreIcon className='h-4 w-4 text-sidebar-primary-foreground' />
+                </div>
+              </Link>
+            ) : (
+              <Link href='/' className='flex items-center gap-2.5 text-sidebar-foreground'>
+                <div className='w-8 h-8 rounded-lg bg-sidebar-primary flex items-center justify-center shrink-0'>
+                  <StoreIcon className='h-4 w-4 text-sidebar-primary-foreground' />
+                </div>
+                <span className='text-base font-bold tracking-tight'>POS Next</span>
               </Link>
             )}
             <Button
@@ -179,9 +188,12 @@ export function Sidebar() {
                 return (
                   <div key={groupIndex} className='space-y-1'>
                     {group.title && !collapsed && (
-                      <h3 className='px-3 py-2 text-xs font-semibold text-sidebar-foreground/60 uppercase tracking-wider'>
-                        {group.title}
-                      </h3>
+                      <div className='flex items-center gap-2 px-3 pt-1 pb-0.5'>
+                        <span className='text-[10px] font-semibold text-sidebar-foreground/50 uppercase tracking-widest'>
+                          {group.title}
+                        </span>
+                        <div className='flex-1 h-px bg-sidebar-border/60' />
+                      </div>
                     )}
                     <div className='space-y-1'>
                       {group.items.map((item) => {
@@ -194,15 +206,17 @@ export function Sidebar() {
                             href={item.href}
                             onClick={() => setMobileOpen(false)}
                             className={cn(
-                              'flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors',
+                              'flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-all duration-150',
                               isActive
-                                ? 'bg-sidebar-accent text-sidebar-accent-foreground'
-                                : 'text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground',
+                                ? 'bg-sidebar-accent text-sidebar-accent-foreground font-semibold nav-item-active'
+                                : 'text-sidebar-foreground/80 hover:bg-sidebar-accent/60 hover:text-sidebar-accent-foreground',
                               collapsed && 'justify-center px-2'
                             )}
                             title={collapsed ? item.title : undefined}
                           >
-                            <Icon className='h-5 w-5 shrink-0' />
+                            <Icon
+                              className={cn('h-4 w-4 shrink-0', isActive && 'text-sidebar-primary')}
+                            />
                             {!collapsed && <span>{item.title}</span>}
                           </Link>
                         );
@@ -221,15 +235,20 @@ export function Sidebar() {
                 href='/settings'
                 onClick={() => setMobileOpen(false)}
                 className={cn(
-                  'flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors',
+                  'flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-all duration-150',
                   pathname === '/settings'
-                    ? 'bg-sidebar-accent text-sidebar-accent-foreground'
-                    : 'text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground',
+                    ? 'bg-sidebar-accent text-sidebar-accent-foreground font-semibold nav-item-active'
+                    : 'text-sidebar-foreground/80 hover:bg-sidebar-accent/60 hover:text-sidebar-accent-foreground',
                   collapsed && 'justify-center px-2'
                 )}
                 title={collapsed ? 'Settings' : undefined}
               >
-                <Settings className='h-5 w-5 shrink-0' />
+                <Settings
+                  className={cn(
+                    'h-4 w-4 shrink-0',
+                    pathname === '/settings' && 'text-sidebar-primary'
+                  )}
+                />
                 {!collapsed && <span>Settings</span>}
               </Link>
             </div>

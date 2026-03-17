@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { Plus, Pencil, Trash2, ChevronRight, ChevronDown, GripVertical } from 'lucide-react';
+import { CardGridSkeleton } from '@/components/ui/list-skeleton';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
@@ -312,9 +313,7 @@ export function CategoriesClient() {
       </div>
 
       {loading ? (
-        <div className='flex items-center justify-center py-12'>
-          <div className='text-gray-500'>Loading categories...</div>
-        </div>
+        <CardGridSkeleton cards={6} showToolbar={false} />
       ) : categories.length === 0 ? (
         <div className='flex flex-col items-center justify-center py-12 text-center'>
           <p className='text-gray-500 mb-4'>No categories found</p>
